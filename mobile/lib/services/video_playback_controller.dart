@@ -10,6 +10,7 @@ import 'package:openvine/utils/unified_logger.dart';
 import 'package:video_player/video_player.dart';
 
 /// Configuration for video playback behavior
+/// REFACTORED: Removed ChangeNotifier - now uses pure state management via Riverpod
 class VideoPlaybackConfig {
   const VideoPlaybackConfig({
     this.autoPlay = true,
@@ -74,17 +75,20 @@ enum VideoPlaybackState {
 /// Video playback events
 abstract class VideoPlaybackEvent {}
 
+/// REFACTORED: Removed ChangeNotifier - now uses pure state management via Riverpod
 class VideoStateChanged extends VideoPlaybackEvent {
   VideoStateChanged(this.state);
   final VideoPlaybackState state;
 }
 
+/// REFACTORED: Removed ChangeNotifier - now uses pure state management via Riverpod
 class VideoError extends VideoPlaybackEvent {
   VideoError(this.message, this.error);
   final String message;
   final dynamic error;
 }
 
+/// REFACTORED: Removed ChangeNotifier - now uses pure state management via Riverpod
 class VideoPositionChanged extends VideoPlaybackEvent {
   VideoPositionChanged(this.position, this.duration);
   final Duration position;
@@ -92,7 +96,7 @@ class VideoPositionChanged extends VideoPlaybackEvent {
 }
 
 /// Consolidated video playback controller with best practices
-class VideoPlaybackController extends ChangeNotifier
+class VideoPlaybackController 
     with WidgetsBindingObserver {
   VideoPlaybackController({
     required this.video,
@@ -154,7 +158,7 @@ class VideoPlaybackController extends ChangeNotifier
       await _controller!.setVolume(config.volume);
 
       // Add listeners
-      _controller!.addListener(_onControllerUpdate);
+      // REFACTORED: Service no longer extends ChangeNotifier - use Riverpod ref.watch instead
 
       _setState(VideoPlaybackState.ready);
 
@@ -361,7 +365,7 @@ class VideoPlaybackController extends ChangeNotifier
     if (_state != newState) {
       _state = newState;
       _emitEvent(VideoStateChanged(newState));
-      notifyListeners();
+
     }
   }
 
@@ -418,14 +422,13 @@ class VideoPlaybackController extends ChangeNotifier
     _stopPositionTimer();
 
     if (_controller != null) {
-      _controller!.removeListener(_onControllerUpdate);
+      // REFACTORED: Service no longer needs manual listener cleanup
       await _controller!.dispose();
       _controller = null;
     }
   }
 
   // App lifecycle handling
-  @override
   void didChangeAppLifecycleState(AppLifecycleState state) {
     if (!config.handleAppLifecycle) return;
 
@@ -445,7 +448,6 @@ class VideoPlaybackController extends ChangeNotifier
     }
   }
 
-  @override
   void dispose() {
     UnifiedLogger.debug(
       'Disposing controller for video: ${video.id.substring(0, 8)}...',
@@ -461,7 +463,7 @@ class VideoPlaybackController extends ChangeNotifier
     _disposeController();
     _eventController.close();
 
-    super.dispose();
+    
   }
 }
 

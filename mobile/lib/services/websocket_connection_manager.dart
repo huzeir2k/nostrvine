@@ -34,7 +34,8 @@ abstract class WebSocketFactory {
 }
 
 /// Manages WebSocket connection with proper state machine and reconnection
-class WebSocketConnectionManager extends ChangeNotifier {
+/// REFACTORED: Removed ChangeNotifier - now uses pure state management via Riverpod
+class WebSocketConnectionManager  {
   WebSocketConnectionManager({
     required this.url,
     required this.socketFactory,
@@ -356,12 +357,11 @@ class WebSocketConnectionManager extends ChangeNotifier {
           _stateController.add(newState);
         }
       });
-      notifyListeners();
+
     }
   }
 
   /// Dispose of resources
-  @override
   void dispose() {
     _reconnectTimer?.cancel();
     _healthCheckTimer?.cancel();
@@ -379,11 +379,12 @@ class WebSocketConnectionManager extends ChangeNotifier {
     }
     _pendingOperations.clear();
 
-    super.dispose();
+    
   }
 }
 
 /// Pool for managing multiple WebSocket connections
+/// REFACTORED: Removed ChangeNotifier - now uses pure state management via Riverpod
 class WebSocketConnectionPool {
   final Map<String, WebSocketConnectionManager> _connections = {};
 
@@ -430,8 +431,8 @@ class WebSocketConnectionPool {
 }
 
 /// Default WebSocket factory using platform adapter
+/// REFACTORED: Removed ChangeNotifier - now uses pure state management via Riverpod
 class DefaultWebSocketFactory implements WebSocketFactory {
-  @override
   WebSocketInterface create(String url) {
     // Import is handled in websocket_adapter.dart
     throw UnimplementedError(

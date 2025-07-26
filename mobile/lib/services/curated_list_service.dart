@@ -4,13 +4,13 @@
 import 'dart:async';
 import 'dart:convert';
 
-import 'package:flutter/foundation.dart';
 import 'package:openvine/services/auth_service.dart';
 import 'package:openvine/services/nostr_service_interface.dart';
 import 'package:openvine/utils/unified_logger.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 /// Represents a curated list of videos
+/// REFACTORED: Removed ChangeNotifier - now uses pure state management via Riverpod
 class CuratedList {
   const CuratedList({
     required this.id,
@@ -82,7 +82,8 @@ class CuratedList {
 }
 
 /// Service for managing NIP-51 curated lists
-class CuratedListService extends ChangeNotifier {
+/// REFACTORED: Removed ChangeNotifier - now uses pure state management via Riverpod
+class CuratedListService  {
   CuratedListService({
     required INostrService nostrService,
     required AuthService authService,
@@ -123,7 +124,7 @@ class CuratedListService extends ChangeNotifier {
       _isInitialized = true;
       Log.info('Curated list service initialized with ${_lists.length} lists',
           name: 'CuratedListService', category: LogCategory.system);
-      notifyListeners();
+
     } catch (e) {
       Log.error('Failed to initialize curated list service: $e',
           name: 'CuratedListService', category: LogCategory.system);
@@ -174,7 +175,7 @@ class CuratedListService extends ChangeNotifier {
 
       Log.info('Created new curated list: $name ($listId)',
           name: 'CuratedListService', category: LogCategory.system);
-      notifyListeners();
+
       return newList;
     } catch (e) {
       Log.error('Failed to create curated list: $e',
@@ -219,7 +220,7 @@ class CuratedListService extends ChangeNotifier {
 
       Log.debug('➕ Added video to list "${list.name}": $videoEventId',
           name: 'CuratedListService', category: LogCategory.system);
-      notifyListeners();
+
       return true;
     } catch (e) {
       Log.error('Failed to add video to list: $e',
@@ -257,7 +258,7 @@ class CuratedListService extends ChangeNotifier {
 
       Log.debug('➖ Removed video from list "${list.name}": $videoEventId',
           name: 'CuratedListService', category: LogCategory.system);
-      notifyListeners();
+
       return true;
     } catch (e) {
       Log.error('Failed to remove video from list: $e',
@@ -318,7 +319,7 @@ class CuratedListService extends ChangeNotifier {
 
       Log.debug('✏️ Updated list: ${updatedList.name}',
           name: 'CuratedListService', category: LogCategory.system);
-      notifyListeners();
+
       return true;
     } catch (e) {
       Log.error('Failed to update list: $e',
@@ -350,7 +351,7 @@ class CuratedListService extends ChangeNotifier {
 
       Log.debug('📱️ Deleted list: ${list.name}',
           name: 'CuratedListService', category: LogCategory.system);
-      notifyListeners();
+
       return true;
     } catch (e) {
       Log.error('Failed to delete list: $e',

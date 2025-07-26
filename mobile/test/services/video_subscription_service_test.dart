@@ -56,7 +56,7 @@ void main() {
 
     setUp(() {
       mockNostrService = MockNostrService();
-      mockSubscriptionManager = MockSubscriptionManager();
+      mockSubscriptionManager = MockSubscriptionManager(TestNostrService());
 
       subscriptionService = VideoSubscriptionService(
         nostrService: mockNostrService,
@@ -139,7 +139,7 @@ void main() {
         final filters = <Filter>[];
 
         // Create a custom mock to capture filters
-        final capturingMock = MockSubscriptionManager();
+        final capturingMock = MockSubscriptionManager(TestNostrService());
         subscriptionService = VideoSubscriptionService(
           nostrService: mockNostrService,
           subscriptionManager: capturingMock,

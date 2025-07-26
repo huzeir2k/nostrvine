@@ -85,7 +85,7 @@ class FeatureFlagVariant {
 }
 
 /// Feature flag service for Flutter
-class FeatureFlagService extends ChangeNotifier {
+class FeatureFlagService  {
   FeatureFlagService({
     required this.apiBaseUrl,
     required this.prefs,
@@ -174,7 +174,7 @@ class FeatureFlagService extends ChangeNotifier {
         // Track analytics
         _trackFlagEvaluation(flagName, decision, attributes);
 
-        notifyListeners();
+
         return decision;
       } else {
         Log.error('Feature flag API error: ${response.statusCode}',
@@ -227,7 +227,7 @@ class FeatureFlagService extends ChangeNotifier {
       _decisionCache.clear();
       _cacheExpiry.clear();
     }
-    notifyListeners();
+
   }
 
   /// Preload feature flags for better performance
@@ -373,11 +373,10 @@ class FeatureFlagService extends ChangeNotifier {
         name: 'FeatureFlagService', category: LogCategory.system);
   }
 
-  @override
   void dispose() {
     _decisionCache.clear();
     _cacheExpiry.clear();
-    super.dispose();
+    
   }
 }
 

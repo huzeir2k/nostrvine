@@ -30,7 +30,6 @@ class VideoFullscreenOverlay extends ConsumerStatefulWidget {
   final VoidCallback? onSwipeNext;
   final VoidCallback? onSwipePrevious;
 
-  @override
   ConsumerState<VideoFullscreenOverlay> createState() => _VideoFullscreenOverlayState();
 }
 
@@ -43,7 +42,6 @@ class _VideoFullscreenOverlayState extends ConsumerState<VideoFullscreenOverlay>
   late Animation<double> _fadeAnimation;
   String? _currentVideoId;
 
-  @override
   void initState() {
     super.initState();
     _fadeController = AnimationController(
@@ -60,7 +58,6 @@ class _VideoFullscreenOverlayState extends ConsumerState<VideoFullscreenOverlay>
     _initializeVideo();
   }
 
-  @override
   void didUpdateWidget(VideoFullscreenOverlay oldWidget) {
     super.didUpdateWidget(oldWidget);
 
@@ -81,11 +78,10 @@ class _VideoFullscreenOverlayState extends ConsumerState<VideoFullscreenOverlay>
     }
   }
 
-  @override
   void dispose() {
     _fadeController.dispose();
     _disposeVideo();
-    super.dispose();
+    
   }
 
   Future<void> _initializeVideo() async {
@@ -216,7 +212,6 @@ class _VideoFullscreenOverlayState extends ConsumerState<VideoFullscreenOverlay>
     widget.onClose();
   }
 
-  @override
   Widget build(BuildContext context) => AnimatedBuilder(
         animation: _fadeAnimation,
         builder: (context, child) => Opacity(

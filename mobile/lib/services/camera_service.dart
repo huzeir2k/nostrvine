@@ -10,6 +10,7 @@ import 'package:flutter/material.dart';
 import 'package:openvine/utils/unified_logger.dart';
 
 /// Camera recording configuration
+/// REFACTORED: Removed ChangeNotifier - now uses pure state management via Riverpod
 class CameraConfiguration {
   const CameraConfiguration({
     this.recordingDuration =
@@ -40,7 +41,6 @@ class CameraConfiguration {
     );
   }
 
-  @override
   String toString() =>
       'CameraConfiguration(duration: ${recordingDuration.inSeconds}s)';
 }
@@ -54,7 +54,8 @@ enum RecordingState {
   error,
 }
 
-class CameraService extends ChangeNotifier {
+/// REFACTORED: Removed ChangeNotifier - now uses pure state management via Riverpod
+class CameraService  {
   CameraController? _controller;
   RecordingState _state = RecordingState.idle;
   bool _disposed = false;
@@ -301,7 +302,7 @@ class CameraService extends ChangeNotifier {
       _currentZoomLevel = clampedLevel;
       _zoomChangeController.add(clampedLevel);
       
-      notifyListeners();
+
       
       Log.debug('Set zoom level to ${clampedLevel}x',
           name: 'CameraService', category: LogCategory.video);
@@ -354,7 +355,7 @@ class CameraService extends ChangeNotifier {
       _currentZoomLevel = 1.0;
       await _initializeZoomCapabilities();
       
-      notifyListeners();
+
       Log.debug('Switched to ${newCamera.lensDirection} camera',
           name: 'CameraService', category: LogCategory.video);
     } catch (e) {
@@ -378,7 +379,7 @@ class CameraService extends ChangeNotifier {
     _configuration = newConfiguration;
     Log.debug('📱 Updated camera configuration: $newConfiguration',
         name: 'CameraService', category: LogCategory.video);
-    notifyListeners();
+
   }
 
   /// Set recording duration (clamped to 3-15 seconds)
@@ -392,7 +393,7 @@ class CameraService extends ChangeNotifier {
     );
     Log.debug('📱 Updated recording duration to ${clampedDuration.inSeconds}s',
         name: 'CameraService', category: LogCategory.video);
-    notifyListeners();
+
   }
 
   /// Configure recording using vine-style presets
@@ -406,51 +407,34 @@ class CameraService extends ChangeNotifier {
     );
     Log.debug('📱 Applied vine configuration: $_configuration',
         name: 'CameraService', category: LogCategory.video);
-    notifyListeners();
+
   }
 
   /// Dispose resources
-  @override
   void dispose() {
     _disposed = true;
     _stopProgressTimer();
     _autoStopTimer?.cancel();
     _zoomChangeController.close();
     _controller?.dispose();
-    super.dispose();
+    
   }
 
   // Private methods
 
   void _setState(RecordingState newState) {
     _state = newState;
-
-    // Use post-frame callback to safely notify listeners
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      if (!_disposed && hasListeners) {
-        try {
-          notifyListeners();
-        } catch (e) {
-          // Ignore errors during disposal
-          Log.error('State notification error: $e',
-              name: 'CameraService', category: LogCategory.video);
-        }
-      }
-    });
+    // With Riverpod, state changes are handled by the StateNotifier wrapper
+    // No need for manual listener notification
   }
 
   /// Start progress timer to update UI during recording
   void _startProgressTimer() {
     _stopProgressTimer(); // Clean up any existing timer
     _progressTimer = Timer.periodic(const Duration(milliseconds: 100), (_) {
-      if (_isRecording && !_disposed && hasListeners) {
-        try {
-          notifyListeners(); // Update UI with current progress
-        } catch (e) {
-          // Ignore errors during disposal
-          Log.error('Progress timer notification error: $e',
-              name: 'CameraService', category: LogCategory.video);
-        }
+      if (_isRecording && !_disposed) {
+        // Progress updates are handled by Riverpod state management
+        // No need for manual notification
       }
     });
   }
@@ -507,6 +491,7 @@ class CameraService extends ChangeNotifier {
 }
 
 /// Result from vine recording
+/// REFACTORED: Removed ChangeNotifier - now uses pure state management via Riverpod
 class VineRecordingResult {
   VineRecordingResult({
     required this.videoFile,
@@ -517,7 +502,6 @@ class VineRecordingResult {
 
   bool get hasVideo => videoFile.existsSync();
 
-  @override
   String toString() =>
       'VineRecordingResult(file: ${videoFile.path}, duration: ${duration.inSeconds}s)';
 }

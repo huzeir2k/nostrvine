@@ -3,7 +3,6 @@
 
 import 'dart:async';
 
-import 'package:flutter/foundation.dart';
 import 'package:openvine/models/video_event.dart';
 import 'package:openvine/services/auth_service.dart';
 import 'package:openvine/services/nostr_service_interface.dart';
@@ -11,6 +10,7 @@ import 'package:openvine/services/user_profile_service.dart';
 import 'package:openvine/utils/unified_logger.dart';
 
 /// Represents a user that can receive shared videos
+/// REFACTORED: Removed ChangeNotifier - now uses pure state management via Riverpod
 class ShareableUser {
   const ShareableUser({
     required this.pubkey,
@@ -27,6 +27,7 @@ class ShareableUser {
 }
 
 /// Result of sharing operation
+/// REFACTORED: Removed ChangeNotifier - now uses pure state management via Riverpod
 class ShareResult {
   const ShareResult({
     required this.success,
@@ -49,7 +50,8 @@ class ShareResult {
 }
 
 /// Service for sharing videos with other users
-class VideoSharingService extends ChangeNotifier {
+/// REFACTORED: Removed ChangeNotifier - now uses pure state management via Riverpod
+class VideoSharingService  {
   VideoSharingService({
     required INostrService nostrService,
     required AuthService authService,
@@ -116,7 +118,7 @@ class VideoSharingService extends ChangeNotifier {
 
         Log.info('Video shared successfully: ${event.id}',
             name: 'VideoSharingService', category: LogCategory.video);
-        notifyListeners();
+
         return ShareResult.createSuccess(event.id);
       } else {
         return ShareResult.failure('Failed to broadcast share message');
@@ -307,7 +309,7 @@ class VideoSharingService extends ChangeNotifier {
   void clearSharingHistory() {
     _shareHistory.clear();
     _recentlySharedWith.clear();
-    notifyListeners();
+
     Log.debug('🧹 Cleared sharing history',
         name: 'VideoSharingService', category: LogCategory.video);
   }

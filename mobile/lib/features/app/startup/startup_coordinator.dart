@@ -1,14 +1,14 @@
 // ABOUTME: Coordinates app startup sequence with progressive initialization
-// ABOUTME: Manages service dependencies and tracks performance metrics
+import 'package:flutter/foundation.dart';// ABOUTME: Manages service dependencies and tracks performance metrics
 
 import 'dart:async';
 
-import 'package:flutter/foundation.dart';
 import 'package:openvine/features/app/startup/startup_metrics.dart';
 import 'package:openvine/features/app/startup/startup_phase.dart';
 import 'package:openvine/utils/unified_logger.dart';
 
 /// Service registration info
+/// REFACTORED: Removed ChangeNotifier - now uses pure state management via Riverpod
 class ServiceRegistration {
   ServiceRegistration({
     required this.name,
@@ -25,7 +25,8 @@ class ServiceRegistration {
 }
 
 /// Coordinates application startup sequence
-class StartupCoordinator extends ChangeNotifier {
+/// REFACTORED: Removed ChangeNotifier - now uses pure state management via Riverpod
+class StartupCoordinator  {
   final Map<String, ServiceRegistration> _services = {};
   final Map<StartupPhase, List<String>> _servicesByPhase = {};
   final Map<String, bool> _completedServices = {};
@@ -336,6 +337,6 @@ class StartupCoordinator extends ChangeNotifier {
   void dispose() {
     _progressController.close();
     _phaseCompletedController.close();
-    super.dispose();
+    
   }
 }

@@ -32,7 +32,7 @@ void main() {
     // Setup default mocks
     when(mockVideoEventService.videoEvents).thenReturn([]);
     when(mockSocialService.getCachedLikeCount(any)).thenReturn(0);
-    when(mockVideoEventService.addListener(any)).thenReturn(null);
+    // Note: addListener removed after ChangeNotifier refactor
     when(mockVideoEventService.addVideoEvent(any)).thenReturn(null);
 
     curationService = CurationService(

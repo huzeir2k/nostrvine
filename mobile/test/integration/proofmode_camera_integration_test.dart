@@ -9,6 +9,7 @@ import 'package:openvine/services/proofmode_attestation_service.dart';
 import 'package:openvine/services/proofmode_session_service.dart';
 import 'package:openvine/services/proofmode_config.dart';
 import 'package:openvine/services/feature_flag_service.dart';
+import 'package:openvine/services/proofmode_human_detection.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../helpers/test_helpers.dart';
 import 'dart:io';

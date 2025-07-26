@@ -5,19 +5,18 @@
 // ignore_for_file: no_leading_underscores_for_library_prefixes
 import 'dart:async' as _i7;
 import 'dart:io' as _i8;
-import 'dart:ui' as _i9;
 
 import 'package:mockito/mockito.dart' as _i1;
-import 'package:mockito/src/dummies.dart' as _i10;
-import 'package:nostr_sdk/event.dart' as _i11;
-import 'package:nostr_sdk/filter.dart' as _i12;
-import 'package:openvine/models/nip94_metadata.dart' as _i13;
+import 'package:mockito/src/dummies.dart' as _i9;
+import 'package:nostr_sdk/event.dart' as _i10;
+import 'package:nostr_sdk/filter.dart' as _i11;
+import 'package:openvine/models/nip94_metadata.dart' as _i12;
 import 'package:openvine/models/pending_upload.dart' as _i2;
 import 'package:openvine/services/auth_service.dart' as _i5;
 import 'package:openvine/services/nostr_key_manager.dart' as _i3;
 import 'package:openvine/services/nostr_service_interface.dart' as _i4;
 import 'package:openvine/services/upload_manager.dart' as _i6;
-import 'package:openvine/services/user_profile_service.dart' as _i14;
+import 'package:openvine/services/user_profile_service.dart' as _i13;
 
 // ignore_for_file: type=lint
 // ignore_for_file: avoid_redundant_argument_values
@@ -100,12 +99,6 @@ class MockUploadManager extends _i1.Mock implements _i6.UploadManager {
         Invocation.getter(#uploadStats),
         returnValue: <String, int>{},
       ) as Map<String, int>);
-
-  @override
-  bool get hasListeners => (super.noSuchMethod(
-        Invocation.getter(#hasListeners),
-        returnValue: false,
-      ) as bool);
 
   @override
   _i7.Future<void> initialize() => (super.noSuchMethod(
@@ -347,33 +340,6 @@ class MockUploadManager extends _i1.Mock implements _i6.UploadManager {
         ),
         returnValueForMissingStub: null,
       );
-
-  @override
-  void addListener(_i9.VoidCallback? listener) => super.noSuchMethod(
-        Invocation.method(
-          #addListener,
-          [listener],
-        ),
-        returnValueForMissingStub: null,
-      );
-
-  @override
-  void removeListener(_i9.VoidCallback? listener) => super.noSuchMethod(
-        Invocation.method(
-          #removeListener,
-          [listener],
-        ),
-        returnValueForMissingStub: null,
-      );
-
-  @override
-  void notifyListeners() => super.noSuchMethod(
-        Invocation.method(
-          #notifyListeners,
-          [],
-        ),
-        returnValueForMissingStub: null,
-      );
 }
 
 /// A class which mocks [INostrService].
@@ -462,17 +428,11 @@ class MockINostrService extends _i1.Mock implements _i4.INostrService {
   @override
   String get primaryRelay => (super.noSuchMethod(
         Invocation.getter(#primaryRelay),
-        returnValue: _i10.dummyValue<String>(
+        returnValue: _i9.dummyValue<String>(
           this,
           Invocation.getter(#primaryRelay),
         ),
       ) as String);
-
-  @override
-  bool get hasListeners => (super.noSuchMethod(
-        Invocation.getter(#hasListeners),
-        returnValue: false,
-      ) as bool);
 
   @override
   bool isRelayAuthenticated(String? relayUrl) => (super.noSuchMethod(
@@ -505,8 +465,8 @@ class MockINostrService extends _i1.Mock implements _i4.INostrService {
       ) as _i7.Future<void>);
 
   @override
-  _i7.Stream<_i11.Event> subscribeToEvents({
-    required List<_i12.Filter>? filters,
+  _i7.Stream<_i10.Event> subscribeToEvents({
+    required List<_i11.Filter>? filters,
     bool? bypassLimits = false,
   }) =>
       (super.noSuchMethod(
@@ -518,11 +478,11 @@ class MockINostrService extends _i1.Mock implements _i4.INostrService {
             #bypassLimits: bypassLimits,
           },
         ),
-        returnValue: _i7.Stream<_i11.Event>.empty(),
-      ) as _i7.Stream<_i11.Event>);
+        returnValue: _i7.Stream<_i10.Event>.empty(),
+      ) as _i7.Stream<_i10.Event>);
 
   @override
-  _i7.Future<_i4.NostrBroadcastResult> broadcastEvent(_i11.Event? event) =>
+  _i7.Future<_i4.NostrBroadcastResult> broadcastEvent(_i10.Event? event) =>
       (super.noSuchMethod(
         Invocation.method(
           #broadcastEvent,
@@ -540,7 +500,7 @@ class MockINostrService extends _i1.Mock implements _i4.INostrService {
 
   @override
   _i7.Future<_i4.NostrBroadcastResult> publishFileMetadata({
-    required _i13.NIP94Metadata? metadata,
+    required _i12.NIP94Metadata? metadata,
     required String? content,
     List<String>? hashtags = const [],
   }) =>
@@ -677,33 +637,6 @@ class MockINostrService extends _i1.Mock implements _i4.INostrService {
         ),
         returnValueForMissingStub: null,
       );
-
-  @override
-  void addListener(_i9.VoidCallback? listener) => super.noSuchMethod(
-        Invocation.method(
-          #addListener,
-          [listener],
-        ),
-        returnValueForMissingStub: null,
-      );
-
-  @override
-  void removeListener(_i9.VoidCallback? listener) => super.noSuchMethod(
-        Invocation.method(
-          #removeListener,
-          [listener],
-        ),
-        returnValueForMissingStub: null,
-      );
-
-  @override
-  void notifyListeners() => super.noSuchMethod(
-        Invocation.method(
-          #notifyListeners,
-          [],
-        ),
-        returnValueForMissingStub: null,
-      );
 }
 
 /// A class which mocks [AuthService].
@@ -749,12 +682,6 @@ class MockAuthService extends _i1.Mock implements _i5.AuthService {
         Invocation.getter(#userStats),
         returnValue: <String, dynamic>{},
       ) as Map<String, dynamic>);
-
-  @override
-  bool get hasListeners => (super.noSuchMethod(
-        Invocation.getter(#hasListeners),
-        returnValue: false,
-      ) as bool);
 
   @override
   _i7.Future<bool> performMigrationIfNeeded({String? biometricPrompt}) =>
@@ -839,7 +766,7 @@ class MockAuthService extends _i1.Mock implements _i5.AuthService {
 
   @override
   _i7.Future<void> refreshCurrentProfile(
-          _i14.UserProfileService? userProfileService) =>
+          _i13.UserProfileService? userProfileService) =>
       (super.noSuchMethod(
         Invocation.method(
           #refreshCurrentProfile,
@@ -883,7 +810,7 @@ class MockAuthService extends _i1.Mock implements _i5.AuthService {
       ) as _i7.Future<String?>);
 
   @override
-  _i7.Future<_i11.Event?> createAndSignEvent({
+  _i7.Future<_i10.Event?> createAndSignEvent({
     required int? kind,
     required String? content,
     List<List<String>>? tags,
@@ -900,8 +827,8 @@ class MockAuthService extends _i1.Mock implements _i5.AuthService {
             #biometricPrompt: biometricPrompt,
           },
         ),
-        returnValue: _i7.Future<_i11.Event?>.value(),
-      ) as _i7.Future<_i11.Event?>);
+        returnValue: _i7.Future<_i10.Event?>.value(),
+      ) as _i7.Future<_i10.Event?>);
 
   @override
   _i7.Future<void> setWebAuthenticationKey(String? publicKeyHex) =>
@@ -918,33 +845,6 @@ class MockAuthService extends _i1.Mock implements _i5.AuthService {
   void dispose() => super.noSuchMethod(
         Invocation.method(
           #dispose,
-          [],
-        ),
-        returnValueForMissingStub: null,
-      );
-
-  @override
-  void addListener(_i9.VoidCallback? listener) => super.noSuchMethod(
-        Invocation.method(
-          #addListener,
-          [listener],
-        ),
-        returnValueForMissingStub: null,
-      );
-
-  @override
-  void removeListener(_i9.VoidCallback? listener) => super.noSuchMethod(
-        Invocation.method(
-          #removeListener,
-          [listener],
-        ),
-        returnValueForMissingStub: null,
-      );
-
-  @override
-  void notifyListeners() => super.noSuchMethod(
-        Invocation.method(
-          #notifyListeners,
           [],
         ),
         returnValueForMissingStub: null,

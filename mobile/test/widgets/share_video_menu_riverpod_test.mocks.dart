@@ -4,24 +4,23 @@
 
 // ignore_for_file: no_leading_underscores_for_library_prefixes
 import 'dart:async' as _i7;
-import 'dart:ui' as _i12;
 
 import 'package:mockito/mockito.dart' as _i1;
 import 'package:mockito/src/dummies.dart' as _i8;
 import 'package:nostr_sdk/event.dart' as _i9;
 import 'package:nostr_sdk/filter.dart' as _i10;
 import 'package:openvine/models/nip94_metadata.dart' as _i11;
-import 'package:openvine/models/user_profile.dart' as _i18;
-import 'package:openvine/models/video_event.dart' as _i13;
+import 'package:openvine/models/user_profile.dart' as _i17;
+import 'package:openvine/models/video_event.dart' as _i12;
 import 'package:openvine/services/content_deletion_service.dart' as _i4;
-import 'package:openvine/services/content_moderation_service.dart' as _i14;
+import 'package:openvine/services/content_moderation_service.dart' as _i13;
 import 'package:openvine/services/content_reporting_service.dart' as _i5;
-import 'package:openvine/services/curated_list_service.dart' as _i15;
+import 'package:openvine/services/curated_list_service.dart' as _i14;
 import 'package:openvine/services/nostr_key_manager.dart' as _i2;
 import 'package:openvine/services/nostr_service_interface.dart' as _i3;
-import 'package:openvine/services/profile_cache_service.dart' as _i19;
-import 'package:openvine/services/social_service.dart' as _i16;
-import 'package:openvine/services/user_profile_service.dart' as _i17;
+import 'package:openvine/services/profile_cache_service.dart' as _i18;
+import 'package:openvine/services/social_service.dart' as _i15;
+import 'package:openvine/services/user_profile_service.dart' as _i16;
 import 'package:openvine/services/video_sharing_service.dart' as _i6;
 
 // ignore_for_file: type=lint
@@ -181,12 +180,6 @@ class MockINostrService extends _i1.Mock implements _i3.INostrService {
           Invocation.getter(#primaryRelay),
         ),
       ) as String);
-
-  @override
-  bool get hasListeners => (super.noSuchMethod(
-        Invocation.getter(#hasListeners),
-        returnValue: false,
-      ) as bool);
 
   @override
   bool isRelayAuthenticated(String? relayUrl) => (super.noSuchMethod(
@@ -391,33 +384,6 @@ class MockINostrService extends _i1.Mock implements _i3.INostrService {
         ),
         returnValueForMissingStub: null,
       );
-
-  @override
-  void addListener(_i12.VoidCallback? listener) => super.noSuchMethod(
-        Invocation.method(
-          #addListener,
-          [listener],
-        ),
-        returnValueForMissingStub: null,
-      );
-
-  @override
-  void removeListener(_i12.VoidCallback? listener) => super.noSuchMethod(
-        Invocation.method(
-          #removeListener,
-          [listener],
-        ),
-        returnValueForMissingStub: null,
-      );
-
-  @override
-  void notifyListeners() => super.noSuchMethod(
-        Invocation.method(
-          #notifyListeners,
-          [],
-        ),
-        returnValueForMissingStub: null,
-      );
 }
 
 /// A class which mocks [ContentDeletionService].
@@ -442,12 +408,6 @@ class MockContentDeletionService extends _i1.Mock
       ) as bool);
 
   @override
-  bool get hasListeners => (super.noSuchMethod(
-        Invocation.getter(#hasListeners),
-        returnValue: false,
-      ) as bool);
-
-  @override
   _i7.Future<void> initialize() => (super.noSuchMethod(
         Invocation.method(
           #initialize,
@@ -459,7 +419,7 @@ class MockContentDeletionService extends _i1.Mock
 
   @override
   _i7.Future<_i4.DeleteResult> deleteContent({
-    required _i13.VideoEvent? video,
+    required _i12.VideoEvent? video,
     required String? reason,
     String? additionalContext,
   }) =>
@@ -489,7 +449,7 @@ class MockContentDeletionService extends _i1.Mock
 
   @override
   _i7.Future<_i4.DeleteResult> quickDelete({
-    required _i13.VideoEvent? video,
+    required _i12.VideoEvent? video,
     required _i4.DeleteReason? reason,
   }) =>
       (super.noSuchMethod(
@@ -551,33 +511,6 @@ class MockContentDeletionService extends _i1.Mock
         ),
         returnValueForMissingStub: null,
       );
-
-  @override
-  void addListener(_i12.VoidCallback? listener) => super.noSuchMethod(
-        Invocation.method(
-          #addListener,
-          [listener],
-        ),
-        returnValueForMissingStub: null,
-      );
-
-  @override
-  void removeListener(_i12.VoidCallback? listener) => super.noSuchMethod(
-        Invocation.method(
-          #removeListener,
-          [listener],
-        ),
-        returnValueForMissingStub: null,
-      );
-
-  @override
-  void notifyListeners() => super.noSuchMethod(
-        Invocation.method(
-          #notifyListeners,
-          [],
-        ),
-        returnValueForMissingStub: null,
-      );
 }
 
 /// A class which mocks [ContentReportingService].
@@ -602,12 +535,6 @@ class MockContentReportingService extends _i1.Mock
       ) as bool);
 
   @override
-  bool get hasListeners => (super.noSuchMethod(
-        Invocation.getter(#hasListeners),
-        returnValue: false,
-      ) as bool);
-
-  @override
   _i7.Future<void> initialize() => (super.noSuchMethod(
         Invocation.method(
           #initialize,
@@ -621,7 +548,7 @@ class MockContentReportingService extends _i1.Mock
   _i7.Future<_i5.ReportResult> reportContent({
     required String? eventId,
     required String? authorPubkey,
-    required _i14.ContentFilterReason? reason,
+    required _i13.ContentFilterReason? reason,
     required String? details,
     String? additionalContext,
     List<String>? hashtags = const [],
@@ -659,7 +586,7 @@ class MockContentReportingService extends _i1.Mock
   @override
   _i7.Future<_i5.ReportResult> reportUser({
     required String? userPubkey,
-    required _i14.ContentFilterReason? reason,
+    required _i13.ContentFilterReason? reason,
     required String? details,
     List<String>? relatedEventIds,
   }) =>
@@ -693,7 +620,7 @@ class MockContentReportingService extends _i1.Mock
   _i7.Future<_i5.ReportResult> quickReport({
     required String? eventId,
     required String? authorPubkey,
-    required _i14.ContentFilterReason? reason,
+    required _i13.ContentFilterReason? reason,
   }) =>
       (super.noSuchMethod(
         Invocation.method(
@@ -778,59 +705,26 @@ class MockContentReportingService extends _i1.Mock
         ),
         returnValueForMissingStub: null,
       );
-
-  @override
-  void addListener(_i12.VoidCallback? listener) => super.noSuchMethod(
-        Invocation.method(
-          #addListener,
-          [listener],
-        ),
-        returnValueForMissingStub: null,
-      );
-
-  @override
-  void removeListener(_i12.VoidCallback? listener) => super.noSuchMethod(
-        Invocation.method(
-          #removeListener,
-          [listener],
-        ),
-        returnValueForMissingStub: null,
-      );
-
-  @override
-  void notifyListeners() => super.noSuchMethod(
-        Invocation.method(
-          #notifyListeners,
-          [],
-        ),
-        returnValueForMissingStub: null,
-      );
 }
 
 /// A class which mocks [CuratedListService].
 ///
 /// See the documentation for Mockito's code generation for more information.
 class MockCuratedListService extends _i1.Mock
-    implements _i15.CuratedListService {
+    implements _i14.CuratedListService {
   MockCuratedListService() {
     _i1.throwOnMissingStub(this);
   }
 
   @override
-  List<_i15.CuratedList> get lists => (super.noSuchMethod(
+  List<_i14.CuratedList> get lists => (super.noSuchMethod(
         Invocation.getter(#lists),
-        returnValue: <_i15.CuratedList>[],
-      ) as List<_i15.CuratedList>);
+        returnValue: <_i14.CuratedList>[],
+      ) as List<_i14.CuratedList>);
 
   @override
   bool get isInitialized => (super.noSuchMethod(
         Invocation.getter(#isInitialized),
-        returnValue: false,
-      ) as bool);
-
-  @override
-  bool get hasListeners => (super.noSuchMethod(
-        Invocation.getter(#hasListeners),
         returnValue: false,
       ) as bool);
 
@@ -854,7 +748,7 @@ class MockCuratedListService extends _i1.Mock
       ) as bool);
 
   @override
-  _i7.Future<_i15.CuratedList?> createList({
+  _i7.Future<_i14.CuratedList?> createList({
     required String? name,
     String? description,
     String? imageUrl,
@@ -871,8 +765,8 @@ class MockCuratedListService extends _i1.Mock
             #isPublic: isPublic,
           },
         ),
-        returnValue: _i7.Future<_i15.CuratedList?>.value(),
-      ) as _i7.Future<_i15.CuratedList?>);
+        returnValue: _i7.Future<_i14.CuratedList?>.value(),
+      ) as _i7.Future<_i14.CuratedList?>);
 
   @override
   _i7.Future<bool> addVideoToList(
@@ -932,11 +826,11 @@ class MockCuratedListService extends _i1.Mock
       ) as bool);
 
   @override
-  _i15.CuratedList? getListById(String? listId) =>
+  _i14.CuratedList? getListById(String? listId) =>
       (super.noSuchMethod(Invocation.method(
         #getListById,
         [listId],
-      )) as _i15.CuratedList?);
+      )) as _i14.CuratedList?);
 
   @override
   _i7.Future<bool> updateList({
@@ -969,48 +863,12 @@ class MockCuratedListService extends _i1.Mock
         ),
         returnValue: _i7.Future<bool>.value(false),
       ) as _i7.Future<bool>);
-
-  @override
-  void addListener(_i12.VoidCallback? listener) => super.noSuchMethod(
-        Invocation.method(
-          #addListener,
-          [listener],
-        ),
-        returnValueForMissingStub: null,
-      );
-
-  @override
-  void removeListener(_i12.VoidCallback? listener) => super.noSuchMethod(
-        Invocation.method(
-          #removeListener,
-          [listener],
-        ),
-        returnValueForMissingStub: null,
-      );
-
-  @override
-  void dispose() => super.noSuchMethod(
-        Invocation.method(
-          #dispose,
-          [],
-        ),
-        returnValueForMissingStub: null,
-      );
-
-  @override
-  void notifyListeners() => super.noSuchMethod(
-        Invocation.method(
-          #notifyListeners,
-          [],
-        ),
-        returnValueForMissingStub: null,
-      );
 }
 
 /// A class which mocks [SocialService].
 ///
 /// See the documentation for Mockito's code generation for more information.
-class MockSocialService extends _i1.Mock implements _i16.SocialService {
+class MockSocialService extends _i1.Mock implements _i15.SocialService {
   MockSocialService() {
     _i1.throwOnMissingStub(this);
   }
@@ -1026,12 +884,6 @@ class MockSocialService extends _i1.Mock implements _i16.SocialService {
         Invocation.getter(#followingPubkeys),
         returnValue: <String>[],
       ) as List<String>);
-
-  @override
-  bool get hasListeners => (super.noSuchMethod(
-        Invocation.getter(#hasListeners),
-        returnValue: false,
-      ) as bool);
 
   @override
   bool isLiked(String? eventId) => (super.noSuchMethod(
@@ -1253,58 +1105,25 @@ class MockSocialService extends _i1.Mock implements _i16.SocialService {
         ),
         returnValueForMissingStub: null,
       );
-
-  @override
-  void addListener(_i12.VoidCallback? listener) => super.noSuchMethod(
-        Invocation.method(
-          #addListener,
-          [listener],
-        ),
-        returnValueForMissingStub: null,
-      );
-
-  @override
-  void removeListener(_i12.VoidCallback? listener) => super.noSuchMethod(
-        Invocation.method(
-          #removeListener,
-          [listener],
-        ),
-        returnValueForMissingStub: null,
-      );
-
-  @override
-  void notifyListeners() => super.noSuchMethod(
-        Invocation.method(
-          #notifyListeners,
-          [],
-        ),
-        returnValueForMissingStub: null,
-      );
 }
 
 /// A class which mocks [UserProfileService].
 ///
 /// See the documentation for Mockito's code generation for more information.
 class MockUserProfileService extends _i1.Mock
-    implements _i17.UserProfileService {
+    implements _i16.UserProfileService {
   MockUserProfileService() {
     _i1.throwOnMissingStub(this);
   }
 
   @override
-  Map<String, _i18.UserProfile> get allProfiles => (super.noSuchMethod(
+  Map<String, _i17.UserProfile> get allProfiles => (super.noSuchMethod(
         Invocation.getter(#allProfiles),
-        returnValue: <String, _i18.UserProfile>{},
-      ) as Map<String, _i18.UserProfile>);
+        returnValue: <String, _i17.UserProfile>{},
+      ) as Map<String, _i17.UserProfile>);
 
   @override
-  bool get hasListeners => (super.noSuchMethod(
-        Invocation.getter(#hasListeners),
-        returnValue: false,
-      ) as bool);
-
-  @override
-  void setPersistentCache(_i19.ProfileCacheService? cacheService) =>
+  void setPersistentCache(_i18.ProfileCacheService? cacheService) =>
       super.noSuchMethod(
         Invocation.method(
           #setPersistentCache,
@@ -1314,11 +1133,11 @@ class MockUserProfileService extends _i1.Mock
       );
 
   @override
-  _i18.UserProfile? getCachedProfile(String? pubkey) =>
+  _i17.UserProfile? getCachedProfile(String? pubkey) =>
       (super.noSuchMethod(Invocation.method(
         #getCachedProfile,
         [pubkey],
-      )) as _i18.UserProfile?);
+      )) as _i17.UserProfile?);
 
   @override
   bool hasProfile(String? pubkey) => (super.noSuchMethod(
@@ -1348,7 +1167,7 @@ class MockUserProfileService extends _i1.Mock
       );
 
   @override
-  _i7.Future<void> updateCachedProfile(_i18.UserProfile? profile) =>
+  _i7.Future<void> updateCachedProfile(_i17.UserProfile? profile) =>
       (super.noSuchMethod(
         Invocation.method(
           #updateCachedProfile,
@@ -1369,7 +1188,7 @@ class MockUserProfileService extends _i1.Mock
       ) as _i7.Future<void>);
 
   @override
-  _i7.Future<_i18.UserProfile?> fetchProfile(
+  _i7.Future<_i17.UserProfile?> fetchProfile(
     String? pubkey, {
     bool? forceRefresh = false,
   }) =>
@@ -1379,8 +1198,8 @@ class MockUserProfileService extends _i1.Mock
           [pubkey],
           {#forceRefresh: forceRefresh},
         ),
-        returnValue: _i7.Future<_i18.UserProfile?>.value(),
-      ) as _i7.Future<_i18.UserProfile?>);
+        returnValue: _i7.Future<_i17.UserProfile?>.value(),
+      ) as _i7.Future<_i17.UserProfile?>);
 
   @override
   _i7.Future<void> fetchMultipleProfiles(
@@ -1459,33 +1278,6 @@ class MockUserProfileService extends _i1.Mock
         ),
         returnValueForMissingStub: null,
       );
-
-  @override
-  void addListener(_i12.VoidCallback? listener) => super.noSuchMethod(
-        Invocation.method(
-          #addListener,
-          [listener],
-        ),
-        returnValueForMissingStub: null,
-      );
-
-  @override
-  void removeListener(_i12.VoidCallback? listener) => super.noSuchMethod(
-        Invocation.method(
-          #removeListener,
-          [listener],
-        ),
-        returnValueForMissingStub: null,
-      );
-
-  @override
-  void notifyListeners() => super.noSuchMethod(
-        Invocation.method(
-          #notifyListeners,
-          [],
-        ),
-        returnValueForMissingStub: null,
-      );
 }
 
 /// A class which mocks [VideoSharingService].
@@ -1504,14 +1296,8 @@ class MockVideoSharingService extends _i1.Mock
       ) as List<_i6.ShareableUser>);
 
   @override
-  bool get hasListeners => (super.noSuchMethod(
-        Invocation.getter(#hasListeners),
-        returnValue: false,
-      ) as bool);
-
-  @override
   _i7.Future<_i6.ShareResult> shareVideoWithUser({
-    required _i13.VideoEvent? video,
+    required _i12.VideoEvent? video,
     required String? recipientPubkey,
     String? personalMessage,
   }) =>
@@ -1541,7 +1327,7 @@ class MockVideoSharingService extends _i1.Mock
 
   @override
   _i7.Future<Map<String, _i6.ShareResult>> shareVideoWithMultipleUsers({
-    required _i13.VideoEvent? video,
+    required _i12.VideoEvent? video,
     required List<String>? recipientPubkeys,
     String? personalMessage,
   }) =>
@@ -1583,7 +1369,7 @@ class MockVideoSharingService extends _i1.Mock
       ) as _i7.Future<List<_i6.ShareableUser>>);
 
   @override
-  String generateShareUrl(_i13.VideoEvent? video) => (super.noSuchMethod(
+  String generateShareUrl(_i12.VideoEvent? video) => (super.noSuchMethod(
         Invocation.method(
           #generateShareUrl,
           [video],
@@ -1598,7 +1384,7 @@ class MockVideoSharingService extends _i1.Mock
       ) as String);
 
   @override
-  String generateShareText(_i13.VideoEvent? video) => (super.noSuchMethod(
+  String generateShareText(_i12.VideoEvent? video) => (super.noSuchMethod(
         Invocation.method(
           #generateShareText,
           [video],
@@ -1634,42 +1420,6 @@ class MockVideoSharingService extends _i1.Mock
   void clearSharingHistory() => super.noSuchMethod(
         Invocation.method(
           #clearSharingHistory,
-          [],
-        ),
-        returnValueForMissingStub: null,
-      );
-
-  @override
-  void addListener(_i12.VoidCallback? listener) => super.noSuchMethod(
-        Invocation.method(
-          #addListener,
-          [listener],
-        ),
-        returnValueForMissingStub: null,
-      );
-
-  @override
-  void removeListener(_i12.VoidCallback? listener) => super.noSuchMethod(
-        Invocation.method(
-          #removeListener,
-          [listener],
-        ),
-        returnValueForMissingStub: null,
-      );
-
-  @override
-  void dispose() => super.noSuchMethod(
-        Invocation.method(
-          #dispose,
-          [],
-        ),
-        returnValueForMissingStub: null,
-      );
-
-  @override
-  void notifyListeners() => super.noSuchMethod(
-        Invocation.method(
-          #notifyListeners,
           [],
         ),
         returnValueForMissingStub: null,

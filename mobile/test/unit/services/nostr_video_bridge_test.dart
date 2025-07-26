@@ -43,7 +43,7 @@ void main() {
       mockNostrService = MockNostrService();
       mockSeenVideosService = MockSeenVideosService();
       mockConnectionService = MockConnectionStatusService();
-      mockSubscriptionManager = MockSubscriptionManager();
+      mockSubscriptionManager = MockSubscriptionManager(TestNostrService());
 
       // Setup default mock behaviors (only what's actually needed)
       when(() => mockVideoManager.addVideoEvent(any()))

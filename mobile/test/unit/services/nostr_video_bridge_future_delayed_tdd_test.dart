@@ -30,7 +30,7 @@ void main() {
     setUp(() {
       mockVideoManager = MockVideoManager();
       mockNostrService = MockNostrService();
-      mockSubscriptionManager = MockSubscriptionManager();
+      mockSubscriptionManager = MockSubscriptionManager(TestNostrService());
 
       // Setup basic mock behaviors for NostrService
       when(() => mockNostrService.isInitialized).thenReturn(true);

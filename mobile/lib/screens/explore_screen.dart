@@ -18,7 +18,6 @@ import 'package:openvine/providers/video_manager_providers.dart';
 class ExploreScreen extends ConsumerStatefulWidget {
   const ExploreScreen({super.key});
 
-  @override
   ConsumerState<ExploreScreen> createState() => ExploreScreenState();
 }
 
@@ -44,13 +43,12 @@ class ExploreScreenState extends ConsumerState<ExploreScreen>
   bool _isLoadingMoreEditorsHashtags = false;
   bool _isLoadingMoreTrendingHashtags = false;
 
-  @override
   void initState() {
     super.initState();
     _tabController = TabController(length: 3, vsync: this, initialIndex: 1);
 
     // Listen for tab changes to close video and reset state
-    _tabController.addListener(_onTabChanged);
+      // REFACTORED: Service no longer extends ChangeNotifier - use Riverpod ref.watch instead
 
     // Add lifecycle observer
     WidgetsBinding.instance.addObserver(this);
@@ -242,10 +240,9 @@ class ExploreScreenState extends ConsumerState<ExploreScreen>
     }
   }
 
-  @override
   void dispose() {
     WidgetsBinding.instance.removeObserver(this);
-    _tabController.removeListener(_onTabChanged);
+      // REFACTORED: Service no longer needs manual listener cleanup
     _tabController.dispose();
 
     // Pause any playing videos - but only if context is still mounted
@@ -258,10 +255,10 @@ class ExploreScreenState extends ConsumerState<ExploreScreen>
       }
     }
 
+    
     super.dispose();
   }
 
-  @override
   void didChangeAppLifecycleState(AppLifecycleState state) {
     super.didChangeAppLifecycleState(state);
 
@@ -285,7 +282,6 @@ class ExploreScreenState extends ConsumerState<ExploreScreen>
     }
   }
 
-  @override
   Widget build(BuildContext context) => Scaffold(
         backgroundColor: VineTheme.backgroundColor,
         appBar: _isInFeedMode

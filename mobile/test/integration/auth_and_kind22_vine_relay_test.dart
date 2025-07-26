@@ -47,7 +47,7 @@ void main() {
       videoEventService.dispose();
       subscriptionManager.dispose();
       nostrService.dispose();
-      keyManager.dispose();
+      // NostrKeyManager doesn't have dispose method
     });
 
     test('AUTH completion tracking works correctly', () async {
@@ -109,8 +109,10 @@ void main() {
       // Track received events
       final receivedEvents = <VideoEvent>[];
       
-      // Listen to video events
-      videoEventService.addListener(() {
+      // Note: VideoEventService no longer extends ChangeNotifier after refactor
+      // Using polling approach to check for new events
+      Timer? eventPollingTimer;
+      void checkForNewEvents() {
         final newEvents = videoEventService.videoEvents;
         for (final event in newEvents) {
           if (!receivedEvents.any((e) => e.id == event.id)) {
@@ -118,7 +120,7 @@ void main() {
             print('Received Kind 22 event: ${event.id.substring(0, 8)} from ${event.pubkey.substring(0, 8)}');
           }
         }
-      });
+      }
 
       // Subscribe to Kind 22 video events with a reasonable limit
       print('Subscribing to Kind 22 video events...');
@@ -128,9 +130,17 @@ void main() {
         includeReposts: false,
       );
 
+      // Start polling for new events every 500ms
+      eventPollingTimer = Timer.periodic(const Duration(milliseconds: 500), (_) {
+        checkForNewEvents();
+      });
+
       // Wait for events to arrive
       print('Waiting for Kind 22 events...');
       await Future.delayed(const Duration(seconds: 15));
+      
+      // Stop polling
+      eventPollingTimer?.cancel();
 
       // Check if we received any Kind 22 events
       print('Total events received: ${receivedEvents.length}');
@@ -181,7 +191,11 @@ void main() {
 
       // Try to subscribe immediately (might happen before AUTH)
       final receivedEvents = <VideoEvent>[];
-      videoEventService.addListener(() {
+      
+      // Note: VideoEventService no longer extends ChangeNotifier after refactor
+      // Using polling approach to check for new events
+      Timer? retryEventPollingTimer;
+      void checkForRetryEvents() {
         final newEvents = videoEventService.videoEvents;
         for (final event in newEvents) {
           if (!receivedEvents.any((e) => e.id == event.id)) {
@@ -189,7 +203,7 @@ void main() {
             print('Received event via retry mechanism: ${event.id.substring(0, 8)}');
           }
         }
-      });
+      }
 
       print('Subscribing before AUTH completion...');
       await videoEventService.subscribeToVideoFeed(
@@ -198,10 +212,18 @@ void main() {
         includeReposts: false,
       );
 
+      // Start polling for events
+      retryEventPollingTimer = Timer.periodic(const Duration(milliseconds: 500), (_) {
+        checkForRetryEvents();
+      });
+
       print('Initial subscription created. Waiting for AUTH completion and retry...');
       
       // Wait longer for AUTH to complete and retry to happen
       await Future.delayed(const Duration(seconds: 20));
+
+      // Stop polling
+      retryEventPollingTimer?.cancel();
 
       print('Final results:');
       print('- Events received: ${receivedEvents.length}');

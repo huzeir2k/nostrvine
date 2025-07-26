@@ -5,18 +5,10 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:openvine/models/video_event.dart';
 import 'package:openvine/providers/video_manager_providers.dart';
+import '../../builders/test_video_event_builder.dart';
 // Helper function to create test videos
 VideoEvent createTestVideo({String? id, String? title}) {
-  return VideoEvent(
-    id: id ?? 'test_video_${DateTime.now().millisecondsSinceEpoch}',
-    pubkey: 'test_pubkey',
-    createdAt: DateTime.now().millisecondsSinceEpoch ~/ 1000,
-    videoUrl: 'https://example.com/test_video.mp4',
-    thumbnailUrl: 'https://example.com/test_thumbnail.jpg',
-    title: title ?? 'Test Video',
-    hashtags: ['test'],
-    metadataMap: {},
-  );
+  return TestVideoEventBuilder.create(id: id, title: title);
 }
 
 void main() {

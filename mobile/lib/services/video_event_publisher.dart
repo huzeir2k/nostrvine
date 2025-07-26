@@ -2,19 +2,21 @@
 // ABOUTME: Handles automatic event creation, signing, and relay broadcasting with smart polling
 
 import 'dart:async';
+import 'dart:io';
 
-import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
 import 'package:nostr_sdk/event.dart';
 import 'package:openvine/models/pending_upload.dart';
 import 'package:openvine/models/ready_event_data.dart';
 import 'package:openvine/services/auth_service.dart';
+import 'package:openvine/services/blurhash_service.dart';
 import 'package:openvine/services/nostr_service_interface.dart';
 import 'package:openvine/services/upload_manager.dart';
 import 'package:openvine/utils/unified_logger.dart';
 
 /// Service for publishing processed videos to Nostr relays
-class VideoEventPublisher extends ChangeNotifier {
+/// REFACTORED: Removed ChangeNotifier - now uses pure state management via Riverpod
+class VideoEventPublisher  {
   VideoEventPublisher({
     required UploadManager uploadManager,
     required INostrService nostrService,
@@ -68,7 +70,7 @@ class VideoEventPublisher extends ChangeNotifier {
     _setupAppLifecycleListener();
 
     // Listen for upload status changes to publish direct uploads immediately
-    _uploadManager.addListener(_checkForDirectUploads);
+      // REFACTORED: Service no longer extends ChangeNotifier - use Riverpod ref.watch instead
 
     // Start polling for ready events
     await startPolling();
@@ -245,6 +247,7 @@ class VideoEventPublisher extends ChangeNotifier {
       String? mimeType;
       String? sha256;
       int? fileSize;
+      String? blurhash;
 
       // Parse the NIP-94 tags to extract video info
       for (final tag in eventData.nip94Tags) {
@@ -266,6 +269,8 @@ class VideoEventPublisher extends ChangeNotifier {
             sha256 = tag.length > 1 ? tag[1] : null;
           case 'size':
             fileSize = tag.length > 1 ? int.tryParse(tag[1]) : null;
+          case 'blurhash':
+            blurhash = tag.length > 1 ? tag[1] : null;
         }
       }
 
@@ -282,6 +287,7 @@ class VideoEventPublisher extends ChangeNotifier {
       if (mimeType != null) videoTags.add(['m', mimeType]);
       if (sha256 != null) videoTags.add(['x', sha256]);
       if (fileSize != null) videoTags.add(['size', fileSize.toString()]);
+      if (blurhash != null) videoTags.add(['blurhash', blurhash]);
 
       // Add hashtags from original tags
       for (final tag in eventData.nip94Tags) {
@@ -597,6 +603,25 @@ class VideoEventPublisher extends ChangeNotifier {
         tags.add(['r', upload.thumbnailPath!, 'thumbnail']); // NIP-71 compliant
         Log.verbose('Including thumbnail: ${upload.thumbnailPath}',
             name: 'VideoEventPublisher', category: LogCategory.video);
+        
+        // Generate blurhash from thumbnail if it's a local file
+        if (upload.thumbnailPath!.startsWith('/') || upload.thumbnailPath!.startsWith('file://')) {
+          try {
+            final thumbnailFile = File(upload.thumbnailPath!.replaceFirst('file://', ''));
+            if (thumbnailFile.existsSync()) {
+              final thumbnailBytes = await thumbnailFile.readAsBytes();
+              final blurhash = await BlurhashService.generateBlurhash(thumbnailBytes);
+              if (blurhash != null) {
+                tags.add(['blurhash', blurhash]);
+                Log.info('Generated blurhash for thumbnail: ${blurhash.substring(0, 10)}...',
+                    name: 'VideoEventPublisher', category: LogCategory.video);
+              }
+            }
+          } catch (e) {
+            Log.warning('Failed to generate blurhash from thumbnail: $e',
+                name: 'VideoEventPublisher', category: LogCategory.video);
+          }
+        }
       }
 
       // Optional tags
@@ -695,7 +720,6 @@ class VideoEventPublisher extends ChangeNotifier {
     }
   }
 
-  @override
   void dispose() {
     Log.debug('📱️ Disposing VideoEventPublisher',
         name: 'VideoEventPublisher', category: LogCategory.video);
@@ -704,11 +728,11 @@ class VideoEventPublisher extends ChangeNotifier {
     _failedEvents.clear();
 
     // Remove upload manager listener
-    _uploadManager.removeListener(_checkForDirectUploads);
+      // REFACTORED: Service no longer needs manual listener cleanup
 
     // Remove app lifecycle listener
     SystemChannels.lifecycle.setMessageHandler(null);
 
-    super.dispose();
+    
   }
 }

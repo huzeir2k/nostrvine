@@ -21,7 +21,6 @@ class VideoMetadataScreen extends ConsumerStatefulWidget {
   final File videoFile;
   final Duration duration;
 
-  @override
   ConsumerState<VideoMetadataScreen> createState() => _VideoMetadataScreenState();
 }
 
@@ -36,7 +35,6 @@ class _VideoMetadataScreenState extends ConsumerState<VideoMetadataScreen> {
   bool _isExpiringPost = false;
   int _expirationHours = 24;
 
-  @override
   void initState() {
     super.initState();
     // Delay initialization to ensure file is ready
@@ -46,7 +44,6 @@ class _VideoMetadataScreenState extends ConsumerState<VideoMetadataScreen> {
     });
   }
 
-  @override
   void dispose() {
     // Unregister from global registry before disposing
     GlobalVideoRegistry().unregisterController(_videoController);
@@ -54,6 +51,7 @@ class _VideoMetadataScreenState extends ConsumerState<VideoMetadataScreen> {
     _titleController.dispose();
     _descriptionController.dispose();
     _hashtagController.dispose();
+    
     super.dispose();
   }
 
@@ -135,7 +133,6 @@ class _VideoMetadataScreenState extends ConsumerState<VideoMetadataScreen> {
     );
   }
 
-  @override
   Widget build(BuildContext context) {
     final screenHeight = MediaQuery.of(context).size.height;
 

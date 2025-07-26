@@ -104,28 +104,20 @@ void main() {
     final videoEventService = VideoEventService(nostrService,
         subscriptionManager: subscriptionManager);
 
-    // Add a listener to track changes
-    var changeCount = 0;
-    videoEventService.addListener(() {
-      changeCount++;
-      Log.info('🔔 VideoEventService notified listeners (change #$changeCount)',
-          name: 'DebugTest');
+    // Note: VideoEventService no longer extends ChangeNotifier after refactor
+    // Tracking state changes via periodic checks instead of listeners
+    void logServiceState(String context) {
+      Log.info('📊 VideoEventService state ($context):', name: 'DebugTest');
       Log.info('  - Event count: ${videoEventService.eventCount}',
           name: 'DebugTest');
       Log.info('  - Has events: ${videoEventService.hasEvents}',
           name: 'DebugTest');
       Log.info('  - Is subscribed: ${videoEventService.isSubscribed}',
           name: 'DebugTest');
-    });
+    }
 
     // Check initial state
-    Log.info('📊 Initial state:', name: 'DebugTest');
-    Log.info('  - Event count: ${videoEventService.eventCount}',
-        name: 'DebugTest');
-    Log.info('  - Has events: ${videoEventService.hasEvents}',
-        name: 'DebugTest');
-    Log.info('  - Is subscribed: ${videoEventService.isSubscribed}',
-        name: 'DebugTest');
+    logServiceState('initial');
 
     // Subscribe to video feed
     Log.info('🚀 Calling subscribeToVideoFeed...', name: 'DebugTest');
@@ -138,13 +130,7 @@ void main() {
     }
 
     // Check state after subscription
-    Log.info('📊 State after subscription:', name: 'DebugTest');
-    Log.info('  - Event count: ${videoEventService.eventCount}',
-        name: 'DebugTest');
-    Log.info('  - Has events: ${videoEventService.hasEvents}',
-        name: 'DebugTest');
-    Log.info('  - Is subscribed: ${videoEventService.isSubscribed}',
-        name: 'DebugTest');
+    logServiceState('after subscription');
     Log.info('  - Error: ${videoEventService.error}', name: 'DebugTest');
 
     // Wait for events to arrive
@@ -152,14 +138,8 @@ void main() {
     await Future.delayed(const Duration(seconds: 2));
 
     // Final check
-    Log.info('📊 Final state:', name: 'DebugTest');
-    Log.info('  - Event count: ${videoEventService.eventCount}',
-        name: 'DebugTest');
-    Log.info('  - Has events: ${videoEventService.hasEvents}',
-        name: 'DebugTest');
-    Log.info('  - Is subscribed: ${videoEventService.isSubscribed}',
-        name: 'DebugTest');
-    Log.info('  - Total listener notifications: $changeCount',
+    logServiceState('final');
+    Log.info('  - Note: Change notifications no longer available after ChangeNotifier removal',
         name: 'DebugTest');
 
     if (videoEventService.hasEvents) {
@@ -184,7 +164,6 @@ void main() {
     );
 
     // Clean up
-    videoEventService.removeListener(() {});
     videoEventService.dispose();
     nostrService.dispose();
   });

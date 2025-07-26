@@ -147,7 +147,7 @@ void main() {
 
     setUp(() {
       mockNostrService = MockNostrService();
-      mockSubscriptionManager = MockSubscriptionManager();
+      mockSubscriptionManager = MockSubscriptionManager(TestNostrService());
 
       networkService = VideoNetworkService(
         nostrService: mockNostrService,
@@ -175,7 +175,7 @@ void main() {
       test('should create subscription with correct filters for hashtags',
           () async {
         // Arrange
-        final capturingMock = CapturingMockSubscriptionManager();
+        final capturingMock = CapturingMockSubscriptionManager(TestNostrService());
 
         networkService = VideoNetworkService(
           nostrService: mockNostrService,

@@ -9,7 +9,8 @@ import 'package:flutter/foundation.dart';
 import 'package:openvine/utils/unified_logger.dart';
 
 /// Service for monitoring connection status and handling offline scenarios
-class ConnectionStatusService extends ChangeNotifier {
+/// REFACTORED: Removed ChangeNotifier - now uses pure state management via Riverpod
+class ConnectionStatusService {
   factory ConnectionStatusService() => _instance;
   ConnectionStatusService._internal();
   static final ConnectionStatusService _instance =
@@ -91,7 +92,6 @@ class ConnectionStatusService extends ChangeNotifier {
       _hasInternetAccess = false;
     }
 
-    notifyListeners();
   }
 
   /// Handle connectivity stream errors
@@ -99,7 +99,6 @@ class ConnectionStatusService extends ChangeNotifier {
     Log.error('Connectivity stream error: $error',
         name: 'ConnectionStatusService', category: LogCategory.system);
     _lastError = error.toString();
-    notifyListeners();
   }
 
   /// Check current connectivity status
@@ -192,7 +191,6 @@ class ConnectionStatusService extends ChangeNotifier {
       _hasInternetAccess = false;
     }
 
-    notifyListeners();
   }
 
   /// Start periodic connectivity checks
@@ -254,10 +252,9 @@ class ConnectionStatusService extends ChangeNotifier {
         'lastError': _lastError,
       };
 
-  @override
   void dispose() {
     _connectivitySubscription?.cancel();
-    super.dispose();
+    
   }
 }
 
@@ -267,7 +264,6 @@ class ConnectionException implements Exception {
   final String message;
   final String? details;
 
-  @override
   String toString() =>
       'ConnectionException: $message${details != null ? ' ($details)' : ''}';
 }

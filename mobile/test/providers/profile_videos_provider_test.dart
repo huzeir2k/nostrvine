@@ -29,7 +29,7 @@ void main() {
   setUp(() {
     mockNostrService = MockINostrService();
     mockVideoEventService = MockVideoEventService();
-    mockSubscriptionManager = MockSubscriptionManager();
+    mockSubscriptionManager = MockSubscriptionManager(TestNostrService());
 
     provider = ProfileVideosProvider(mockNostrService);
     provider.setVideoEventService(mockVideoEventService);

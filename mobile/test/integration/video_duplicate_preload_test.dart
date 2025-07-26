@@ -14,19 +14,11 @@ import 'package:openvine/widgets/video_feed_item.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import '../helpers/test_helpers.dart';
+import '../builders/test_video_event_builder.dart';
 
 // Helper function to create test videos
 VideoEvent createTestVideo({String? id, String? title}) {
-  return VideoEvent(
-    id: id ?? 'test_video_${DateTime.now().millisecondsSinceEpoch}',
-    pubkey: 'test_pubkey',
-    createdAt: DateTime.now().millisecondsSinceEpoch ~/ 1000,
-    videoUrl: 'https://example.com/test_video.mp4',
-    thumbnailUrl: 'https://example.com/test_thumbnail.jpg',
-    title: title ?? 'Test Video',
-    hashtags: ['test'],
-    metadataMap: {},
-  );
+  return TestVideoEventBuilder.create(id: id, title: title);
 }
 
 void main() {

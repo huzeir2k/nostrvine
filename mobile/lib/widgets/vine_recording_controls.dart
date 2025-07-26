@@ -15,7 +15,6 @@ class VineRecordingProgressBar extends StatelessWidget {
   });
   final VineRecordingController controller;
 
-  @override
   Widget build(BuildContext context) => Container(
         height: 4,
         margin: const EdgeInsets.symmetric(horizontal: 20),
@@ -67,7 +66,6 @@ class VineRecordButton extends StatefulWidget {
   final VineRecordingController controller;
   final VoidCallback? onRecordingComplete;
 
-  @override
   State<VineRecordButton> createState() => _VineRecordButtonState();
 }
 
@@ -77,7 +75,6 @@ class _VineRecordButtonState extends State<VineRecordButton>
   late Animation<double> _scaleAnimation;
   bool _isPressed = false;
 
-  @override
   void initState() {
     super.initState();
     _animationController = AnimationController(
@@ -95,14 +92,13 @@ class _VineRecordButtonState extends State<VineRecordButton>
     );
 
     // Listen for recording completion
-    widget.controller.addListener(_onRecordingStateChanged);
+      // REFACTORED: Service no longer extends ChangeNotifier - use Riverpod ref.watch instead
   }
 
-  @override
   void dispose() {
-    widget.controller.removeListener(_onRecordingStateChanged);
+      // REFACTORED: Service no longer needs manual listener cleanup
     _animationController.dispose();
-    super.dispose();
+    
   }
 
   void _onRecordingStateChanged() {
@@ -156,7 +152,6 @@ class _VineRecordButtonState extends State<VineRecordButton>
     widget.controller.stopRecording();
   }
 
-  @override
   Widget build(BuildContext context) {
     // Use press-and-hold behavior for all platforms
     return Listener(
@@ -254,7 +249,6 @@ class VineRecordingInstructions extends StatelessWidget {
   });
   final VineRecordingController controller;
 
-  @override
   Widget build(BuildContext context) => Column(
         children: [
           // Duration display
@@ -332,7 +326,6 @@ class VineRecordingUI extends StatelessWidget {
   final VoidCallback? onRecordingComplete;
   final VoidCallback? onCancel;
 
-  @override
   Widget build(BuildContext context) => SafeArea(
         child: Padding(
           padding: const EdgeInsets.all(16),

@@ -6,6 +6,7 @@ import 'package:http/http.dart' as http;
 import 'package:openvine/models/video_event.dart';
 import 'package:openvine/services/thumbnail_api_service.dart';
 import 'package:openvine/utils/unified_logger.dart';
+import 'package:openvine/widgets/blurhash_display.dart';
 import 'package:openvine/widgets/video_icon_placeholder.dart';
 
 /// Smart thumbnail widget that automatically generates thumbnails from the API
@@ -176,6 +177,36 @@ class _VideoThumbnailWidgetState extends State<VideoThumbnailWidget> {
   }
 
   Widget _buildContent() {
+    // While determining what thumbnail to use, show blurhash if available
+    if (_isLoading && widget.video.blurhash != null) {
+      return Stack(
+        children: [
+          BlurhashDisplay(
+            blurhash: widget.video.blurhash!,
+            width: widget.width,
+            height: widget.height,
+            fit: widget.fit,
+          ),
+          if (widget.showPlayIcon)
+            Center(
+              child: Container(
+                width: 48,
+                height: 48,
+                decoration: BoxDecoration(
+                  color: Colors.black.withValues(alpha: 0.5),
+                  shape: BoxShape.circle,
+                ),
+                child: const Icon(
+                  Icons.play_arrow,
+                  color: Colors.white,
+                  size: 32,
+                ),
+              ),
+            ),
+        ],
+      );
+    }
+    
     if (_isLoading) {
       return VideoIconPlaceholder(
         width: widget.width,
@@ -187,31 +218,40 @@ class _VideoThumbnailWidgetState extends State<VideoThumbnailWidget> {
     }
 
     if (_thumbnailUrl != null) {
-      return Image.network(
-        _thumbnailUrl!,
+      // Use BlurhashImage to show blurhash while loading the actual thumbnail
+      return BlurhashImage(
+        imageUrl: _thumbnailUrl!,
+        blurhash: widget.video.blurhash,
         width: widget.width,
         height: widget.height,
         fit: widget.fit,
-        errorBuilder: (context, error, stackTrace) => VideoIconPlaceholder(
-          width: widget.width,
-          height: widget.height,
-          showPlayIcon: widget.showPlayIcon,
-          borderRadius: widget.borderRadius?.topLeft.x ?? 8.0,
-        ),
-        loadingBuilder: (context, child, loadingProgress) {
-          if (loadingProgress == null) return child;
-          return VideoIconPlaceholder(
-            width: widget.width,
-            height: widget.height,
-            showLoading: true,
-            showPlayIcon: widget.showPlayIcon,
-            borderRadius: widget.borderRadius?.topLeft.x ?? 8.0,
-          );
-        },
+        errorBuilder: (context, error, stackTrace) => 
+          widget.video.blurhash != null
+            ? BlurhashDisplay(
+                blurhash: widget.video.blurhash!,
+                width: widget.width,
+                height: widget.height,
+                fit: widget.fit,
+              )
+            : VideoIconPlaceholder(
+                width: widget.width,
+                height: widget.height,
+                showPlayIcon: widget.showPlayIcon,
+                borderRadius: widget.borderRadius?.topLeft.x ?? 8.0,
+              ),
       );
     }
 
-    // Fallback to placeholder
+    // Fallback - try blurhash first, then icon placeholder
+    if (widget.video.blurhash != null) {
+      return BlurhashDisplay(
+        blurhash: widget.video.blurhash!,
+        width: widget.width,
+        height: widget.height,
+        fit: widget.fit,
+      );
+    }
+    
     return VideoIconPlaceholder(
       width: widget.width,
       height: widget.height,

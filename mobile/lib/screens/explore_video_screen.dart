@@ -24,7 +24,6 @@ class ExploreVideoScreen extends ConsumerStatefulWidget {
   final String contextTitle;
   final int? startingIndex;
 
-  @override
   ConsumerState<ExploreVideoScreen> createState() => _ExploreVideoScreenState();
 }
 
@@ -33,7 +32,6 @@ class _ExploreVideoScreenState extends ConsumerState<ExploreVideoScreen> {
   late int _currentIndex;
   VideoManager? _videoManager;
 
-  @override
   void initState() {
     super.initState();
 
@@ -59,10 +57,10 @@ class _ExploreVideoScreenState extends ConsumerState<ExploreVideoScreen> {
     });
   }
 
-  @override
   void dispose() {
     _pageController.dispose();
     _pauseAllVideos();
+    
     super.dispose();
   }
 
@@ -155,7 +153,6 @@ class _ExploreVideoScreenState extends ConsumerState<ExploreVideoScreen> {
     }
   }
 
-  @override
   Widget build(BuildContext context) => Scaffold(
         backgroundColor: Colors.black,
         appBar: AppBar(

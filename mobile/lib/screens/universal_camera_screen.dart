@@ -6,10 +6,10 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:openvine/main.dart';
 import 'package:openvine/providers/app_providers.dart';
 import 'package:openvine/providers/video_manager_providers.dart';
+import 'package:openvine/providers/vine_recording_provider.dart';
 import 'package:openvine/screens/video_metadata_screen.dart';
 import 'package:openvine/services/nostr_key_manager.dart';
 import 'package:openvine/services/upload_manager.dart';
-import 'package:openvine/services/vine_recording_controller.dart';
 import 'package:openvine/theme/vine_theme.dart';
 import 'package:openvine/utils/unified_logger.dart';
 import 'package:openvine/widgets/vine_recording_controls.dart';
@@ -22,7 +22,6 @@ class UniversalCameraScreen extends ConsumerStatefulWidget {
 }
 
 class _UniversalCameraScreenState extends ConsumerState<UniversalCameraScreen> {
-  late VineRecordingController _recordingController;
   late final NostrKeyManager _keyManager;
   UploadManager? _uploadManager;
 
@@ -32,13 +31,12 @@ class _UniversalCameraScreenState extends ConsumerState<UniversalCameraScreen> {
   @override
   void initState() {
     super.initState();
-    _recordingController = VineRecordingController();
     _initializeServices();
   }
 
   @override
   void dispose() {
-    _recordingController.dispose();
+    // Provider handles disposal automatically
     super.dispose();
   }
 
@@ -57,8 +55,9 @@ class _UniversalCameraScreenState extends ConsumerState<UniversalCameraScreen> {
           _uploadManager = ref.read(uploadManagerProvider);
           _keyManager = ref.read(nostrKeyManagerProvider);
 
-          // Initialize recording controller
-          await _recordingController.initialize();
+          // Initialize recording controller via provider
+          final recordingNotifier = ref.read(vineRecordingProvider.notifier);
+          await recordingNotifier.initialize();
 
           if (mounted) {
             setState(() {
@@ -103,7 +102,8 @@ class _UniversalCameraScreenState extends ConsumerState<UniversalCameraScreen> {
 
     try {
       // Finish recording and get the video file
-      final videoFile = await _recordingController.finishRecording();
+      final recordingNotifier = ref.read(vineRecordingProvider.notifier);
+      final videoFile = await recordingNotifier.finishRecording();
 
       if (videoFile != null && mounted) {
         // Navigate to metadata screen
@@ -112,7 +112,7 @@ class _UniversalCameraScreenState extends ConsumerState<UniversalCameraScreen> {
           MaterialPageRoute(
             builder: (context) => VideoMetadataScreen(
               videoFile: videoFile,
-              duration: _recordingController.totalRecordedDuration,
+              duration: recordingNotifier.controller.totalRecordedDuration,
             ),
           ),
         );
@@ -186,12 +186,13 @@ class _UniversalCameraScreenState extends ConsumerState<UniversalCameraScreen> {
             // Camera preview (full screen)
             if (_errorMessage == null)
               Positioned.fill(
-                child: Builder(
-                  builder: (context) {
+                child: Consumer(
+                  builder: (context, ref, child) {
                     Log.debug('📱 Building camera preview widget',
                         name: 'UniversalCameraScreen',
                         category: LogCategory.ui);
-                    return _recordingController.cameraPreview;
+                    final controller = ref.watch(vineRecordingProvider.notifier).controller;
+                    return controller.cameraPreview;
                   },
                 ),
               )
@@ -201,13 +202,16 @@ class _UniversalCameraScreenState extends ConsumerState<UniversalCameraScreen> {
             // Recording UI overlay
             if (_errorMessage == null)
               Positioned.fill(
-                child: ListenableBuilder(
-                  listenable: _recordingController,
-                  builder: (context, child) => VineRecordingUI(
-                    controller: _recordingController,
-                    onRecordingComplete: _onRecordingComplete,
-                    onCancel: _onCancel,
-                  ),
+                child: Consumer(
+                  builder: (context, ref, child) {
+                    final recordingNotifier = ref.watch(vineRecordingProvider.notifier);
+                    ref.watch(vineRecordingProvider); // Watch state to trigger rebuilds
+                    return VineRecordingUI(
+                      controller: recordingNotifier.controller,
+                      onRecordingComplete: _onRecordingComplete,
+                      onCancel: _onCancel,
+                    );
+                  },
                 ),
               ),
 

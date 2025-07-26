@@ -31,8 +31,8 @@ void main() {
       mockHashtagService = MockHashtagService();
     });
 
-    Widget createTestWidget(String hashtag) => MaterialApp(
-          home: final container = ProviderContainer(
+    Widget createTestWidget(String hashtag) {
+      final container = ProviderContainer(
         overrides: [
           videoEventServiceProvider.overrideWithValue(mockVideoService),
           hashtagServiceProvider.overrideWithValue(mockHashtagService),
@@ -42,11 +42,10 @@ void main() {
       return ProviderScope(
         parent: container,
         child: MaterialApp(
-          home: HashtagFeedScreen(hashtag: hashtag
+          home: HashtagFeedScreen(hashtag: hashtag),
         ),
-      ),
-          ),
-        );
+      );
+    }
 
     testWidgets('should display hashtag in app bar', (tester) async {
       const testHashtag = 'bitcoin';

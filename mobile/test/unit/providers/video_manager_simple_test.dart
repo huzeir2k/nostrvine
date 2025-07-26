@@ -5,6 +5,8 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:openvine/models/video_event.dart';
 import 'package:openvine/providers/video_manager_providers.dart';
+import '../../builders/test_video_event_builder.dart';
+import '../../helpers/mock_video_manager_notifier.dart';
 
 void main() {
   group('VideoManager Simple Functionality', () {
@@ -15,7 +17,11 @@ void main() {
     });
 
     setUp(() {
-      container = ProviderContainer();
+      container = ProviderContainer(
+        overrides: [
+          videoManagerProvider.overrideWith(() => MockVideoManager()),
+        ],
+      );
     });
 
     tearDown(() {
@@ -34,15 +40,9 @@ void main() {
       expect(initialState.config, isNotNull);
       
       // Should accept videos directly via addVideoEvent
-      final testVideo = VideoEvent(
+      final testVideo = TestVideoEventBuilder.create(
         id: 'test_video_id',
-        pubkey: 'test_pubkey',
-        createdAt: DateTime.now().millisecondsSinceEpoch ~/ 1000,
-        videoUrl: 'https://example.com/test_video.mp4',
-        thumbnailUrl: 'https://example.com/test_thumbnail.jpg',
         title: 'Test Video',
-        hashtags: ['test'],
-        metadataMap: {},
       );
       videoManager.addVideoEvent(testVideo);
       
@@ -62,7 +62,12 @@ void main() {
     });
 
     test('Multiple preload calls should not create duplicate controllers', () async {
-      final testVideo = DefaultContentService.createDefaultVideo();
+      final testVideo = TestVideoEventBuilder.create(
+        id: 'test_video_id_2',
+        title: 'Test Video 2',
+        videoUrl: 'https://example.com/test_video2.mp4',
+        thumbnailUrl: 'https://example.com/test_thumbnail2.jpg',
+      );
       final videoManager = container.read(videoManagerProvider.notifier);
       
       // Add video event first
@@ -81,7 +86,12 @@ void main() {
     });
 
     test('Pause and resume should work on single controller', () async {
-      final testVideo = DefaultContentService.createDefaultVideo();
+      final testVideo = TestVideoEventBuilder.create(
+        id: 'test_video_id_2',
+        title: 'Test Video 2',
+        videoUrl: 'https://example.com/test_video2.mp4',
+        thumbnailUrl: 'https://example.com/test_thumbnail2.jpg',
+      );
       final videoManager = container.read(videoManagerProvider.notifier);
       
       // Add and preload video

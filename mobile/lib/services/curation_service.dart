@@ -5,7 +5,6 @@ import 'dart:async';
 import 'dart:convert';
 import 'dart:math';
 
-import 'package:flutter/foundation.dart';
 import 'package:http/http.dart' as http;
 import 'package:nostr_sdk/filter.dart';
 import 'package:openvine/constants/app_constants.dart';
@@ -16,7 +15,8 @@ import 'package:openvine/services/social_service.dart';
 import 'package:openvine/services/video_event_service.dart';
 import 'package:openvine/utils/unified_logger.dart';
 
-class CurationService extends ChangeNotifier {
+/// REFACTORED: Removed ChangeNotifier - now uses pure state management via Riverpod
+class CurationService  {
   CurationService({
     required INostrService nostrService,
     required VideoEventService videoEventService,
@@ -27,7 +27,7 @@ class CurationService extends ChangeNotifier {
     _initializeWithSampleData();
 
     // Listen for video updates and refresh curation data
-    _videoEventService.addListener(_onVideoDataChanged);
+      // REFACTORED: Service no longer extends ChangeNotifier - use Riverpod ref.watch instead
   }
   final INostrService _nostrService;
   final VideoEventService _videoEventService;
@@ -68,7 +68,7 @@ class CurationService extends ChangeNotifier {
     _populateSampleSets();
 
     _isLoading = false;
-    notifyListeners();
+
   }
 
   /// Populate sample sets with real video data
@@ -356,7 +356,7 @@ class CurationService extends ChangeNotifier {
                 '✅ Updated trending videos from analytics: ${orderedTrending.length} videos',
                 name: 'CurationService',
                 category: LogCategory.system);
-            notifyListeners();
+
           } else {
             Log.warning(
                 '⚠️ No trending videos found after fetching from relays',
@@ -399,7 +399,7 @@ class CurationService extends ChangeNotifier {
   Future<void> refreshCurationSets({List<String>? curatorPubkeys}) async {
     _isLoading = true;
     _error = null;
-    notifyListeners();
+
 
     try {
       // TODO: Implement actual Nostr queries for kind 30005 events
@@ -407,11 +407,11 @@ class CurationService extends ChangeNotifier {
       _populateSampleSets();
 
       _isLoading = false;
-      notifyListeners();
+
     } catch (e) {
       _error = 'Failed to refresh curation sets: $e';
       _isLoading = false;
-      notifyListeners();
+
       Log.error('Error refreshing curation sets: $e',
           name: 'CurationService', category: LogCategory.system);
     }
@@ -466,7 +466,7 @@ class CurationService extends ChangeNotifier {
 
             // Update the video cache for this set
             _updateVideoCache(curationSet);
-            notifyListeners();
+
           } catch (e) {
             Log.error('Failed to parse curation set from event: $e',
                 name: 'CurationService', category: LogCategory.system);
@@ -482,7 +482,7 @@ class CurationService extends ChangeNotifier {
       Timer.periodic(const Duration(minutes: 5), (_) {
         if (!_isLoading) {
           _populateSampleSets();
-          notifyListeners();
+
         }
       });
     } catch (e) {
@@ -546,7 +546,7 @@ class CurationService extends ChangeNotifier {
     // Refresh if we have new videos
     if (currentVideoCount > cachedCount) {
       _populateSampleSets();
-      notifyListeners();
+
     }
   }
 
@@ -567,13 +567,12 @@ class CurationService extends ChangeNotifier {
         name: 'CurationService', category: LogCategory.system);
 
     _populateSampleSets();
-    notifyListeners();
+
   }
 
-  @override
   void dispose() {
     // Clean up any subscriptions
-    _videoEventService.removeListener(_onVideoDataChanged);
-    super.dispose();
+      // REFACTORED: Service no longer needs manual listener cleanup
+    
   }
 }

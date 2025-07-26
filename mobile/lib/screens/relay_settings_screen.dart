@@ -10,7 +10,6 @@ import 'package:openvine/theme/app_theme.dart';
 class RelaySettingsScreen extends ConsumerStatefulWidget {
   const RelaySettingsScreen({super.key});
 
-  @override
   ConsumerState<RelaySettingsScreen> createState() => _RelaySettingsScreenState();
 }
 
@@ -19,9 +18,9 @@ class _RelaySettingsScreenState extends ConsumerState<RelaySettingsScreen> {
   final _formKey = GlobalKey<FormState>();
   bool _isAddingRelay = false;
 
-  @override
   void dispose() {
     _relayController.dispose();
+    
     super.dispose();
   }
 
@@ -150,7 +149,6 @@ class _RelaySettingsScreenState extends ConsumerState<RelaySettingsScreen> {
     );
   }
 
-  @override
   Widget build(BuildContext context) {
     final isDarkMode = Theme.of(context).brightness == Brightness.dark;
     final iNostrService = ref.read(nostrServiceProvider);

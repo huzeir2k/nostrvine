@@ -1,7 +1,6 @@
 // ABOUTME: Content blocklist service for filtering unwanted content from feeds
 // ABOUTME: Maintains internal blocklist while allowing explicit profile visits
 
-import 'package:flutter/foundation.dart';
 import 'package:openvine/utils/nostr_encoding.dart';
 import 'package:openvine/utils/unified_logger.dart';
 
@@ -10,7 +9,8 @@ import 'package:openvine/utils/unified_logger.dart';
 /// This service maintains an internal blocklist of npubs whose content
 /// should be filtered from all general feeds (home, explore, hashtag feeds).
 /// Users can still explicitly visit blocked profiles if they choose to follow them.
-class ContentBlocklistService extends ChangeNotifier {
+/// REFACTORED: Removed ChangeNotifier - now uses pure state management via Riverpod
+class ContentBlocklistService  {
   ContentBlocklistService() {
     // Initialize with the specific npub requested
     _addInitialBlockedContent();
@@ -74,7 +74,7 @@ class ContentBlocklistService extends ChangeNotifier {
   void blockUser(String pubkey) {
     if (!_runtimeBlocklist.contains(pubkey)) {
       _runtimeBlocklist.add(pubkey);
-      notifyListeners();
+
       Log.debug('Added user to blocklist: ${pubkey.substring(0, 8)}...',
           name: 'ContentBlocklistService', category: LogCategory.system);
     }
@@ -85,7 +85,7 @@ class ContentBlocklistService extends ChangeNotifier {
   void unblockUser(String pubkey) {
     if (_runtimeBlocklist.contains(pubkey)) {
       _runtimeBlocklist.remove(pubkey);
-      notifyListeners();
+
       Log.info('Removed user from blocklist: ${pubkey.substring(0, 8)}...',
           name: 'ContentBlocklistService', category: LogCategory.system);
     } else if (_internalBlocklist.contains(pubkey)) {
@@ -119,7 +119,7 @@ class ContentBlocklistService extends ChangeNotifier {
   void clearRuntimeBlocks() {
     if (_runtimeBlocklist.isNotEmpty) {
       _runtimeBlocklist.clear();
-      notifyListeners();
+
       Log.debug('🧹 Cleared all runtime blocks',
           name: 'ContentBlocklistService', category: LogCategory.system);
     }

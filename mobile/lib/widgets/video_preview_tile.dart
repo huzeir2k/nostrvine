@@ -24,7 +24,6 @@ class VideoPreviewTile extends StatefulWidget {
   final double? height;
   final VoidCallback? onTap;
 
-  @override
   State<VideoPreviewTile> createState() => _VideoPreviewTileState();
 }
 
@@ -34,10 +33,8 @@ class _VideoPreviewTileState extends State<VideoPreviewTile>
   bool _isInitializing = false;
   bool _hasError = false;
 
-  @override
   bool get wantKeepAlive => false; // Don't keep alive to save memory
 
-  @override
   void initState() {
     super.initState();
     if (widget.isActive) {
@@ -50,7 +47,6 @@ class _VideoPreviewTileState extends State<VideoPreviewTile>
     }
   }
 
-  @override
   void didUpdateWidget(VideoPreviewTile oldWidget) {
     super.didUpdateWidget(oldWidget);
 
@@ -63,10 +59,9 @@ class _VideoPreviewTileState extends State<VideoPreviewTile>
     }
   }
 
-  @override
   void dispose() {
     _disposeVideo();
-    super.dispose();
+    
   }
 
   Future<void> _initializeVideo() async {
@@ -141,7 +136,6 @@ class _VideoPreviewTileState extends State<VideoPreviewTile>
     }
   }
 
-  @override
   Widget build(BuildContext context) {
     super.build(context);
 

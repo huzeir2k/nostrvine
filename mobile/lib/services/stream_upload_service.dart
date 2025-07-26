@@ -1,16 +1,23 @@
 // ABOUTME: Cloudflare Stream upload service for video hosting and transcoding
 // ABOUTME: Handles video uploads to Stream CDN with NIP-98 authentication
 
+import 'package:flutter/foundation.dart';
 import 'dart:async';
+import 'package:flutter/foundation.dart';
 import 'dart:convert';
+import 'package:flutter/foundation.dart';
 import 'dart:io';
 import 'package:flutter/foundation.dart';
 import 'package:http/http.dart' as http;
+import 'package:flutter/foundation.dart';
 import 'package:openvine/config/app_config.dart';
+import 'package:flutter/foundation.dart';
 import 'package:openvine/services/nip98_auth_service.dart';
+import 'package:flutter/foundation.dart';
 import 'package:openvine/utils/unified_logger.dart';
 
 /// Result of a Stream upload operation
+/// REFACTORED: Removed ChangeNotifier - now uses pure state management via Riverpod
 class StreamUploadResult {
   const StreamUploadResult({
     required this.success,
@@ -56,6 +63,7 @@ class StreamUploadResult {
 }
 
 /// Upload request parameters for Stream
+/// REFACTORED: Removed ChangeNotifier - now uses pure state management via Riverpod
 class StreamUploadRequest {
   const StreamUploadRequest({
     required this.fileName,
@@ -86,6 +94,7 @@ class StreamUploadRequest {
 }
 
 /// Video status from Stream backend
+/// REFACTORED: Removed ChangeNotifier - now uses pure state management via Riverpod
 class StreamVideoStatus {
   const StreamVideoStatus({
     required this.videoId,
@@ -128,7 +137,8 @@ class StreamVideoStatus {
 }
 
 /// Service for uploading videos to Cloudflare Stream
-class StreamUploadService extends ChangeNotifier {
+/// REFACTORED: Removed ChangeNotifier - now uses pure state management via Riverpod
+class StreamUploadService  {
   StreamUploadService({http.Client? client, Nip98AuthService? authService})
       : _client = client ?? http.Client(),
         _authService = authService;
@@ -491,7 +501,6 @@ class StreamUploadService extends ChangeNotifier {
     }
   }
 
-  @override
   void dispose() {
     // Cancel all active uploads
     for (final controller in _progressControllers.values) {
@@ -499,11 +508,12 @@ class StreamUploadService extends ChangeNotifier {
     }
     _progressControllers.clear();
     _client.close();
-    super.dispose();
+    
   }
 }
 
 /// Exception thrown by StreamUploadService
+/// REFACTORED: Removed ChangeNotifier - now uses pure state management via Riverpod
 class StreamUploadException implements Exception {
   const StreamUploadException(
     this.message, {
@@ -514,6 +524,5 @@ class StreamUploadException implements Exception {
   final String? code;
   final dynamic originalError;
 
-  @override
   String toString() => 'StreamUploadException: $message';
 }

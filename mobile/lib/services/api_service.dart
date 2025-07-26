@@ -1,10 +1,9 @@
 // ABOUTME: HTTP API service for communicating with the OpenVine backend
-// ABOUTME: Handles ready events polling, authentication, and error handling
+import 'package:flutter/foundation.dart';// ABOUTME: Handles ready events polling, authentication, and error handling
 
 import 'dart:async';
 import 'dart:convert';
 
-import 'package:flutter/foundation.dart';
 import 'package:http/http.dart' as http;
 import 'package:openvine/config/app_config.dart';
 import 'package:openvine/models/ready_event_data.dart';
@@ -14,6 +13,7 @@ import 'package:openvine/services/nip98_auth_service.dart';
 import 'package:openvine/utils/unified_logger.dart';
 
 /// Exception thrown by API service
+/// REFACTORED: Removed ChangeNotifier - now uses pure state management via Riverpod
 class ApiException implements Exception {
   const ApiException(this.message, {this.statusCode, this.responseBody});
   final String message;
@@ -25,7 +25,8 @@ class ApiException implements Exception {
 }
 
 /// Service for backend API communication
-class ApiService extends ChangeNotifier {
+/// REFACTORED: Removed ChangeNotifier - now uses pure state management via Riverpod
+class ApiService  {
   ApiService({
     http.Client? client,
     Nip98AuthService? authService,
@@ -327,6 +328,6 @@ class ApiService extends ChangeNotifier {
   @override
   void dispose() {
     _client.close();
-    super.dispose();
+    
   }
 }

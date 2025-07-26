@@ -1,7 +1,9 @@
 import 'package:flutter_test/flutter_test.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:mockito/annotations.dart';
 import 'package:mockito/mockito.dart';
 import 'package:openvine/providers/profile_stats_provider.dart';
+import 'package:openvine/providers/app_providers.dart';
 import 'package:openvine/services/social_service.dart';
 
 // Generate mocks
@@ -10,26 +12,30 @@ import 'profile_stats_provider_test.mocks.dart';
 
 void main() {
   group('ProfileStatsProvider', () {
-    late ProfileStatsProvider provider;
+    late ProviderContainer container;
     late MockSocialService mockSocialService;
 
     setUp(() {
       mockSocialService = MockSocialService();
-      provider = ProfileStatsProvider(mockSocialService);
+      container = ProviderContainer(
+        overrides: [
+          socialServiceProvider.overrideWithValue(mockSocialService),
+        ],
+      );
     });
 
     tearDown(() {
-      provider.dispose();
+      container.dispose();
     });
 
     group('Initial State', () {
       test('should have correct initial state', () {
-        expect(provider.loadingState, ProfileStatsLoadingState.idle);
-        expect(provider.stats, isNull);
-        expect(provider.error, isNull);
-        expect(provider.isLoading, false);
-        expect(provider.hasError, false);
-        expect(provider.hasData, false);
+        final notifier = container.read(profileStatsNotifierProvider);
+        expect(notifier.isLoading, false);
+        expect(notifier.stats, isNull);
+        expect(notifier.error, isNull);
+        expect(notifier.hasError, false);
+        expect(notifier.hasData, false);
       });
     });
 

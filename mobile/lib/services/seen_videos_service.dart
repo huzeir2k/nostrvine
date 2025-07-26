@@ -3,12 +3,12 @@
 
 import 'dart:async';
 
-import 'package:flutter/foundation.dart';
 import 'package:openvine/utils/unified_logger.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 /// Service for tracking seen videos to prevent duplicates in feed
-class SeenVideosService extends ChangeNotifier {
+/// REFACTORED: Removed ChangeNotifier - now uses pure state management via Riverpod
+class SeenVideosService  {
   static const String _seenVideosKey = 'seen_video_ids';
   static const int _maxSeenVideos =
       1000; // Limit storage to prevent unbounded growth
@@ -31,7 +31,7 @@ class SeenVideosService extends ChangeNotifier {
       _prefs = await SharedPreferences.getInstance();
       await _loadSeenVideos();
       _isInitialized = true;
-      notifyListeners();
+
       Log.info(
           '📱️ SeenVideosService initialized with ${_seenVideoIds.length} seen videos',
           name: 'SeenVideosService',
@@ -99,7 +99,7 @@ class SeenVideosService extends ChangeNotifier {
     await _saveSeenVideos();
 
     // Notify listeners that seen videos have changed
-    notifyListeners();
+
   }
 
   /// Mark multiple videos as seen (batch operation)
@@ -115,7 +115,7 @@ class SeenVideosService extends ChangeNotifier {
 
     if (hasChanges) {
       await _saveSeenVideos();
-      notifyListeners();
+
     }
   }
 
@@ -129,7 +129,7 @@ class SeenVideosService extends ChangeNotifier {
       await _prefs!.remove(_seenVideosKey);
     }
 
-    notifyListeners();
+
   }
 
   /// Remove a specific video from seen list (mark as unseen)
@@ -143,7 +143,7 @@ class SeenVideosService extends ChangeNotifier {
     _seenVideoIds.remove(videoId);
 
     await _saveSeenVideos();
-    notifyListeners();
+
   }
 
   /// Get statistics about seen videos
@@ -154,10 +154,9 @@ class SeenVideosService extends ChangeNotifier {
             (_seenVideoIds.length / _maxSeenVideos * 100).toStringAsFixed(1),
       };
 
-  @override
   void dispose() {
     // Save any pending changes before disposing
     _saveSeenVideos();
-    super.dispose();
+    
   }
 }

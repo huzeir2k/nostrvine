@@ -121,18 +121,18 @@ void main() {
           // Override service dependencies
           videoEventsNostrServiceProvider.overrideWithValue(mockNostrService1),
           videoEventsSubscriptionManagerProvider
-              .overrideWithValue(MockSubscriptionManager()),
+              .overrideWithValue(MockSubscriptionManager(TestNostrService())),
           curationServiceProvider.overrideWithValue(mockCurationService),
           // Override dependencies for userProfileNotifierProvider
           nostrServiceProvider.overrideWithValue(mockNostrService2),
           subscriptionManagerProvider
-              .overrideWithValue(MockSubscriptionManager()),
+              .overrideWithValue(MockSubscriptionManager(TestNostrService())),
           userProfileNotifierProvider.overrideWith(() =>
               customUserProfiles ?? MockUserProfileNotifier(onFetchProfiles: (_) {})),
           // Override social provider dependencies
           social.nostrServiceProvider.overrideWithValue(mockNostrService3),
           social.subscriptionManagerProvider
-              .overrideWithValue(MockSubscriptionManager()),
+              .overrideWithValue(MockSubscriptionManager(TestNostrService())),
         ],
       );
     }

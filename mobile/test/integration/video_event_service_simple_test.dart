@@ -40,7 +40,7 @@ void main() {
 
       // Set up mocks
       mockNostrService = MockINostrService();
-      mockSubscriptionManager = MockSubscriptionManager();
+      mockSubscriptionManager = MockSubscriptionManager(mockNostrService);
       mockEventStream = StreamController<Event>.broadcast();
 
       // Mock basic properties

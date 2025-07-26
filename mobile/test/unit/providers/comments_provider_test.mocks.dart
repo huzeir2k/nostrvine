@@ -4,19 +4,18 @@
 
 // ignore_for_file: no_leading_underscores_for_library_prefixes
 import 'dart:async' as _i6;
-import 'dart:ui' as _i8;
 
 import 'package:mockito/mockito.dart' as _i1;
-import 'package:mockito/src/dummies.dart' as _i10;
+import 'package:mockito/src/dummies.dart' as _i9;
 import 'package:nostr_sdk/event.dart' as _i7;
-import 'package:nostr_sdk/filter.dart' as _i11;
-import 'package:openvine/models/nip94_metadata.dart' as _i12;
+import 'package:nostr_sdk/filter.dart' as _i10;
+import 'package:openvine/models/nip94_metadata.dart' as _i11;
 import 'package:openvine/services/auth_service.dart' as _i2;
 import 'package:openvine/services/nostr_key_manager.dart' as _i3;
 import 'package:openvine/services/nostr_service_interface.dart' as _i4;
 import 'package:openvine/services/social_service.dart' as _i5;
-import 'package:openvine/services/subscription_manager.dart' as _i13;
-import 'package:openvine/services/user_profile_service.dart' as _i9;
+import 'package:openvine/services/subscription_manager.dart' as _i12;
+import 'package:openvine/services/user_profile_service.dart' as _i8;
 
 // ignore_for_file: type=lint
 // ignore_for_file: avoid_redundant_argument_values
@@ -83,12 +82,6 @@ class MockSocialService extends _i1.Mock implements _i5.SocialService {
         Invocation.getter(#followingPubkeys),
         returnValue: <String>[],
       ) as List<String>);
-
-  @override
-  bool get hasListeners => (super.noSuchMethod(
-        Invocation.getter(#hasListeners),
-        returnValue: false,
-      ) as bool);
 
   @override
   bool isLiked(String? eventId) => (super.noSuchMethod(
@@ -310,33 +303,6 @@ class MockSocialService extends _i1.Mock implements _i5.SocialService {
         ),
         returnValueForMissingStub: null,
       );
-
-  @override
-  void addListener(_i8.VoidCallback? listener) => super.noSuchMethod(
-        Invocation.method(
-          #addListener,
-          [listener],
-        ),
-        returnValueForMissingStub: null,
-      );
-
-  @override
-  void removeListener(_i8.VoidCallback? listener) => super.noSuchMethod(
-        Invocation.method(
-          #removeListener,
-          [listener],
-        ),
-        returnValueForMissingStub: null,
-      );
-
-  @override
-  void notifyListeners() => super.noSuchMethod(
-        Invocation.method(
-          #notifyListeners,
-          [],
-        ),
-        returnValueForMissingStub: null,
-      );
 }
 
 /// A class which mocks [AuthService].
@@ -382,12 +348,6 @@ class MockAuthService extends _i1.Mock implements _i2.AuthService {
         Invocation.getter(#userStats),
         returnValue: <String, dynamic>{},
       ) as Map<String, dynamic>);
-
-  @override
-  bool get hasListeners => (super.noSuchMethod(
-        Invocation.getter(#hasListeners),
-        returnValue: false,
-      ) as bool);
 
   @override
   _i6.Future<bool> performMigrationIfNeeded({String? biometricPrompt}) =>
@@ -472,7 +432,7 @@ class MockAuthService extends _i1.Mock implements _i2.AuthService {
 
   @override
   _i6.Future<void> refreshCurrentProfile(
-          _i9.UserProfileService? userProfileService) =>
+          _i8.UserProfileService? userProfileService) =>
       (super.noSuchMethod(
         Invocation.method(
           #refreshCurrentProfile,
@@ -551,33 +511,6 @@ class MockAuthService extends _i1.Mock implements _i2.AuthService {
   void dispose() => super.noSuchMethod(
         Invocation.method(
           #dispose,
-          [],
-        ),
-        returnValueForMissingStub: null,
-      );
-
-  @override
-  void addListener(_i8.VoidCallback? listener) => super.noSuchMethod(
-        Invocation.method(
-          #addListener,
-          [listener],
-        ),
-        returnValueForMissingStub: null,
-      );
-
-  @override
-  void removeListener(_i8.VoidCallback? listener) => super.noSuchMethod(
-        Invocation.method(
-          #removeListener,
-          [listener],
-        ),
-        returnValueForMissingStub: null,
-      );
-
-  @override
-  void notifyListeners() => super.noSuchMethod(
-        Invocation.method(
-          #notifyListeners,
           [],
         ),
         returnValueForMissingStub: null,
@@ -670,17 +603,11 @@ class MockINostrService extends _i1.Mock implements _i4.INostrService {
   @override
   String get primaryRelay => (super.noSuchMethod(
         Invocation.getter(#primaryRelay),
-        returnValue: _i10.dummyValue<String>(
+        returnValue: _i9.dummyValue<String>(
           this,
           Invocation.getter(#primaryRelay),
         ),
       ) as String);
-
-  @override
-  bool get hasListeners => (super.noSuchMethod(
-        Invocation.getter(#hasListeners),
-        returnValue: false,
-      ) as bool);
 
   @override
   bool isRelayAuthenticated(String? relayUrl) => (super.noSuchMethod(
@@ -714,7 +641,7 @@ class MockINostrService extends _i1.Mock implements _i4.INostrService {
 
   @override
   _i6.Stream<_i7.Event> subscribeToEvents({
-    required List<_i11.Filter>? filters,
+    required List<_i10.Filter>? filters,
     bool? bypassLimits = false,
   }) =>
       (super.noSuchMethod(
@@ -748,7 +675,7 @@ class MockINostrService extends _i1.Mock implements _i4.INostrService {
 
   @override
   _i6.Future<_i4.NostrBroadcastResult> publishFileMetadata({
-    required _i12.NIP94Metadata? metadata,
+    required _i11.NIP94Metadata? metadata,
     required String? content,
     List<String>? hashtags = const [],
   }) =>
@@ -885,57 +812,24 @@ class MockINostrService extends _i1.Mock implements _i4.INostrService {
         ),
         returnValueForMissingStub: null,
       );
-
-  @override
-  void addListener(_i8.VoidCallback? listener) => super.noSuchMethod(
-        Invocation.method(
-          #addListener,
-          [listener],
-        ),
-        returnValueForMissingStub: null,
-      );
-
-  @override
-  void removeListener(_i8.VoidCallback? listener) => super.noSuchMethod(
-        Invocation.method(
-          #removeListener,
-          [listener],
-        ),
-        returnValueForMissingStub: null,
-      );
-
-  @override
-  void notifyListeners() => super.noSuchMethod(
-        Invocation.method(
-          #notifyListeners,
-          [],
-        ),
-        returnValueForMissingStub: null,
-      );
 }
 
 /// A class which mocks [SubscriptionManager].
 ///
 /// See the documentation for Mockito's code generation for more information.
 class MockSubscriptionManager extends _i1.Mock
-    implements _i13.SubscriptionManager {
+    implements _i12.SubscriptionManager {
   MockSubscriptionManager() {
     _i1.throwOnMissingStub(this);
   }
 
   @override
-  bool get hasListeners => (super.noSuchMethod(
-        Invocation.getter(#hasListeners),
-        returnValue: false,
-      ) as bool);
-
-  @override
   _i6.Future<String> createSubscription({
     required String? name,
-    required List<_i11.Filter>? filters,
+    required List<_i10.Filter>? filters,
     required dynamic Function(_i7.Event)? onEvent,
     dynamic Function(dynamic)? onError,
-    _i8.VoidCallback? onComplete,
+    dynamic onComplete,
     Duration? timeout,
     int? priority = 5,
   }) =>
@@ -953,7 +847,7 @@ class MockSubscriptionManager extends _i1.Mock
             #priority: priority,
           },
         ),
-        returnValue: _i6.Future<String>.value(_i10.dummyValue<String>(
+        returnValue: _i6.Future<String>.value(_i9.dummyValue<String>(
           this,
           Invocation.method(
             #createSubscription,
@@ -1006,33 +900,6 @@ class MockSubscriptionManager extends _i1.Mock
   void dispose() => super.noSuchMethod(
         Invocation.method(
           #dispose,
-          [],
-        ),
-        returnValueForMissingStub: null,
-      );
-
-  @override
-  void addListener(_i8.VoidCallback? listener) => super.noSuchMethod(
-        Invocation.method(
-          #addListener,
-          [listener],
-        ),
-        returnValueForMissingStub: null,
-      );
-
-  @override
-  void removeListener(_i8.VoidCallback? listener) => super.noSuchMethod(
-        Invocation.method(
-          #removeListener,
-          [listener],
-        ),
-        returnValueForMissingStub: null,
-      );
-
-  @override
-  void notifyListeners() => super.noSuchMethod(
-        Invocation.method(
-          #notifyListeners,
           [],
         ),
         returnValueForMissingStub: null,

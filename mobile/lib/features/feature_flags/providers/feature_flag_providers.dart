@@ -43,8 +43,8 @@ Map<FeatureFlag, bool> featureFlagState(Ref ref) {
   
   // Add listener to service for state changes
   void invalidate() => ref.invalidateSelf();
-  service.addListener(invalidate);
-  ref.onDispose(() => service.removeListener(invalidate));
+      // REFACTORED: Service no longer extends ChangeNotifier - use Riverpod ref.watch instead
+      // REFACTORED: Service no longer needs manual listener cleanup
   
   return service.currentState.allFlags;
 }

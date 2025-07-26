@@ -2,7 +2,6 @@
 // ABOUTME: Single source of truth for video playback state based on real visibility detection
 
 import 'dart:async';
-import 'package:flutter/foundation.dart';
 import 'package:openvine/utils/unified_logger.dart';
 
 /// Visibility info for a video widget
@@ -24,7 +23,9 @@ class VideoVisibilityInfo {
 /// This service is the SINGLE SOURCE OF TRUTH for which videos should be playing.
 /// It uses actual visibility detection (not index-based assumptions) to ensure
 /// videos NEVER play when not visible on screen.
-class VideoVisibilityManager extends ChangeNotifier {
+/// 
+/// REFACTORED: Removed ChangeNotifier - now uses pure state management via Riverpod
+class VideoVisibilityManager {
   /// Minimum visibility fraction required for a video to play (50%)
   static const double minVisibilityThreshold = 0.5;
 
@@ -137,7 +138,6 @@ class VideoVisibilityManager extends ChangeNotifier {
 
     // Notify listeners if playability changed
     if (wasPlayable != isNowPlayable) {
-      notifyListeners();
     }
   }
 
@@ -150,7 +150,6 @@ class VideoVisibilityManager extends ChangeNotifier {
       name: 'VideoVisibilityManager',
       category: LogCategory.video,
     );
-    notifyListeners();
   }
 
   /// Pause all videos (e.g., when app goes to background)
@@ -158,7 +157,6 @@ class VideoVisibilityManager extends ChangeNotifier {
     _playableVideos.clear();
     Log.info('⏸️ Paused all videos',
         name: 'VideoVisibilityManager', category: LogCategory.video);
-    notifyListeners();
   }
 
   /// Resume visibility-based playback
@@ -177,7 +175,6 @@ class VideoVisibilityManager extends ChangeNotifier {
       name: 'VideoVisibilityManager',
       category: LogCategory.video,
     );
-    notifyListeners();
   }
 
   /// Mark a video as actively playing (enables auto-play mode)
@@ -187,7 +184,6 @@ class VideoVisibilityManager extends ChangeNotifier {
   void setActivelyPlaying(String videoId) {
     if (_playableVideos.contains(videoId)) {
       _setActivelyPlaying(videoId);
-      notifyListeners();
     }
   }
 
@@ -218,7 +214,6 @@ class VideoVisibilityManager extends ChangeNotifier {
     _lastPlayingVideo = null;
     Log.info('⏹️ Auto-play disabled',
         name: 'VideoVisibilityManager', category: LogCategory.video);
-    notifyListeners();
   }
 
   /// Check if a specific video should auto-play when visible
@@ -269,9 +264,8 @@ class VideoVisibilityManager extends ChangeNotifier {
         ),
       };
 
-  @override
   void dispose() {
     _visibilityStreamController.close();
-    super.dispose();
+    
   }
 }

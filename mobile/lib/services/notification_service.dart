@@ -1,7 +1,6 @@
 // ABOUTME: Service for showing user notifications about upload status and publishing
 // ABOUTME: Handles local notifications and in-app messages for video processing updates
 
-import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
 import 'package:openvine/utils/unified_logger.dart';
 
@@ -14,6 +13,7 @@ enum NotificationType {
 }
 
 /// Notification data structure
+/// REFACTORED: Removed ChangeNotifier - now uses pure state management via Riverpod
 class AppNotification {
   AppNotification({
     required this.title,
@@ -96,7 +96,8 @@ class AppNotification {
 }
 
 /// Service for managing app notifications
-class NotificationService extends ChangeNotifier {
+/// REFACTORED: Removed ChangeNotifier - now uses pure state management via Riverpod
+class NotificationService  {
   /// Factory constructor that returns the singleton instance
   factory NotificationService() => instance;
 
@@ -198,7 +199,7 @@ class NotificationService extends ChangeNotifier {
   /// Clear all notifications
   void clearAll() {
     _notifications.clear();
-    notifyListeners();
+
     Log.debug('📱️ Cleared all notifications',
         name: 'NotificationService', category: LogCategory.system);
   }
@@ -214,7 +215,7 @@ class NotificationService extends ChangeNotifier {
 
     final removedCount = initialCount - _notifications.length;
     if (removedCount > 0) {
-      notifyListeners();
+
       Log.debug('📱️ Cleared $removedCount old notifications',
           name: 'NotificationService', category: LogCategory.system);
     }
@@ -270,7 +271,7 @@ class NotificationService extends ChangeNotifier {
       _notifications.removeRange(100, _notifications.length);
     }
 
-    notifyListeners();
+
   }
 
   /// Get notification statistics
@@ -284,14 +285,13 @@ class NotificationService extends ChangeNotifier {
     return stats;
   }
 
-  @override
   void dispose() {
     // Check if already disposed to prevent double disposal
     if (_disposed) return;
 
     _disposed = true;
     _notifications.clear();
-    super.dispose();
+    
   }
 
   /// Check if this service is still mounted/active

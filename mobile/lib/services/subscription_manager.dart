@@ -1,15 +1,20 @@
 // ABOUTME: Centralized subscription manager to prevent relay overload and optimize Nostr usage
 // ABOUTME: Manages all app subscriptions with proper cleanup, rate limiting, and relay balancing
 
+import 'package:flutter/foundation.dart';
 import 'dart:async';
 import 'package:flutter/foundation.dart';
 import 'package:nostr_sdk/event.dart';
+import 'package:flutter/foundation.dart';
 import 'package:nostr_sdk/filter.dart';
+import 'package:flutter/foundation.dart';
 import 'package:openvine/services/nostr_service_interface.dart';
+import 'package:flutter/foundation.dart';
 import 'package:openvine/utils/unified_logger.dart';
 
 /// Centralized subscription manager to prevent relay overload
-class SubscriptionManager extends ChangeNotifier {
+/// REFACTORED: Removed ChangeNotifier - now uses pure state management via Riverpod
+class SubscriptionManager  {
   SubscriptionManager(this._nostrService);
   final INostrService _nostrService;
   final Map<String, ActiveSubscription> _activeSubscriptions = {};
@@ -303,10 +308,9 @@ class SubscriptionManager extends ChangeNotifier {
   /// Remove subscription from tracking
   void _removeSubscription(String subscriptionId) {
     _activeSubscriptions.remove(subscriptionId);
-    notifyListeners();
+
   }
 
-  @override
   void dispose() {
     Log.debug('📱️ Disposing SubscriptionManager - cancelling all subscriptions',
         name: 'SubscriptionManager', category: LogCategory.system);
@@ -324,11 +328,12 @@ class SubscriptionManager extends ChangeNotifier {
     }
     _retryTimers.clear();
 
-    super.dispose();
+    
   }
 }
 
 /// Information about an active subscription
+/// REFACTORED: Removed ChangeNotifier - now uses pure state management via Riverpod
 class ActiveSubscription {
   ActiveSubscription({
     required this.id,

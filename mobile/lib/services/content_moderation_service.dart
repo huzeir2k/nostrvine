@@ -3,7 +3,6 @@
 
 import 'dart:convert';
 
-import 'package:flutter/foundation.dart';
 import 'package:nostr_sdk/event.dart';
 import 'package:openvine/utils/unified_logger.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -32,6 +31,7 @@ enum ContentSeverity {
 }
 
 /// Mute list entry representing filtered content
+/// REFACTORED: Removed ChangeNotifier - now uses pure state management via Riverpod
 class MuteListEntry {
   const MuteListEntry({
     required this.type,
@@ -81,6 +81,7 @@ class MuteListEntry {
 }
 
 /// Content moderation result
+/// REFACTORED: Removed ChangeNotifier - now uses pure state management via Riverpod
 class ModerationResult {
   const ModerationResult({
     required this.shouldFilter,
@@ -104,7 +105,8 @@ class ModerationResult {
 }
 
 /// Content moderation service managing mute lists and filtering
-class ContentModerationService extends ChangeNotifier {
+/// REFACTORED: Removed ChangeNotifier - now uses pure state management via Riverpod
+class ContentModerationService  {
   ContentModerationService({
     required SharedPreferences prefs,
   }) : _prefs = prefs {
@@ -230,7 +232,7 @@ class ContentModerationService extends ChangeNotifier {
     _muteLists['local'] = localList;
 
     await _saveLocalMuteList();
-    notifyListeners();
+
 
     Log.debug('Added to mute list: $type:$value (${reason.name})',
         name: 'ContentModerationService', category: LogCategory.system);
@@ -244,7 +246,7 @@ class ContentModerationService extends ChangeNotifier {
         (entry) => entry.type == type && entry.value == value,
       );
       await _saveLocalMuteList();
-      notifyListeners();
+
     }
   }
 
@@ -277,7 +279,7 @@ class ContentModerationService extends ChangeNotifier {
       _subscribedLists.add(listId);
       await _subscribeToMuteList(listId);
       await _saveSubscribedLists();
-      notifyListeners();
+
 
       Log.verbose('Subscribed to mute list: $listId',
           name: 'ContentModerationService', category: LogCategory.system);
@@ -294,7 +296,7 @@ class ContentModerationService extends ChangeNotifier {
     _subscribedLists.remove(listId);
     _muteLists.remove(listId);
     await _saveSubscribedLists();
-    notifyListeners();
+
   }
 
   /// Update moderation settings
@@ -311,7 +313,7 @@ class ContentModerationService extends ChangeNotifier {
     _autoHideLevel = autoHideLevel ?? _autoHideLevel;
 
     await _saveSettings();
-    notifyListeners();
+
   }
 
   /// Get moderation statistics
@@ -506,9 +508,8 @@ class ContentModerationService extends ChangeNotifier {
     await _prefs.setString(_subscribedListsKey, jsonEncode(_subscribedLists));
   }
 
-  @override
   void dispose() {
     // Clean up any active subscriptions
-    super.dispose();
+    
   }
 }

@@ -148,7 +148,7 @@ void main() {
 
     test('includeReposts flag should be tracked correctly', () async {
       final mockNostrService = MockNostrService();
-      final mockSubscriptionManager = MockSubscriptionManager();
+      final mockSubscriptionManager = MockSubscriptionManager(TestNostrService());
       final videoEventService = VideoEventService(mockNostrService,
           subscriptionManager: mockSubscriptionManager);
 

@@ -2,7 +2,6 @@
 // ABOUTME: Provides seamless authentication for web users with multiple Nostr login methods
 
 import 'dart:async';
-import 'package:flutter/foundation.dart';
 import 'package:openvine/services/nip07_service.dart';
 import 'package:openvine/utils/unified_logger.dart';
 // import 'nsec_bunker_service.dart'; // Temporarily disabled due to nostr library compatibility
@@ -15,6 +14,7 @@ enum WebAuthMethod {
 }
 
 /// Web authentication result
+/// REFACTORED: Removed ChangeNotifier - now uses pure state management via Riverpod
 class WebAuthResult {
   const WebAuthResult({
     required this.success,
@@ -51,27 +51,26 @@ abstract class WebSigner {
 }
 
 /// NIP-07 signer implementation
+/// REFACTORED: Removed ChangeNotifier - now uses pure state management via Riverpod
 class Nip07Signer implements WebSigner {
   Nip07Signer(this._service);
   final Nip07Service _service;
 
-  @override
   Future<Map<String, dynamic>?> signEvent(Map<String, dynamic> event) async {
     final result = await _service.signEvent(event);
     return result.success ? result.signedEvent : null;
   }
 
-  @override
   void dispose() {
     _service.disconnect();
   }
 }
 
 /// Bunker signer implementation (temporarily disabled)
+/// REFACTORED: Removed ChangeNotifier - now uses pure state management via Riverpod
 class BunkerSigner implements WebSigner {
   BunkerSigner();
 
-  @override
   Future<Map<String, dynamic>?> signEvent(Map<String, dynamic> event) async {
     // Temporarily return null - bunker not implemented yet
     Log.warning('Bunker signing temporarily unavailable',
@@ -79,14 +78,14 @@ class BunkerSigner implements WebSigner {
     return null;
   }
 
-  @override
   void dispose() {
     // No-op for now
   }
 }
 
 /// Unified web authentication service
-class WebAuthService extends ChangeNotifier {
+/// REFACTORED: Removed ChangeNotifier - now uses pure state management via Riverpod
+class WebAuthService  {
   factory WebAuthService() => _instance;
   WebAuthService._internal();
   static final WebAuthService _instance = WebAuthService._internal();
@@ -173,7 +172,7 @@ class WebAuthService extends ChangeNotifier {
 
       Log.info('NIP-07 authentication successful',
           name: 'WebAuthService', category: LogCategory.system);
-      notifyListeners();
+
 
       return WebAuthResult.success(WebAuthMethod.nip07, result.publicKey!);
     } catch (e) {
@@ -228,7 +227,7 @@ class WebAuthService extends ChangeNotifier {
     _nip07Service.disconnect();
     // await _bunkerService.disconnect(); // Temporarily disabled
 
-    notifyListeners();
+
     Log.info('Web authentication disconnected',
         name: 'WebAuthService', category: LogCategory.system);
   }
@@ -248,7 +247,7 @@ class WebAuthService extends ChangeNotifier {
 
           Log.info('Restored NIP-07 session',
               name: 'WebAuthService', category: LogCategory.system);
-          notifyListeners();
+
           return;
         }
       } catch (e) {
@@ -275,9 +274,8 @@ class WebAuthService extends ChangeNotifier {
         'bunkerInfo': {'status': 'temporarily_disabled'},
       };
 
-  @override
   void dispose() {
     disconnect();
-    super.dispose();
+    
   }
 }

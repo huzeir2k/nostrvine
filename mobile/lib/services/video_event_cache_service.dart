@@ -2,7 +2,6 @@
 // ABOUTME: Extracted from VideoEventService to follow Single Responsibility Principle
 
 import 'dart:math';
-import 'package:flutter/foundation.dart';
 import 'package:openvine/constants/app_constants.dart';
 import 'package:openvine/models/video_event.dart';
 import 'package:openvine/utils/unified_logger.dart';
@@ -14,7 +13,8 @@ import 'package:openvine/utils/unified_logger.dart';
 /// - Duplicate prevention
 /// - Memory management (500 video limit)
 /// - Cache queries by author
-class VideoEventCacheService extends ChangeNotifier {
+/// REFACTORED: Removed ChangeNotifier - now uses pure state management via Riverpod
+class VideoEventCacheService  {
   final List<VideoEvent> _videoEvents = [];
   int _duplicateVideoEventCount = 0;
 
@@ -44,14 +44,14 @@ class VideoEventCacheService extends ChangeNotifier {
   void addVideo(VideoEvent videoEvent) {
     _addVideoWithPriority(videoEvent);
     _trimCacheIfNeeded();
-    notifyListeners();
+
   }
 
   /// Clear all videos from the cache
   void clear() {
     _videoEvents.clear();
     _duplicateVideoEventCount = 0;
-    notifyListeners();
+
   }
 
   /// Add default videos if cache is empty or ensure they're prioritized
@@ -73,7 +73,7 @@ class VideoEventCacheService extends ChangeNotifier {
         );
       }
 
-      notifyListeners();
+
     } else {
       // We have videos - ensure default videos are present with correct priority
       final defaultVideoIds = defaultVideos.map((v) => v.id).toSet();
@@ -91,7 +91,7 @@ class VideoEventCacheService extends ChangeNotifier {
         defaultVideos.forEach(_addVideoWithPriority);
 
         _trimCacheIfNeeded();
-        notifyListeners();
+
       }
     }
   }

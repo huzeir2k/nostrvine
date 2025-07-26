@@ -3,7 +3,6 @@
 
 import 'dart:async';
 import 'dart:collection';
-import 'package:flutter/foundation.dart';
 import 'package:openvine/utils/unified_logger.dart';
 
 /// Circuit breaker states
@@ -19,6 +18,7 @@ enum CircuitBreakerState {
 }
 
 /// Failure tracking entry
+/// REFACTORED: Removed ChangeNotifier - now uses pure state management via Riverpod
 class FailureEntry {
   const FailureEntry({
     required this.url,
@@ -31,7 +31,8 @@ class FailureEntry {
 }
 
 /// Enhanced circuit breaker for video loading failures
-class VideoCircuitBreaker extends ChangeNotifier {
+/// REFACTORED: Removed ChangeNotifier - now uses pure state management via Riverpod
+class VideoCircuitBreaker  {
   VideoCircuitBreaker({
     int failureThreshold = 5,
     Duration openTimeout = const Duration(minutes: 2),
@@ -204,7 +205,7 @@ class VideoCircuitBreaker extends ChangeNotifier {
 
     Log.debug('CircuitBreaker: Reset to closed state',
         name: 'CircuitBreakerService', category: LogCategory.system);
-    notifyListeners();
+
   }
 
   /// Clear permanently failed URLs (allow retry)
@@ -215,10 +216,9 @@ class VideoCircuitBreaker extends ChangeNotifier {
         name: 'CircuitBreakerService', category: LogCategory.system);
   }
 
-  @override
   void dispose() {
     _recoveryTimer?.cancel();
-    super.dispose();
+    
   }
 
   // Private methods
@@ -243,7 +243,7 @@ class VideoCircuitBreaker extends ChangeNotifier {
 
     Log.debug('CircuitBreaker: Transitioned to OPEN state',
         name: 'CircuitBreakerService', category: LogCategory.system);
-    notifyListeners();
+
   }
 
   void _transitionToHalfOpen() {
@@ -261,7 +261,7 @@ class VideoCircuitBreaker extends ChangeNotifier {
 
     Log.debug('CircuitBreaker: Transitioned to HALF-OPEN state',
         name: 'CircuitBreakerService', category: LogCategory.system);
-    notifyListeners();
+
   }
 
   void _transitionToClosed() {
@@ -272,7 +272,7 @@ class VideoCircuitBreaker extends ChangeNotifier {
 
     Log.debug('CircuitBreaker: Transitioned to CLOSED state',
         name: 'CircuitBreakerService', category: LogCategory.system);
-    notifyListeners();
+
   }
 
   List<FailureEntry> _getRecentFailures(Duration timeWindow) {

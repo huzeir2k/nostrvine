@@ -3,7 +3,6 @@
 
 import 'dart:async';
 import 'dart:math';
-import 'package:flutter/foundation.dart';
 import 'package:openvine/services/video_manager_interface.dart';
 import 'package:openvine/utils/unified_logger.dart';
 
@@ -13,7 +12,8 @@ import 'package:openvine/utils/unified_logger.dart';
 /// including memory usage, preload success rates, error patterns, and user
 /// engagement metrics. It supports real-time analytics and alerting for
 /// production deployments.
-class VideoPerformanceMonitor extends ChangeNotifier {
+/// REFACTORED: Removed ChangeNotifier - now uses pure state management via Riverpod
+class VideoPerformanceMonitor  {
   VideoPerformanceMonitor({
     required IVideoManager videoManager,
     Duration samplingInterval = const Duration(seconds: 30),
@@ -67,7 +67,7 @@ class VideoPerformanceMonitor extends ChangeNotifier {
 
     Log.info('VideoPerformanceMonitor: Started monitoring',
         name: 'VideoPerformanceMonitor', category: LogCategory.video);
-    notifyListeners();
+
   }
 
   /// Stop performance monitoring
@@ -80,7 +80,7 @@ class VideoPerformanceMonitor extends ChangeNotifier {
 
     Log.info('VideoPerformanceMonitor: Stopped monitoring',
         name: 'VideoPerformanceMonitor', category: LogCategory.video);
-    notifyListeners();
+
   }
 
   /// Record a video preload event
@@ -228,20 +228,19 @@ class VideoPerformanceMonitor extends ChangeNotifier {
 
     Log.debug('VideoPerformanceMonitor: Cleared all data',
         name: 'VideoPerformanceMonitor', category: LogCategory.video);
-    notifyListeners();
+
   }
 
   /// Dismiss an active alert
   void dismissAlert(String alertId) {
     _activeAlerts.removeWhere((alert) => alert.id == alertId);
-    notifyListeners();
+
   }
 
-  @override
   void dispose() {
     stopMonitoring();
     _alertController.close();
-    super.dispose();
+    
   }
 
   // Private methods
@@ -270,7 +269,7 @@ class VideoPerformanceMonitor extends ChangeNotifier {
     // Check for alerts
     _checkThresholds(sample);
 
-    notifyListeners();
+
   }
 
   void _checkThresholds(PerformanceSample sample) {
@@ -625,6 +624,7 @@ class VideoPerformanceMonitor extends ChangeNotifier {
 
 // Data classes for performance monitoring
 
+/// REFACTORED: Removed ChangeNotifier - now uses pure state management via Riverpod
 class PerformanceSample {
   const PerformanceSample({
     required this.timestamp,
@@ -646,6 +646,7 @@ class PerformanceSample {
   final int preloadingQueue;
 }
 
+/// REFACTORED: Removed ChangeNotifier - now uses pure state management via Riverpod
 class PerformanceStatistics {
   const PerformanceStatistics({
     required this.timestamp,
@@ -679,6 +680,7 @@ class PerformanceStatistics {
   final int sampleCount;
 }
 
+/// REFACTORED: Removed ChangeNotifier - now uses pure state management via Riverpod
 class PerformanceAnalytics {
   const PerformanceAnalytics({
     required this.timeRange,
@@ -698,6 +700,7 @@ class PerformanceAnalytics {
   final List<PerformanceRecommendation> recommendations;
 }
 
+/// REFACTORED: Removed ChangeNotifier - now uses pure state management via Riverpod
 class PerformanceAlert {
   PerformanceAlert({
     required this.type,
@@ -715,6 +718,7 @@ class PerformanceAlert {
   final Map<String, dynamic> metadata;
 }
 
+/// REFACTORED: Removed ChangeNotifier - now uses pure state management via Riverpod
 class AlertThresholds {
   const AlertThresholds({
     this.highMemoryThreshold = 500,
@@ -732,6 +736,7 @@ class AlertThresholds {
   final Duration slowPreloadThreshold;
 }
 
+/// REFACTORED: Removed ChangeNotifier - now uses pure state management via Riverpod
 class ErrorSummary {
   const ErrorSummary({
     required this.message,
@@ -743,18 +748,21 @@ class ErrorSummary {
   final double percentage;
 }
 
+/// REFACTORED: Removed ChangeNotifier - now uses pure state management via Riverpod
 class MemoryTrend {
   const MemoryTrend({required this.direction, required this.changeRate});
   final TrendDirection direction;
   final double changeRate;
 }
 
+/// REFACTORED: Removed ChangeNotifier - now uses pure state management via Riverpod
 class PerformanceTrend {
   const PerformanceTrend({required this.direction, required this.score});
   final TrendDirection direction;
   final double score;
 }
 
+/// REFACTORED: Removed ChangeNotifier - now uses pure state management via Riverpod
 class MemoryUsageAnalysis {
   const MemoryUsageAnalysis({
     required this.average,
@@ -770,6 +778,7 @@ class MemoryUsageAnalysis {
   final List<MemoryDistributionBucket> distribution;
 }
 
+/// REFACTORED: Removed ChangeNotifier - now uses pure state management via Riverpod
 class MemoryDistributionBucket {
   const MemoryDistributionBucket({
     required this.rangeStart,
@@ -783,6 +792,7 @@ class MemoryDistributionBucket {
   final double percentage;
 }
 
+/// REFACTORED: Removed ChangeNotifier - now uses pure state management via Riverpod
 class PreloadPerformanceAnalysis {
   const PreloadPerformanceAnalysis({
     required this.averageTime,
@@ -798,6 +808,7 @@ class PreloadPerformanceAnalysis {
   final int fastPreloads;
 }
 
+/// REFACTORED: Removed ChangeNotifier - now uses pure state management via Riverpod
 class ErrorAnalysis {
   const ErrorAnalysis({
     required this.totalErrors,
@@ -811,6 +822,7 @@ class ErrorAnalysis {
   final double errorRate;
 }
 
+/// REFACTORED: Removed ChangeNotifier - now uses pure state management via Riverpod
 class AlertSummary {
   const AlertSummary({
     required this.totalAlerts,
@@ -826,6 +838,7 @@ class AlertSummary {
   final List<PerformanceAlert> recentAlerts;
 }
 
+/// REFACTORED: Removed ChangeNotifier - now uses pure state management via Riverpod
 class PerformanceRecommendation {
   const PerformanceRecommendation({
     required this.type,

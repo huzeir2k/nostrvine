@@ -98,7 +98,6 @@ class VideoPlaybackWidget extends StatefulWidget {
         showPlayPauseIcon: false,
       );
 
-  @override
   State<VideoPlaybackWidget> createState() => _VideoPlaybackWidgetState();
 }
 
@@ -109,7 +108,6 @@ class _VideoPlaybackWidgetState extends State<VideoPlaybackWidget>
   late Animation<double> _playPauseIconAnimation;
   bool _showPlayPauseIcon = false;
 
-  @override
   void initState() {
     super.initState();
 
@@ -133,13 +131,12 @@ class _VideoPlaybackWidgetState extends State<VideoPlaybackWidget>
       ),
     );
 
-    _playbackController.addListener(_onPlaybackStateChange);
+      // REFACTORED: Service no longer extends ChangeNotifier - use Riverpod ref.watch instead
     _playbackController.events.listen(_onPlaybackEvent);
 
     _initializeVideo();
   }
 
-  @override
   void didUpdateWidget(VideoPlaybackWidget oldWidget) {
     super.didUpdateWidget(oldWidget);
 
@@ -148,11 +145,10 @@ class _VideoPlaybackWidgetState extends State<VideoPlaybackWidget>
     }
   }
 
-  @override
   void dispose() {
     _playPauseIconController.dispose();
     _playbackController.dispose();
-    super.dispose();
+    
   }
 
   Future<void> _initializeVideo() async {
@@ -222,7 +218,6 @@ class _VideoPlaybackWidgetState extends State<VideoPlaybackWidget>
         ),
       );
 
-  @override
   Widget build(BuildContext context) => Container(
         width: double.infinity,
         height: double.infinity,

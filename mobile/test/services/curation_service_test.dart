@@ -103,6 +103,9 @@ void main() {
       service.dispose();
     });
 
+    // Note: CurationService no longer extends ChangeNotifier after refactor
+    // Listener tests are no longer applicable
+    /*
     test('should notify listeners when curation sets are refreshed', () async {
       var notified = false;
       curationService.addListener(() {
@@ -114,5 +117,6 @@ void main() {
 
       expect(notified, isTrue);
     });
+    */
   });
 }

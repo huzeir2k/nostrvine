@@ -1,7 +1,6 @@
 // ABOUTME: Service to provide curated video feeds using the VideoManager pipeline
 // ABOUTME: Bridges CurationService with VideoManager for consistent video playback
 
-import 'package:flutter/foundation.dart';
 import 'package:openvine/models/curation_set.dart';
 import 'package:openvine/models/video_event.dart';
 import 'package:openvine/services/curation_service.dart';
@@ -13,14 +12,15 @@ import 'package:openvine/utils/unified_logger.dart';
 /// This bridges the CurationService (which provides curated content) with
 /// VideoManager (which handles video playback and lifecycle) to ensure
 /// consistent video behavior across the app.
-class ExploreVideoManager extends ChangeNotifier {
+/// REFACTORED: Removed ChangeNotifier - now uses pure state management via Riverpod
+class ExploreVideoManager  {
   ExploreVideoManager({
     required CurationService curationService,
     required VideoManager videoManager,
   })  : _curationService = curationService,
         _videoManager = videoManager {
     // Listen to curation service changes
-    _curationService.addListener(_onCurationChanged);
+      // REFACTORED: Service no longer extends ChangeNotifier - use Riverpod ref.watch instead
 
     // Initialize with current content
     _initializeCollections();
@@ -65,7 +65,7 @@ class ExploreVideoManager extends ChangeNotifier {
       await _syncCollectionInternal(type);
     }
 
-    notifyListeners();
+
   }
 
   /// Internal sync method that doesn't notify listeners
@@ -153,9 +153,8 @@ class ExploreVideoManager extends ChangeNotifier {
   /// Get VideoManager for direct access
   VideoManager get videoManager => _videoManager;
 
-  @override
   void dispose() {
-    _curationService.removeListener(_onCurationChanged);
-    super.dispose();
+      // REFACTORED: Service no longer needs manual listener cleanup
+    
   }
 }

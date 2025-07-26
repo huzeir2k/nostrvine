@@ -20,7 +20,6 @@ class ContentWarning extends StatefulWidget {
   final VoidCallback? onBlock;
   final bool showControls;
 
-  @override
   State<ContentWarning> createState() => _ContentWarningState();
 }
 
@@ -29,7 +28,6 @@ class _ContentWarningState extends State<ContentWarning>
   bool _isRevealed = false;
   late AnimationController _animationController;
 
-  @override
   void initState() {
     super.initState();
     _animationController = AnimationController(
@@ -38,13 +36,11 @@ class _ContentWarningState extends State<ContentWarning>
     );
   }
 
-  @override
   void dispose() {
     _animationController.dispose();
-    super.dispose();
+    
   }
 
-  @override
   Widget build(BuildContext context) {
     // If content is clean or user has revealed it, show normally
     if (!widget.moderationResult.shouldFilter || _isRevealed) {
@@ -267,6 +263,11 @@ class _ContentWarningState extends State<ContentWarning>
         return 'Content Blocked';
     }
   }
+  
+  @override
+  void dispose() {
+    super.dispose();
+  }
 }
 
 /// Quick content warning for less severe content
@@ -285,7 +286,6 @@ class QuickContentWarning extends StatelessWidget {
   final Color color;
   final VoidCallback? onTap;
 
-  @override
   Widget build(BuildContext context) => Stack(
         children: [
           child,
@@ -336,20 +336,17 @@ class VideoContentWarning extends StatefulWidget {
   final VoidCallback? onPlay;
   final VoidCallback? onReport;
 
-  @override
   State<VideoContentWarning> createState() => _VideoContentWarningState();
 }
 
 class _VideoContentWarningState extends State<VideoContentWarning> {
   bool _showWarning = true;
 
-  @override
   void initState() {
     super.initState();
     _showWarning = widget.moderationResult.shouldFilter;
   }
 
-  @override
   Widget build(BuildContext context) {
     if (!_showWarning) {
       return widget.thumbnail;

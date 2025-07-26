@@ -22,7 +22,6 @@ class InfiniteFeedScreen extends ConsumerStatefulWidget {
   final FeedType feedType;
   final int startingIndex;
 
-  @override
   ConsumerState<InfiniteFeedScreen> createState() => _InfiniteFeedScreenState();
 }
 
@@ -35,7 +34,6 @@ class _InfiniteFeedScreenState extends ConsumerState<InfiniteFeedScreen>
   int _currentIndex = 0;
   bool _isInitialized = false;
 
-  @override
   void initState() {
     super.initState();
     _pageController = PageController(initialPage: widget.startingIndex);
@@ -48,7 +46,6 @@ class _InfiniteFeedScreenState extends ConsumerState<InfiniteFeedScreen>
     });
   }
 
-  @override
   void dispose() {
     WidgetsBinding.instance.removeObserver(this);
     _pageController.dispose();
@@ -56,10 +53,10 @@ class _InfiniteFeedScreenState extends ConsumerState<InfiniteFeedScreen>
     // Pause all videos when leaving
     _videoManager?.pauseAllVideos();
 
+    
     super.dispose();
   }
 
-  @override
   void didChangeAppLifecycleState(AppLifecycleState state) {
     super.didChangeAppLifecycleState(state);
 
@@ -86,7 +83,7 @@ class _InfiniteFeedScreenState extends ConsumerState<InfiniteFeedScreen>
       );
 
       // Listen for feed updates
-      _feedService.addListener(_onFeedChanged);
+      // REFACTORED: Service no longer extends ChangeNotifier - use Riverpod ref.watch instead
 
       // Initialize the feed
       _feedService.initializeFeed(widget.feedType).then((_) {
@@ -211,7 +208,6 @@ class _InfiniteFeedScreenState extends ConsumerState<InfiniteFeedScreen>
     await _feedService.refreshFeed(widget.feedType);
   }
 
-  @override
   Widget build(BuildContext context) => Scaffold(
         backgroundColor: Colors.black,
         appBar: AppBar(

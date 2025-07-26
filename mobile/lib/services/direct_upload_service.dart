@@ -7,7 +7,6 @@ import 'dart:io';
 import 'dart:typed_data';
 
 import 'package:crypto/crypto.dart';
-import 'package:flutter/foundation.dart';
 import 'package:http/http.dart' as http;
 import 'package:http_parser/http_parser.dart';
 import 'package:openvine/config/app_config.dart';
@@ -16,6 +15,7 @@ import 'package:openvine/services/video_thumbnail_service.dart';
 import 'package:openvine/utils/unified_logger.dart';
 
 /// Result of a direct upload operation
+/// REFACTORED: Removed ChangeNotifier - now uses pure state management via Riverpod
 class DirectUploadResult {
   const DirectUploadResult({
     required this.success,
@@ -53,7 +53,8 @@ class DirectUploadResult {
 }
 
 /// Service for uploading videos and images directly to CF Workers
-class DirectUploadService extends ChangeNotifier {
+/// REFACTORED: Removed ChangeNotifier - now uses pure state management via Riverpod
+class DirectUploadService  {
   DirectUploadService({Nip98AuthService? authService})
       : _authService = authService;
   static String get _baseUrl => AppConfig.backendBaseUrl;
@@ -582,7 +583,6 @@ class DirectUploadService extends ChangeNotifier {
     }
   }
 
-  @override
   void dispose() {
     // Cancel all active uploads and subscriptions
     for (final subscription in _progressSubscriptions.values) {
@@ -593,11 +593,12 @@ class DirectUploadService extends ChangeNotifier {
     }
     _progressSubscriptions.clear();
     _progressControllers.clear();
-    super.dispose();
+    
   }
 }
 
 /// Exception thrown by DirectUploadService
+/// REFACTORED: Removed ChangeNotifier - now uses pure state management via Riverpod
 class DirectUploadException implements Exception {
   const DirectUploadException(
     this.message, {
@@ -608,6 +609,5 @@ class DirectUploadException implements Exception {
   final String? code;
   final dynamic originalError;
 
-  @override
   String toString() => 'DirectUploadException: $message';
 }

@@ -51,7 +51,7 @@ void main() {
     });
 
     // Create VideoEventService
-    final mockSubscriptionManager = MockSubscriptionManager();
+    final mockSubscriptionManager = MockSubscriptionManager(mockNostrService);
     final videoEventService = VideoEventService(mockNostrService,
         subscriptionManager: mockSubscriptionManager);
 

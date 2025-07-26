@@ -20,7 +20,8 @@ import 'package:openvine/utils/unified_logger.dart';
 /// 2. Filtering and processing events
 /// 3. Adding them to the single VideoManagerService
 /// 4. Managing subscription lifecycle
-class NostrVideoBridge extends ChangeNotifier {
+/// REFACTORED: Removed ChangeNotifier - now uses pure state management via Riverpod
+class NostrVideoBridge  {
   NostrVideoBridge({
     required IVideoManager videoManager,
     required INostrService nostrService,
@@ -101,7 +102,7 @@ class NostrVideoBridge extends ChangeNotifier {
       );
 
       // Listen for new video events
-      _videoEventService.addListener(_onVideoEventsChanged);
+      // REFACTORED: Service no longer extends ChangeNotifier - use Riverpod ref.watch instead
 
       // Listen for connection changes (if available)
       // Note: ConnectionStatusService may not have statusStream method
@@ -112,7 +113,7 @@ class NostrVideoBridge extends ChangeNotifier {
 
       Log.info('NostrVideoBridge: Bridge started successfully',
           name: 'NostrVideoBridge', category: LogCategory.relay);
-      notifyListeners();
+
     } catch (e) {
       Log.error('NostrVideoBridge: Failed to start bridge: $e',
           name: 'NostrVideoBridge', category: LogCategory.relay);
@@ -141,7 +142,7 @@ class NostrVideoBridge extends ChangeNotifier {
 
     Log.info('NostrVideoBridge: Bridge stopped',
         name: 'NostrVideoBridge', category: LogCategory.relay);
-    notifyListeners();
+
   }
 
   /// Restart the bridge (useful for configuration changes)
@@ -206,10 +207,9 @@ class NostrVideoBridge extends ChangeNotifier {
             true, // _connectionService.isConnected may not be available
       };
 
-  @override
   void dispose() {
     stop();
-    super.dispose();
+    
   }
 
   // Private methods
@@ -382,6 +382,7 @@ class NostrVideoBridge extends ChangeNotifier {
 }
 
 /// Factory for creating NostrVideoBridge instances with proper dependencies
+/// REFACTORED: Removed ChangeNotifier - now uses pure state management via Riverpod
 class NostrVideoBridgeFactory {
   static NostrVideoBridge create({
     required IVideoManager videoManager,

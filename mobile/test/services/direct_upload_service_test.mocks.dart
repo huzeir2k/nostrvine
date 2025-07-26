@@ -7,7 +7,6 @@ import 'dart:async' as _i4;
 import 'dart:convert' as _i5;
 import 'dart:io' as _i3;
 import 'dart:typed_data' as _i7;
-import 'dart:ui' as _i9;
 
 import 'package:http/http.dart' as _i2;
 import 'package:mockito/mockito.dart' as _i1;
@@ -388,12 +387,6 @@ class MockNip98AuthService extends _i1.Mock implements _i8.Nip98AuthService {
       ) as bool);
 
   @override
-  bool get hasListeners => (super.noSuchMethod(
-        Invocation.getter(#hasListeners),
-        returnValue: false,
-      ) as bool);
-
-  @override
   _i4.Future<_i8.Nip98Token?> createAuthToken({
     required String? url,
     required _i8.HttpMethod? method,
@@ -425,33 +418,6 @@ class MockNip98AuthService extends _i1.Mock implements _i8.Nip98AuthService {
   void dispose() => super.noSuchMethod(
         Invocation.method(
           #dispose,
-          [],
-        ),
-        returnValueForMissingStub: null,
-      );
-
-  @override
-  void addListener(_i9.VoidCallback? listener) => super.noSuchMethod(
-        Invocation.method(
-          #addListener,
-          [listener],
-        ),
-        returnValueForMissingStub: null,
-      );
-
-  @override
-  void removeListener(_i9.VoidCallback? listener) => super.noSuchMethod(
-        Invocation.method(
-          #removeListener,
-          [listener],
-        ),
-        returnValueForMissingStub: null,
-      );
-
-  @override
-  void notifyListeners() => super.noSuchMethod(
-        Invocation.method(
-          #notifyListeners,
           [],
         ),
         returnValueForMissingStub: null,

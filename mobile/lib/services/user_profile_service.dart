@@ -4,7 +4,6 @@
 import 'dart:async';
 import 'dart:math' as math;
 
-import 'package:flutter/foundation.dart';
 import 'package:nostr_sdk/event.dart';
 import 'package:nostr_sdk/filter.dart';
 import 'package:openvine/models/user_profile.dart';
@@ -15,7 +14,8 @@ import 'package:openvine/services/subscription_manager.dart';
 import 'package:openvine/utils/unified_logger.dart';
 
 /// Service for managing user profiles from Nostr kind 0 events
-class UserProfileService extends ChangeNotifier {
+/// REFACTORED: Removed ChangeNotifier - now uses pure state management via Riverpod
+class UserProfileService  {
   UserProfileService(this._nostrService,
       {required SubscriptionManager subscriptionManager})
       : _subscriptionManager = subscriptionManager;
@@ -127,7 +127,7 @@ class UserProfileService extends ChangeNotifier {
         'Updated cached profile for ${profile.pubkey.substring(0, 8)}: ${profile.bestDisplayName}',
         name: 'UserProfileService',
         category: LogCategory.system);
-    notifyListeners();
+
   }
 
   /// Initialize the profile service
@@ -327,7 +327,7 @@ class UserProfileService extends ChangeNotifier {
           '✅ Cached profile for ${event.pubkey.substring(0, 8)}: ${profile.bestDisplayName}',
           name: 'UserProfileService',
           category: LogCategory.system);
-      notifyListeners();
+
     } catch (e) {
       Log.error('Error parsing profile event: $e',
           name: 'UserProfileService', category: LogCategory.system);
@@ -532,7 +532,7 @@ class UserProfileService extends ChangeNotifier {
   /// Clear profile cache
   void clearCache() {
     _profileCache.clear();
-    notifyListeners();
+
     Log.debug('🧹 Profile cache cleared',
         name: 'UserProfileService', category: LogCategory.system);
   }
@@ -540,7 +540,7 @@ class UserProfileService extends ChangeNotifier {
   /// Remove specific profile from cache
   void removeProfile(String pubkey) {
     if (_profileCache.remove(pubkey) != null) {
-      notifyListeners();
+
       Log.debug('📱️ Removed profile from cache: ${pubkey.substring(0, 8)}...',
           name: 'UserProfileService', category: LogCategory.system);
     }
@@ -575,7 +575,6 @@ class UserProfileService extends ChangeNotifier {
         'isInitialized': _isInitialized,
       };
 
-  @override
   void dispose() {
     // Cancel batch operations
     _batchDebounceTimer?.cancel();
@@ -599,17 +598,17 @@ class UserProfileService extends ChangeNotifier {
     _pendingBatchPubkeys.clear();
     _knownMissingProfiles.clear();
     _missingProfileRetryAfter.clear();
-    super.dispose();
+    
     Log.debug('🗑️ UserProfileService disposed',
         name: 'UserProfileService', category: LogCategory.system);
   }
 }
 
 /// Exception thrown by user profile service operations
+/// REFACTORED: Removed ChangeNotifier - now uses pure state management via Riverpod
 class UserProfileServiceException implements Exception {
   const UserProfileServiceException(this.message);
   final String message;
 
-  @override
   String toString() => 'UserProfileServiceException: $message';
 }

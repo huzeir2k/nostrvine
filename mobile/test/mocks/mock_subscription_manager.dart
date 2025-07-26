@@ -49,9 +49,9 @@ class MockSubscriptionManager extends SubscriptionManager {
   }
 
   @override
-  void cancelSubscription(String subscriptionId) {
+  Future<void> cancelSubscription(String subscriptionId) async {
     final controller = _subscriptions.remove(subscriptionId);
-    controller?.close();
+    await controller?.close();
     _filters.remove(subscriptionId);
   }
 

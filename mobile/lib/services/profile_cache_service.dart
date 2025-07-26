@@ -3,11 +3,14 @@
 
 import 'package:flutter/foundation.dart';
 import 'package:hive/hive.dart';
+import 'package:flutter/foundation.dart';
 import 'package:openvine/models/user_profile.dart';
+import 'package:flutter/foundation.dart';
 import 'package:openvine/utils/unified_logger.dart';
 
 /// Service for persistent caching of user profiles
-class ProfileCacheService extends ChangeNotifier {
+/// REFACTORED: Removed ChangeNotifier - now uses pure state management via Riverpod
+class ProfileCacheService  {
   static const String _boxName = 'user_profiles';
   static const int _maxCacheSize = 1000; // Maximum number of profiles to cache
   static const Duration _cacheExpiry =
@@ -123,7 +126,7 @@ class ProfileCacheService extends ChangeNotifier {
           name: 'ProfileCacheService',
           category: LogCategory.storage);
 
-      notifyListeners();
+
     } catch (e) {
       Log.error('Error caching profile for ${profile.pubkey}: $e',
           name: 'ProfileCacheService', category: LogCategory.storage);
@@ -144,7 +147,7 @@ class ProfileCacheService extends ChangeNotifier {
             'Updated cached profile for ${profile.pubkey.substring(0, 8)}... (${profile.bestDisplayName})',
             name: 'ProfileCacheService',
             category: LogCategory.storage);
-        notifyListeners();
+
       } else {
         Log.warning(
             '⏩ Skipping update for ${profile.pubkey.substring(0, 8)}... - cached version is newer',
@@ -165,7 +168,7 @@ class ProfileCacheService extends ChangeNotifier {
       await _profileBox!.delete(pubkey);
       Log.debug('📱️ Removed cached profile for ${pubkey.substring(0, 8)}...',
           name: 'ProfileCacheService', category: LogCategory.storage);
-      notifyListeners();
+
     } catch (e) {
       Log.error('Error removing cached profile for $pubkey: $e',
           name: 'ProfileCacheService', category: LogCategory.storage);
@@ -207,7 +210,7 @@ class ProfileCacheService extends ChangeNotifier {
       await _profileBox!.clear();
       Log.debug('📱️ Cleared all cached profiles',
           name: 'ProfileCacheService', category: LogCategory.storage);
-      notifyListeners();
+
     } catch (e) {
       Log.error('Error clearing profile cache: $e',
           name: 'ProfileCacheService', category: LogCategory.storage);
@@ -275,9 +278,8 @@ class ProfileCacheService extends ChangeNotifier {
     }
   }
 
-  @override
   void dispose() {
     _profileBox?.close();
-    super.dispose();
+    
   }
 }

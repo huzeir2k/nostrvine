@@ -4,15 +4,14 @@
 
 // ignore_for_file: no_leading_underscores_for_library_prefixes
 import 'dart:async' as _i4;
-import 'dart:ui' as _i6;
 
 import 'package:mockito/mockito.dart' as _i1;
 import 'package:openvine/models/curation_set.dart' as _i3;
 import 'package:openvine/models/video_event.dart' as _i5;
-import 'package:openvine/models/video_state.dart' as _i8;
+import 'package:openvine/models/video_state.dart' as _i7;
 import 'package:openvine/services/curation_service.dart' as _i2;
-import 'package:openvine/services/video_manager_interface.dart' as _i7;
-import 'package:video_player/video_player.dart' as _i9;
+import 'package:openvine/services/video_manager_interface.dart' as _i6;
+import 'package:video_player/video_player.dart' as _i8;
 
 // ignore_for_file: type=lint
 // ignore_for_file: avoid_redundant_argument_values
@@ -45,12 +44,6 @@ class MockCurationService extends _i1.Mock implements _i2.CurationService {
   @override
   bool get isLoading => (super.noSuchMethod(
         Invocation.getter(#isLoading),
-        returnValue: false,
-      ) as bool);
-
-  @override
-  bool get hasListeners => (super.noSuchMethod(
-        Invocation.getter(#hasListeners),
         returnValue: false,
       ) as bool);
 
@@ -161,39 +154,12 @@ class MockCurationService extends _i1.Mock implements _i2.CurationService {
         ),
         returnValueForMissingStub: null,
       );
-
-  @override
-  void addListener(_i6.VoidCallback? listener) => super.noSuchMethod(
-        Invocation.method(
-          #addListener,
-          [listener],
-        ),
-        returnValueForMissingStub: null,
-      );
-
-  @override
-  void removeListener(_i6.VoidCallback? listener) => super.noSuchMethod(
-        Invocation.method(
-          #removeListener,
-          [listener],
-        ),
-        returnValueForMissingStub: null,
-      );
-
-  @override
-  void notifyListeners() => super.noSuchMethod(
-        Invocation.method(
-          #notifyListeners,
-          [],
-        ),
-        returnValueForMissingStub: null,
-      );
 }
 
 /// A class which mocks [IVideoManager].
 ///
 /// See the documentation for Mockito's code generation for more information.
-class MockIVideoManager extends _i1.Mock implements _i7.IVideoManager {
+class MockIVideoManager extends _i1.Mock implements _i6.IVideoManager {
   MockIVideoManager() {
     _i1.throwOnMissingStub(this);
   }
@@ -229,18 +195,18 @@ class MockIVideoManager extends _i1.Mock implements _i7.IVideoManager {
       ) as _i4.Stream<void>);
 
   @override
-  _i8.VideoState? getVideoState(String? videoId) =>
+  _i7.VideoState? getVideoState(String? videoId) =>
       (super.noSuchMethod(Invocation.method(
         #getVideoState,
         [videoId],
-      )) as _i8.VideoState?);
+      )) as _i7.VideoState?);
 
   @override
-  _i9.VideoPlayerController? getController(String? videoId) =>
+  _i8.VideoPlayerController? getController(String? videoId) =>
       (super.noSuchMethod(Invocation.method(
         #getController,
         [videoId],
-      )) as _i9.VideoPlayerController?);
+      )) as _i8.VideoPlayerController?);
 
   @override
   _i4.Future<void> addVideoEvent(_i5.VideoEvent? event) => (super.noSuchMethod(

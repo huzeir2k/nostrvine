@@ -24,7 +24,6 @@ class VideoIconPlaceholder extends StatefulWidget {
   final double borderRadius;
   final bool showPlayIcon;
 
-  @override
   State<VideoIconPlaceholder> createState() => _VideoIconPlaceholderState();
 }
 
@@ -33,7 +32,6 @@ class _VideoIconPlaceholderState extends State<VideoIconPlaceholder>
   late AnimationController _animationController;
   late Animation<double> _pulseAnimation;
 
-  @override
   void initState() {
     super.initState();
     _animationController = AnimationController(
@@ -55,7 +53,6 @@ class _VideoIconPlaceholderState extends State<VideoIconPlaceholder>
     }
   }
 
-  @override
   void didUpdateWidget(VideoIconPlaceholder oldWidget) {
     super.didUpdateWidget(oldWidget);
     if (widget.showLoading != oldWidget.showLoading) {
@@ -68,13 +65,11 @@ class _VideoIconPlaceholderState extends State<VideoIconPlaceholder>
     }
   }
 
-  @override
   void dispose() {
     _animationController.dispose();
-    super.dispose();
+    
   }
 
-  @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final isDark = theme.brightness == Brightness.dark;
@@ -151,7 +146,6 @@ class VideoIconPlaceholderCompact extends StatelessWidget {
   final Color? iconColor;
   final Color? backgroundColor;
 
-  @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final isDark = theme.brightness == Brightness.dark;

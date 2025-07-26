@@ -16,7 +16,6 @@ class CommentsScreen extends ConsumerStatefulWidget {
   });
   final VideoEvent videoEvent;
 
-  @override
   ConsumerState<CommentsScreen> createState() => _CommentsScreenState();
 }
 
@@ -26,18 +25,17 @@ class _CommentsScreenState extends ConsumerState<CommentsScreen> {
   String? _replyingToCommentId;
   bool _isPosting = false;
   // Using Riverpod commentsNotifierProvider instead
-  @override
   void initState() {
     super.initState();
     // Comments notifier is automatically initialized when watched
   }
 
-  @override
   void dispose() {
     _commentController.dispose();
     for (final controller in _replyControllers.values) {
       controller.dispose();
     }
+    
     super.dispose();
   }
 
@@ -75,7 +73,6 @@ class _CommentsScreenState extends ConsumerState<CommentsScreen> {
     }
   }
 
-  @override
   Widget build(BuildContext context) => Scaffold(
         backgroundColor: Colors.black,
         body: Stack(

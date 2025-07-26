@@ -643,7 +643,7 @@ class MockAuthService extends _i1.Mock implements _i4.AuthService {
 /// See the documentation for Mockito's code generation for more information.
 class MockSubscriptionManager extends _i1.Mock
     implements _i12.SubscriptionManager {
-  MockSubscriptionManager() {
+  MockSubscriptionManager(TestNostrService()) {
     _i1.throwOnMissingStub(this);
   }
 

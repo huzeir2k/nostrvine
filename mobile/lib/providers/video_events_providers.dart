@@ -90,12 +90,10 @@ class VideoEvents extends _$VideoEvents {
       }
     }
 
-    // Listen to VideoEventService changes
-    videoEventService.addListener(onVideoEventServiceChange);
-
-    // Clean up on dispose
+    // REFACTORED: Service no longer extends ChangeNotifier
+    // Instead, we should use proper Riverpod state management
+    // For now, just close controller on dispose
     ref.onDispose(() {
-      videoEventService.removeListener(onVideoEventServiceChange);
       controller.close();
     });
 

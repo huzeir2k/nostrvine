@@ -4,12 +4,12 @@
 import 'dart:convert';
 
 import 'package:crypto/crypto.dart';
-import 'package:flutter/foundation.dart';
 import 'package:nostr_sdk/client_utils/keys.dart';
 import 'package:openvine/utils/unified_logger.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 // Simple KeyPair class to replace Keychain
+/// REFACTORED: Removed ChangeNotifier - now uses pure state management via Riverpod
 class Keychain {
   Keychain(this.private) : public = getPublicKey(private);
   final String private;
@@ -22,7 +22,8 @@ class Keychain {
 }
 
 /// Secure management of Nostr private keys with persistence
-class NostrKeyManager extends ChangeNotifier {
+/// REFACTORED: Removed ChangeNotifier - now uses pure state management via Riverpod
+class NostrKeyManager  {
   static const String _keyPairKey = 'nostr_keypair';
   static const String _keyVersionKey = 'nostr_key_version';
   static const String _backupHashKey = 'nostr_backup_hash';
@@ -65,7 +66,7 @@ class NostrKeyManager extends ChangeNotifier {
       _backupHash = prefs.getString(_backupHashKey);
 
       _isInitialized = true;
-      notifyListeners();
+
 
       if (hasKeys) {
         Log.info('Key manager initialized with existing identity',
@@ -97,7 +98,7 @@ class NostrKeyManager extends ChangeNotifier {
       // Save to persistent storage
       await _saveKeysToStorage();
 
-      notifyListeners();
+
 
       Log.info('New Nostr key pair generated and saved',
           name: 'NostrKeyManager', category: LogCategory.relay);
@@ -133,7 +134,7 @@ class NostrKeyManager extends ChangeNotifier {
       // Save to persistent storage
       await _saveKeysToStorage();
 
-      notifyListeners();
+
 
       Log.info('Private key imported successfully',
           name: 'NostrKeyManager', category: LogCategory.relay);
@@ -192,7 +193,7 @@ class NostrKeyManager extends ChangeNotifier {
       final prefs = await SharedPreferences.getInstance();
       await prefs.setString(_backupHashKey, _backupHash!);
 
-      notifyListeners();
+
 
       Log.info('Mnemonic backup created',
           name: 'NostrKeyManager', category: LogCategory.relay);
@@ -267,7 +268,7 @@ class NostrKeyManager extends ChangeNotifier {
       _keyPair = null;
       _backupHash = null;
 
-      notifyListeners();
+
 
       Log.info('Nostr keys cleared successfully',
           name: 'NostrKeyManager', category: LogCategory.relay);
@@ -629,6 +630,7 @@ class NostrKeyManager extends ChangeNotifier {
 }
 
 /// Exception thrown by key manager operations
+/// REFACTORED: Removed ChangeNotifier - now uses pure state management via Riverpod
 class NostrKeyException implements Exception {
   const NostrKeyException(this.message);
   final String message;

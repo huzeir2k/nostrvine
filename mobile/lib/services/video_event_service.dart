@@ -16,7 +16,8 @@ import 'package:openvine/services/subscription_manager.dart';
 import 'package:openvine/utils/unified_logger.dart';
 
 /// Service for handling NIP-71 kind 22 video events
-class VideoEventService extends ChangeNotifier {
+/// REFACTORED: Removed ChangeNotifier - now uses pure state management via Riverpod
+class VideoEventService  {
   VideoEventService(
     this._nostrService, {
     required SubscriptionManager subscriptionManager,
@@ -159,11 +160,11 @@ class VideoEventService extends ChangeNotifier {
     // Set loading state immediately to prevent race conditions
     _isLoading = true;
     _error = null;
-    notifyListeners();
+
 
     if (!_nostrService.isInitialized) {
       _isLoading = false;
-      notifyListeners();
+
       Log.error('Cannot subscribe - Nostr service not initialized',
           name: 'VideoEventService', category: LogCategory.video);
       throw const VideoEventServiceException('Nostr service not initialized');
@@ -172,7 +173,7 @@ class VideoEventService extends ChangeNotifier {
     // Check connection status
     if (!_connectionService.isOnline) {
       _isLoading = false;
-      notifyListeners();
+
       Log.warning('Device is offline, will retry when connection is restored',
           name: 'VideoEventService', category: LogCategory.video);
       _scheduleRetryWhenOnline();
@@ -407,7 +408,7 @@ class VideoEventService extends ChangeNotifier {
       }
     } finally {
       _isLoading = false;
-      notifyListeners();
+
     }
   }
 
@@ -569,7 +570,7 @@ class VideoEventService extends ChangeNotifier {
                 '🎬 DEBUG: Successfully added video event! Total: ${_videoEvents.length} events',
                 name: 'VideoEventService',
                 category: LogCategory.video);
-            notifyListeners();
+
           } else {
             Log.warning('🎬 FILTER: ⏩ Skipping video event without video URL (hasVideo=false)',
                 name: 'VideoEventService', category: LogCategory.video);
@@ -669,7 +670,7 @@ class VideoEventService extends ChangeNotifier {
                 'Added repost event! Total: ${_videoEvents.length} events',
                 name: 'VideoEventService',
                 category: LogCategory.video);
-            notifyListeners();
+
           } else {
             // Fetch original event from relays
             Log.verbose('Fetching original video event from relays...',
@@ -702,7 +703,7 @@ class VideoEventService extends ChangeNotifier {
       _scheduleRetryWhenOnline();
     }
 
-    notifyListeners();
+
   }
 
   /// Handle subscription completion
@@ -798,7 +799,7 @@ class VideoEventService extends ChangeNotifier {
     _isLoading = true;
     // Defer notifyListeners to avoid setState during build
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      notifyListeners();
+
     });
 
     try {
@@ -847,7 +848,7 @@ class VideoEventService extends ChangeNotifier {
       }
     } finally {
       _isLoading = false;
-      notifyListeners();
+
     }
   }
 
@@ -902,7 +903,7 @@ class VideoEventService extends ChangeNotifier {
   /// Load more content without date restrictions - for when users reach end of feed
   Future<void> loadMoreContentUnlimited({int limit = 300}) async {
     _isLoading = true;
-    notifyListeners();
+
 
     try {
       Log.debug('📱 Loading unlimited content for end-of-feed...',
@@ -961,7 +962,7 @@ class VideoEventService extends ChangeNotifier {
       }
     } finally {
       _isLoading = false;
-      notifyListeners();
+
     }
   }
 
@@ -1072,7 +1073,7 @@ class VideoEventService extends ChangeNotifier {
   /// Clear all video events
   void clearVideoEvents() {
     _videoEvents.clear();
-    notifyListeners();
+
   }
 
   /// Cancel all existing subscriptions
@@ -1114,7 +1115,7 @@ class VideoEventService extends ChangeNotifier {
           name: 'VideoEventService', category: LogCategory.video);
     }
 
-    notifyListeners();
+
   }
 
   /// Get video events sorted by engagement (placeholder - would need reaction events)
@@ -1233,7 +1234,7 @@ class VideoEventService extends ChangeNotifier {
                     'Added fetched repost event! Total: ${_videoEvents.length} events',
                     name: 'VideoEventService',
                     category: LogCategory.video);
-                notifyListeners();
+
               } else {
                 Log.warning('⏩ Skipping repost of video without URL',
                     name: 'VideoEventService', category: LogCategory.video);
@@ -1538,12 +1539,11 @@ class VideoEventService extends ChangeNotifier {
     return true;
   }
 
-  @override
   void dispose() {
     _retryTimer?.cancel();
     _authStateSubscription?.cancel();
     unsubscribeFromVideoFeed();
-    super.dispose();
+    
   }
 
   /// Shuffle regular videos for users not following anyone (preserves classic vines at top)
@@ -1577,7 +1577,7 @@ class VideoEventService extends ChangeNotifier {
 
         Log.info('Shuffled ${regularVideos.length} videos for discovery',
             name: 'VideoEventService', category: LogCategory.video);
-        notifyListeners();
+
       }
     }
   }
@@ -1585,7 +1585,7 @@ class VideoEventService extends ChangeNotifier {
   /// Add a video event to the cache (for external services like CurationService)
   void addVideoEvent(VideoEvent videoEvent) {
     _addVideoWithPriority(videoEvent);
-    notifyListeners();
+
   }
 
   /// Validate that a video event has a valid, accessible URL
@@ -1626,10 +1626,10 @@ class VideoEventService extends ChangeNotifier {
 }
 
 /// Exception thrown by video event service operations
+/// REFACTORED: Removed ChangeNotifier - now uses pure state management via Riverpod
 class VideoEventServiceException implements Exception {
   const VideoEventServiceException(this.message);
   final String message;
 
-  @override
   String toString() => 'VideoEventServiceException: $message';
 }

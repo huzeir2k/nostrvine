@@ -37,7 +37,7 @@ void main() {
     setUp(() {
       mockNostrService = MockINostrService();
       mockAuthService = MockAuthService();
-      mockSubscriptionManager = MockSubscriptionManager();
+      mockSubscriptionManager = MockSubscriptionManager(TestNostrService());
 
       // Mock subscribeToEvents to prevent initialization calls
       when(mockNostrService.subscribeToEvents(filters: anyNamed('filters')))

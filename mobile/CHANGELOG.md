@@ -5,7 +5,20 @@ All notable changes to the OpenVine mobile application will be documented in thi
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [Unreleased] - 2025-06-30
+## [Unreleased] - 2025-07-26
+
+### Added
+- **Blurhash Support**: Implemented blurhash generation and display for Kind 22 video events
+  - Videos now publish with blurhash tags for progressive image loading
+  - Added blurhash generation from video thumbnails during upload
+  - Created BlurhashDisplay widget for rendering blurhash placeholders
+  - Updated VideoThumbnailWidget to show blurhash while loading thumbnails
+  - Provides instant visual feedback with smooth transitions to actual thumbnails
+
+### Changed
+- **Relay Configuration**: Switched to using relay3.openvine.co as primary relay
+- Enhanced VideoEvent model to parse and store blurhash from Kind 22 events
+- Updated video publishing to include blurhash tag following NIP-71 standards
 
 ### Fixed
 - **CRITICAL**: Resolved relay subscription limit (50 subscriptions) that was preventing video comments and interactions from loading on web platform

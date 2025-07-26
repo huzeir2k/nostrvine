@@ -88,6 +88,7 @@ dependencies:
   cached_network_image: ^3.3.1
   share_plus: ^10.1.2  # Cross-platform sharing
   google_fonts: ^6.2.1  # For using Google Fonts including Pacifico
+  blurhash_dart: ^1.2.1  # Generate blurhash for progressive image loading
   # Nostr SDK - Local package for comprehensive Nostr support
   nostr_sdk:
     path: ../nostr_sdk

@@ -2,10 +2,10 @@
 // ABOUTME: Manages username availability checking and registration with the backend
 
 import 'dart:convert';
-import 'package:flutter/foundation.dart';
 import 'package:http/http.dart' as http;
 
-class Nip05Service extends ChangeNotifier {
+/// REFACTORED: Removed ChangeNotifier - now uses pure state management via Riverpod
+class Nip05Service  {
   Nip05Service({http.Client? httpClient})
       : _httpClient = httpClient ?? http.Client();
   static const String _baseUrl =
@@ -27,13 +27,13 @@ class Nip05Service extends ChangeNotifier {
     if (!_isValidUsername(username)) {
       _error =
           'Invalid username format. Only letters, numbers, dash, underscore, and dot allowed.';
-      notifyListeners();
+
       return false;
     }
 
     _isChecking = true;
     _error = null;
-    notifyListeners();
+
 
     try {
       final response = await _httpClient.get(
@@ -48,7 +48,7 @@ class Nip05Service extends ChangeNotifier {
         final isAvailable = names == null || !names.containsKey(username);
 
         _isChecking = false;
-        notifyListeners();
+
 
         return isAvailable;
       } else {
@@ -57,7 +57,7 @@ class Nip05Service extends ChangeNotifier {
     } catch (e) {
       _error = 'Failed to check username: $e';
       _isChecking = false;
-      notifyListeners();
+
       return false;
     }
   }
@@ -67,19 +67,19 @@ class Nip05Service extends ChangeNotifier {
       String username, String pubkey, List<String> relays) async {
     if (!_isValidUsername(username)) {
       _error = 'Invalid username format';
-      notifyListeners();
+
       return false;
     }
 
     if (!_isValidPubkey(pubkey)) {
       _error = 'Invalid public key format';
-      notifyListeners();
+
       return false;
     }
 
     _isChecking = true;
     _error = null;
-    notifyListeners();
+
 
     try {
       final response = await _httpClient.post(
@@ -100,7 +100,7 @@ class Nip05Service extends ChangeNotifier {
           _isVerified = true;
           _isChecking = false;
           _error = null;
-          notifyListeners();
+
           return true;
         } else {
           throw Exception(data['error'] ?? 'Registration failed');
@@ -108,13 +108,13 @@ class Nip05Service extends ChangeNotifier {
       } else if (response.statusCode == 409) {
         _error = 'Username already taken';
         _isChecking = false;
-        notifyListeners();
+
         return false;
       } else if (response.statusCode == 403) {
         _error =
             'Username is reserved. Contact support if you are the original owner.';
         _isChecking = false;
-        notifyListeners();
+
         return false;
       } else {
         final data = jsonDecode(response.body);
@@ -123,7 +123,7 @@ class Nip05Service extends ChangeNotifier {
     } catch (e) {
       _error = 'Failed to register username: $e';
       _isChecking = false;
-      notifyListeners();
+
       return false;
     }
   }
@@ -134,7 +134,7 @@ class Nip05Service extends ChangeNotifier {
     final parts = identifier.split('@');
     if (parts.length != 2) {
       _error = 'Invalid NIP-05 identifier format';
-      notifyListeners();
+
       return false;
     }
 
@@ -143,7 +143,7 @@ class Nip05Service extends ChangeNotifier {
 
     _isChecking = true;
     _error = null;
-    notifyListeners();
+
 
     try {
       final response = await _httpClient.get(
@@ -158,20 +158,20 @@ class Nip05Service extends ChangeNotifier {
           _currentUsername = username;
           _isVerified = true;
           _isChecking = false;
-          notifyListeners();
+
           return true;
         }
       }
 
       _isVerified = false;
       _isChecking = false;
-      notifyListeners();
+
       return false;
     } catch (e) {
       _error = 'Failed to verify NIP-05: $e';
       _isVerified = false;
       _isChecking = false;
-      notifyListeners();
+
       return false;
     }
   }
@@ -181,7 +181,7 @@ class Nip05Service extends ChangeNotifier {
     if (nip05Identifier == null || nip05Identifier.isEmpty) {
       _currentUsername = null;
       _isVerified = false;
-      notifyListeners();
+
       return;
     }
 
@@ -195,7 +195,7 @@ class Nip05Service extends ChangeNotifier {
       _isVerified = false;
     }
 
-    notifyListeners();
+
   }
 
   /// Validate username format
@@ -218,6 +218,6 @@ class Nip05Service extends ChangeNotifier {
     _isVerified = false;
     _isChecking = false;
     _error = null;
-    notifyListeners();
+
   }
 }

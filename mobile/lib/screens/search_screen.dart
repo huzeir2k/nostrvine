@@ -13,7 +13,6 @@ import 'package:openvine/utils/unified_logger.dart';
 class SearchScreen extends ConsumerStatefulWidget {
   const SearchScreen({super.key});
 
-  @override
   ConsumerState<SearchScreen> createState() => _SearchScreenState();
 }
 
@@ -29,17 +28,16 @@ class _SearchScreenState extends ConsumerState<SearchScreen>
   bool _isSearching = false;
   String _currentQuery = '';
 
-  @override
   void initState() {
     super.initState();
     _tabController = TabController(length: 3, vsync: this);
-    _searchController.addListener(_onSearchChanged);
+      // REFACTORED: Service no longer extends ChangeNotifier - use Riverpod ref.watch instead
   }
 
-  @override
   void dispose() {
     _searchController.dispose();
     _tabController.dispose();
+    
     super.dispose();
   }
 
@@ -140,7 +138,6 @@ class _SearchScreenState extends ConsumerState<SearchScreen>
     });
   }
 
-  @override
   Widget build(BuildContext context) => Scaffold(
         backgroundColor: VineTheme.backgroundColor,
         appBar: AppBar(
@@ -392,7 +389,6 @@ class _VideoSearchResultCard extends StatelessWidget {
   const _VideoSearchResultCard({required this.video});
   final VideoEvent video;
 
-  @override
   Widget build(BuildContext context) => Card(
         color: Colors.grey[900],
         child: Padding(
@@ -499,7 +495,6 @@ class _UserSearchResultCard extends StatelessWidget {
   final dynamic profile; // UserProfile type would be defined elsewhere
   final VoidCallback onTap;
 
-  @override
   Widget build(BuildContext context) => Card(
         color: Colors.grey[900],
         child: ListTile(
@@ -549,7 +544,6 @@ class _HashtagSearchResultCard extends StatelessWidget {
   final String hashtag;
   final VoidCallback onTap;
 
-  @override
   Widget build(BuildContext context) => Card(
         color: Colors.grey[900],
         child: ListTile(

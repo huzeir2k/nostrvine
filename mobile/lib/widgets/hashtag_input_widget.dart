@@ -14,7 +14,6 @@ class HashtagInputWidget extends StatefulWidget {
   final Function(List<String>) onHashtagsChanged;
   final int maxHashtags;
 
-  @override
   State<HashtagInputWidget> createState() => _HashtagInputWidgetState();
 }
 
@@ -22,17 +21,15 @@ class _HashtagInputWidgetState extends State<HashtagInputWidget> {
   late TextEditingController _controller;
   List<String> _hashtags = [];
 
-  @override
   void initState() {
     super.initState();
     _controller = TextEditingController(text: widget.initialValue);
     _parseHashtags(widget.initialValue);
   }
 
-  @override
   void dispose() {
     _controller.dispose();
-    super.dispose();
+    
   }
 
   void _parseHashtags(String text) {
@@ -42,7 +39,6 @@ class _HashtagInputWidgetState extends State<HashtagInputWidget> {
     widget.onHashtagsChanged(_hashtags);
   }
 
-  @override
   Widget build(BuildContext context) => Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -74,4 +70,9 @@ class _HashtagInputWidgetState extends State<HashtagInputWidget> {
           ],
         ],
       );
+      
+  @override
+  void dispose() {
+    super.dispose();
+  }
 }

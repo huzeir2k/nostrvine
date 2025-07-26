@@ -3,7 +3,6 @@
 
 import 'dart:convert';
 
-import 'package:flutter/foundation.dart';
 import 'package:nostr_sdk/event.dart';
 import 'package:openvine/services/content_moderation_service.dart';
 import 'package:openvine/services/nostr_service_interface.dart';
@@ -11,6 +10,7 @@ import 'package:openvine/utils/unified_logger.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 /// Report submission result
+/// REFACTORED: Removed ChangeNotifier - now uses pure state management via Riverpod
 class ReportResult {
   const ReportResult({
     required this.success,
@@ -37,6 +37,7 @@ class ReportResult {
 }
 
 /// Content report data
+/// REFACTORED: Removed ChangeNotifier - now uses pure state management via Riverpod
 class ContentReport {
   const ContentReport({
     required this.reportId,
@@ -84,7 +85,8 @@ class ContentReport {
 }
 
 /// Service for reporting inappropriate content
-class ContentReportingService extends ChangeNotifier {
+/// REFACTORED: Removed ChangeNotifier - now uses pure state management via Riverpod
+class ContentReportingService  {
   ContentReportingService({
     required INostrService nostrService,
     required SharedPreferences prefs,
@@ -179,7 +181,7 @@ class ContentReportingService extends ChangeNotifier {
 
       _reportHistory.add(report);
       await _saveReportHistory();
-      notifyListeners();
+
 
       Log.debug('Content report submitted: $reportId',
           name: 'ContentReportingService', category: LogCategory.system);
@@ -275,7 +277,7 @@ class ContentReportingService extends ChangeNotifier {
 
     if (_reportHistory.length != initialCount) {
       await _saveReportHistory();
-      notifyListeners();
+
 
       final removedCount = initialCount - _reportHistory.length;
       Log.debug('🧹 Cleared $removedCount old reports',
@@ -435,9 +437,8 @@ class ContentReportingService extends ChangeNotifier {
     }
   }
 
-  @override
   void dispose() {
     // Clean up any active operations
-    super.dispose();
+    
   }
 }

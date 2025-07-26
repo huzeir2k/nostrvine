@@ -30,6 +30,7 @@ class VideoEvent {
     this.vineId,
     this.group,
     this.altText,
+    this.blurhash,
     this.isRepost = false,
     this.reposterId,
     this.reposterPubkey,
@@ -67,6 +68,7 @@ class VideoEvent {
     String? vineId;
     String? group;
     String? altText;
+    String? blurhash;
 
     // Parse event tags according to NIP-71
     // Handle both List<String> and List<dynamic> from different nostr implementations
@@ -177,6 +179,9 @@ class VideoEvent {
         case 'alt':
           // Accessibility text
           altText = tagValue as String?;
+        case 'blurhash':
+          // Blurhash for progressive image loading
+          blurhash = tagValue as String?;
         case 't':
           if (tagValue.isNotEmpty) {
             hashtags.add(tagValue);
@@ -313,6 +318,7 @@ class VideoEvent {
       vineId: vineId,
       group: group,
       altText: altText,
+      blurhash: blurhash,
       isRepost: false,
       reposterId: null,
       reposterPubkey: null,
@@ -340,6 +346,7 @@ class VideoEvent {
   final String? vineId; // 'd' tag - original vine ID for replaceable events
   final String? group; // 'h' tag - group/community identification
   final String? altText; // 'alt' tag - accessibility text
+  final String? blurhash; // 'blurhash' tag - for progressive image loading
 
   // Repost metadata fields
   final bool isRepost;
@@ -523,6 +530,7 @@ class VideoEvent {
     String? vineId,
     String? group,
     String? altText,
+    String? blurhash,
     bool? isRepost,
     String? reposterId,
     String? reposterPubkey,
@@ -548,6 +556,7 @@ class VideoEvent {
         vineId: vineId ?? this.vineId,
         group: group ?? this.group,
         altText: altText ?? this.altText,
+        blurhash: blurhash ?? this.blurhash,
         isRepost: isRepost ?? this.isRepost,
         reposterId: reposterId ?? this.reposterId,
         reposterPubkey: reposterPubkey ?? this.reposterPubkey,

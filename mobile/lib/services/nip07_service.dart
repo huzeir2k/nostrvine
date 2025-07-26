@@ -55,7 +55,7 @@ class Nip07SignResult {
 }
 
 /// Service for managing NIP-07 browser extension interactions
-class Nip07Service extends ChangeNotifier {
+class Nip07Service  {
   factory Nip07Service() => _instance;
   Nip07Service._internal();
   static final Nip07Service _instance = Nip07Service._internal();
@@ -146,7 +146,7 @@ class Nip07Service extends ChangeNotifier {
       Log.verbose('Public key: ${pubkey.substring(0, 16)}...',
           name: 'Nip07Service', category: LogCategory.system);
 
-      notifyListeners();
+
       return Nip07AuthResult.success(pubkey);
     } on nip07.Nip07Exception catch (e) {
       Log.error('NIP-07 authentication failed: ${e.message}',
@@ -253,7 +253,7 @@ class Nip07Service extends ChangeNotifier {
 
     Log.info('📱 Disconnected from NIP-07 extension',
         name: 'Nip07Service', category: LogCategory.system);
-    notifyListeners();
+
   }
 
   /// Get connection status for debugging

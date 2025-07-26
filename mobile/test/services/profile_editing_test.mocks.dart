@@ -4,20 +4,19 @@
 
 // ignore_for_file: no_leading_underscores_for_library_prefixes
 import 'dart:async' as _i5;
-import 'dart:ui' as _i10;
 
 import 'package:mockito/mockito.dart' as _i1;
 import 'package:mockito/src/dummies.dart' as _i6;
 import 'package:nostr_sdk/event.dart' as _i7;
 import 'package:nostr_sdk/filter.dart' as _i8;
 import 'package:openvine/models/nip94_metadata.dart' as _i9;
-import 'package:openvine/models/user_profile.dart' as _i12;
+import 'package:openvine/models/user_profile.dart' as _i11;
 import 'package:openvine/services/auth_service.dart' as _i4;
 import 'package:openvine/services/nostr_key_manager.dart' as _i2;
 import 'package:openvine/services/nostr_service_interface.dart' as _i3;
-import 'package:openvine/services/profile_cache_service.dart' as _i13;
-import 'package:openvine/services/subscription_manager.dart' as _i14;
-import 'package:openvine/services/user_profile_service.dart' as _i11;
+import 'package:openvine/services/profile_cache_service.dart' as _i12;
+import 'package:openvine/services/subscription_manager.dart' as _i13;
+import 'package:openvine/services/user_profile_service.dart' as _i10;
 
 // ignore_for_file: type=lint
 // ignore_for_file: avoid_redundant_argument_values
@@ -156,12 +155,6 @@ class MockINostrService extends _i1.Mock implements _i3.INostrService {
           Invocation.getter(#primaryRelay),
         ),
       ) as String);
-
-  @override
-  bool get hasListeners => (super.noSuchMethod(
-        Invocation.getter(#hasListeners),
-        returnValue: false,
-      ) as bool);
 
   @override
   bool isRelayAuthenticated(String? relayUrl) => (super.noSuchMethod(
@@ -366,33 +359,6 @@ class MockINostrService extends _i1.Mock implements _i3.INostrService {
         ),
         returnValueForMissingStub: null,
       );
-
-  @override
-  void addListener(_i10.VoidCallback? listener) => super.noSuchMethod(
-        Invocation.method(
-          #addListener,
-          [listener],
-        ),
-        returnValueForMissingStub: null,
-      );
-
-  @override
-  void removeListener(_i10.VoidCallback? listener) => super.noSuchMethod(
-        Invocation.method(
-          #removeListener,
-          [listener],
-        ),
-        returnValueForMissingStub: null,
-      );
-
-  @override
-  void notifyListeners() => super.noSuchMethod(
-        Invocation.method(
-          #notifyListeners,
-          [],
-        ),
-        returnValueForMissingStub: null,
-      );
 }
 
 /// A class which mocks [AuthService].
@@ -438,12 +404,6 @@ class MockAuthService extends _i1.Mock implements _i4.AuthService {
         Invocation.getter(#userStats),
         returnValue: <String, dynamic>{},
       ) as Map<String, dynamic>);
-
-  @override
-  bool get hasListeners => (super.noSuchMethod(
-        Invocation.getter(#hasListeners),
-        returnValue: false,
-      ) as bool);
 
   @override
   _i5.Future<bool> performMigrationIfNeeded({String? biometricPrompt}) =>
@@ -528,7 +488,7 @@ class MockAuthService extends _i1.Mock implements _i4.AuthService {
 
   @override
   _i5.Future<void> refreshCurrentProfile(
-          _i11.UserProfileService? userProfileService) =>
+          _i10.UserProfileService? userProfileService) =>
       (super.noSuchMethod(
         Invocation.method(
           #refreshCurrentProfile,
@@ -611,58 +571,25 @@ class MockAuthService extends _i1.Mock implements _i4.AuthService {
         ),
         returnValueForMissingStub: null,
       );
-
-  @override
-  void addListener(_i10.VoidCallback? listener) => super.noSuchMethod(
-        Invocation.method(
-          #addListener,
-          [listener],
-        ),
-        returnValueForMissingStub: null,
-      );
-
-  @override
-  void removeListener(_i10.VoidCallback? listener) => super.noSuchMethod(
-        Invocation.method(
-          #removeListener,
-          [listener],
-        ),
-        returnValueForMissingStub: null,
-      );
-
-  @override
-  void notifyListeners() => super.noSuchMethod(
-        Invocation.method(
-          #notifyListeners,
-          [],
-        ),
-        returnValueForMissingStub: null,
-      );
 }
 
 /// A class which mocks [UserProfileService].
 ///
 /// See the documentation for Mockito's code generation for more information.
 class MockUserProfileService extends _i1.Mock
-    implements _i11.UserProfileService {
+    implements _i10.UserProfileService {
   MockUserProfileService() {
     _i1.throwOnMissingStub(this);
   }
 
   @override
-  Map<String, _i12.UserProfile> get allProfiles => (super.noSuchMethod(
+  Map<String, _i11.UserProfile> get allProfiles => (super.noSuchMethod(
         Invocation.getter(#allProfiles),
-        returnValue: <String, _i12.UserProfile>{},
-      ) as Map<String, _i12.UserProfile>);
+        returnValue: <String, _i11.UserProfile>{},
+      ) as Map<String, _i11.UserProfile>);
 
   @override
-  bool get hasListeners => (super.noSuchMethod(
-        Invocation.getter(#hasListeners),
-        returnValue: false,
-      ) as bool);
-
-  @override
-  void setPersistentCache(_i13.ProfileCacheService? cacheService) =>
+  void setPersistentCache(_i12.ProfileCacheService? cacheService) =>
       super.noSuchMethod(
         Invocation.method(
           #setPersistentCache,
@@ -672,11 +599,11 @@ class MockUserProfileService extends _i1.Mock
       );
 
   @override
-  _i12.UserProfile? getCachedProfile(String? pubkey) =>
+  _i11.UserProfile? getCachedProfile(String? pubkey) =>
       (super.noSuchMethod(Invocation.method(
         #getCachedProfile,
         [pubkey],
-      )) as _i12.UserProfile?);
+      )) as _i11.UserProfile?);
 
   @override
   bool hasProfile(String? pubkey) => (super.noSuchMethod(
@@ -706,7 +633,7 @@ class MockUserProfileService extends _i1.Mock
       );
 
   @override
-  _i5.Future<void> updateCachedProfile(_i12.UserProfile? profile) =>
+  _i5.Future<void> updateCachedProfile(_i11.UserProfile? profile) =>
       (super.noSuchMethod(
         Invocation.method(
           #updateCachedProfile,
@@ -727,7 +654,7 @@ class MockUserProfileService extends _i1.Mock
       ) as _i5.Future<void>);
 
   @override
-  _i5.Future<_i12.UserProfile?> fetchProfile(
+  _i5.Future<_i11.UserProfile?> fetchProfile(
     String? pubkey, {
     bool? forceRefresh = false,
   }) =>
@@ -737,8 +664,8 @@ class MockUserProfileService extends _i1.Mock
           [pubkey],
           {#forceRefresh: forceRefresh},
         ),
-        returnValue: _i5.Future<_i12.UserProfile?>.value(),
-      ) as _i5.Future<_i12.UserProfile?>);
+        returnValue: _i5.Future<_i11.UserProfile?>.value(),
+      ) as _i5.Future<_i11.UserProfile?>);
 
   @override
   _i5.Future<void> fetchMultipleProfiles(
@@ -817,49 +744,16 @@ class MockUserProfileService extends _i1.Mock
         ),
         returnValueForMissingStub: null,
       );
-
-  @override
-  void addListener(_i10.VoidCallback? listener) => super.noSuchMethod(
-        Invocation.method(
-          #addListener,
-          [listener],
-        ),
-        returnValueForMissingStub: null,
-      );
-
-  @override
-  void removeListener(_i10.VoidCallback? listener) => super.noSuchMethod(
-        Invocation.method(
-          #removeListener,
-          [listener],
-        ),
-        returnValueForMissingStub: null,
-      );
-
-  @override
-  void notifyListeners() => super.noSuchMethod(
-        Invocation.method(
-          #notifyListeners,
-          [],
-        ),
-        returnValueForMissingStub: null,
-      );
 }
 
 /// A class which mocks [SubscriptionManager].
 ///
 /// See the documentation for Mockito's code generation for more information.
 class MockSubscriptionManager extends _i1.Mock
-    implements _i14.SubscriptionManager {
+    implements _i13.SubscriptionManager {
   MockSubscriptionManager() {
     _i1.throwOnMissingStub(this);
   }
-
-  @override
-  bool get hasListeners => (super.noSuchMethod(
-        Invocation.getter(#hasListeners),
-        returnValue: false,
-      ) as bool);
 
   @override
   _i5.Future<String> createSubscription({
@@ -867,7 +761,7 @@ class MockSubscriptionManager extends _i1.Mock
     required List<_i8.Filter>? filters,
     required dynamic Function(_i7.Event)? onEvent,
     dynamic Function(dynamic)? onError,
-    _i10.VoidCallback? onComplete,
+    dynamic onComplete,
     Duration? timeout,
     int? priority = 5,
   }) =>
@@ -938,33 +832,6 @@ class MockSubscriptionManager extends _i1.Mock
   void dispose() => super.noSuchMethod(
         Invocation.method(
           #dispose,
-          [],
-        ),
-        returnValueForMissingStub: null,
-      );
-
-  @override
-  void addListener(_i10.VoidCallback? listener) => super.noSuchMethod(
-        Invocation.method(
-          #addListener,
-          [listener],
-        ),
-        returnValueForMissingStub: null,
-      );
-
-  @override
-  void removeListener(_i10.VoidCallback? listener) => super.noSuchMethod(
-        Invocation.method(
-          #removeListener,
-          [listener],
-        ),
-        returnValueForMissingStub: null,
-      );
-
-  @override
-  void notifyListeners() => super.noSuchMethod(
-        Invocation.method(
-          #notifyListeners,
           [],
         ),
         returnValueForMissingStub: null,

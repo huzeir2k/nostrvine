@@ -46,8 +46,7 @@ void main() {
 
       // Set up default mocks
       when(() => mockUploadManager.getUpload(any())).thenReturn(null);
-      when(() => mockUploadManager.addListener(any())).thenReturn(null);
-      when(() => mockUploadManager.removeListener(any())).thenReturn(null);
+      // Note: addListener/removeListener removed after ChangeNotifier refactor
       when(() => mockVideoManager.stopAllVideos()).thenReturn(null);
       when(() => mockKeyManager.publicKey).thenReturn('test-pubkey');
     });

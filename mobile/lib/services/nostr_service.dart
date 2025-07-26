@@ -27,16 +27,17 @@ import 'package:shared_preferences/shared_preferences.dart';
 enum RelayStatus { connected, connecting, disconnected }
 
 /// Exception for NostrService errors
+/// REFACTORED: Removed ChangeNotifier - now uses pure state management via Riverpod
 class NostrServiceException implements Exception {
   NostrServiceException(this.message);
   final String message;
 
-  @override
   String toString() => 'NostrServiceException: $message';
 }
 
 /// Unified NostrService implementation using nostr_sdk
-class NostrService extends ChangeNotifier implements INostrService, BackgroundAwareService {
+/// REFACTORED: Removed ChangeNotifier - now uses pure state management via Riverpod
+class NostrService  implements INostrService, BackgroundAwareService {
   // Our ID -> SDK subscription ID
 
   NostrService(this._keyManager);
@@ -84,33 +85,23 @@ class NostrService extends ChangeNotifier implements INostrService, BackgroundAw
       StreamController<Map<String, bool>>.broadcast();
 
   // INostrService implementation
-  @override
   bool get isInitialized => _isInitialized && !_isDisposed;
 
-  @override
   bool get isDisposed => _isDisposed;
 
-  @override
   List<String> get connectedRelays => List.unmodifiable(_connectedRelays);
 
-  @override
   String? get publicKey => _isDisposed ? null : _keyManager.publicKey;
 
-  @override
   bool get hasKeys => _isDisposed ? false : _keyManager.hasKeys;
 
-  @override
   NostrKeyManager get keyManager => _keyManager;
 
-  @override
   int get relayCount => _connectedRelays.length;
 
-  @override
   int get connectedRelayCount => _connectedRelays.length;
 
-  @override
   List<String> get relays => List.unmodifiable(_relays);
-  @override
   Map<String, dynamic> get relayStatuses {
     final statuses = <String, dynamic>{};
     for (final url in _relays) {
@@ -157,7 +148,6 @@ class NostrService extends ChangeNotifier implements INostrService, BackgroundAw
         name: 'NostrService', category: LogCategory.relay);
   }
 
-  @override
   Future<void> initialize({List<String>? customRelays}) async {
     if (_isInitialized) {
       Log.warning('⚠️ NostrService already initialized',
@@ -227,7 +217,7 @@ class NostrService extends ChangeNotifier implements INostrService, BackgroundAw
       _relays.addAll(relaysToConnect);
 
       // Notify listeners about relay list
-      notifyListeners();
+
 
       // Create event filters (we'll handle subscriptions manually)
       final eventFilters = <EventFilter>[];
@@ -315,7 +305,7 @@ class NostrService extends ChangeNotifier implements INostrService, BackgroundAw
           'NostrService initialized with ${_connectedRelays.length} relays',
           name: 'NostrService',
           category: LogCategory.relay);
-      notifyListeners();
+
     } catch (e) {
       Log.error('Failed to initialize NostrService: $e',
           name: 'NostrService', category: LogCategory.relay);
@@ -378,7 +368,7 @@ class NostrService extends ChangeNotifier implements INostrService, BackgroundAw
       // Notify listeners if auth state changed
       if (authStateChanged) {
         _authStateController.add(Map.from(_relayAuthStates));
-        notifyListeners();
+
       }
 
       // If no auth is pending, we're done
@@ -398,7 +388,6 @@ class NostrService extends ChangeNotifier implements INostrService, BackgroundAw
     return true;
   }
 
-  @override
   Stream<Event> subscribeToEvents({
     required List<Filter> filters,
     bool bypassLimits = false, // Not needed in v2 - SDK handles limits
@@ -486,7 +475,6 @@ class NostrService extends ChangeNotifier implements INostrService, BackgroundAw
     return controller.stream;
   }
 
-  @override
   Future<NostrBroadcastResult> broadcastEvent(Event event) async {
     if (!_isInitialized || !hasKeys) {
       throw NostrServiceException(
@@ -652,7 +640,6 @@ class NostrService extends ChangeNotifier implements INostrService, BackgroundAw
     }
   }
 
-  @override
   Future<NostrBroadcastResult> publishFileMetadata({
     required NIP94Metadata metadata,
     required String content,
@@ -702,7 +689,6 @@ class NostrService extends ChangeNotifier implements INostrService, BackgroundAw
     return broadcastEvent(event);
   }
 
-  @override
   Future<NostrBroadcastResult> publishVideoEvent({
     required String videoUrl,
     required String content,
@@ -761,7 +747,6 @@ class NostrService extends ChangeNotifier implements INostrService, BackgroundAw
   }
 
   /// Add a new relay
-  @override
   Future<bool> addRelay(String relayUrl) async {
     if (_relays.contains(relayUrl)) {
       return true; // Already in list
@@ -782,7 +767,7 @@ class NostrService extends ChangeNotifier implements INostrService, BackgroundAw
       if (success) {
         _relayInstances[relayUrl] = relay;
         _connectedRelays.add(relayUrl);
-        notifyListeners();
+
         return true;
       } else {
         // Remove from lists if connection failed
@@ -802,7 +787,6 @@ class NostrService extends ChangeNotifier implements INostrService, BackgroundAw
   }
 
   /// Remove a relay
-  @override
   Future<void> removeRelay(String relayUrl) async {
     try {
       // Remove from SDK
@@ -819,7 +803,7 @@ class NostrService extends ChangeNotifier implements INostrService, BackgroundAw
       await _saveRelays();
 
       if (!_isDisposed) {
-        notifyListeners();
+
       }
       Log.info('📱 Disconnected from relay: $relayUrl',
           name: 'NostrService', category: LogCategory.relay);
@@ -830,7 +814,6 @@ class NostrService extends ChangeNotifier implements INostrService, BackgroundAw
   }
 
   /// Get connection status for all relays
-  @override
   Map<String, bool> getRelayStatus() {
     final status = <String, bool>{};
     for (final relayUrl in _relays) {
@@ -840,7 +823,6 @@ class NostrService extends ChangeNotifier implements INostrService, BackgroundAw
   }
 
   /// Reconnect to all configured relays
-  @override
   Future<void> reconnectAll() async {
     Log.debug('Reconnecting to all relays...',
         name: 'NostrService', category: LogCategory.relay);
@@ -905,7 +887,7 @@ class NostrService extends ChangeNotifier implements INostrService, BackgroundAw
       }
     }
 
-    notifyListeners();
+
   }
 
   /// Save relay list to preferences
@@ -921,7 +903,6 @@ class NostrService extends ChangeNotifier implements INostrService, BackgroundAw
     }
   }
 
-  @override
   Future<void> closeAllSubscriptions() async {
     Log.info(
         '🧹 Closing all active subscriptions (${_activeSubscriptions.length} total)',
@@ -1037,14 +1018,11 @@ class NostrService extends ChangeNotifier implements INostrService, BackgroundAw
   }
 
   // Primary relay getter
-  @override
   String get primaryRelay => primaryRelayUrl;
 
   // BackgroundAwareService implementation
-  @override
   String get serviceName => 'NostrService';
 
-  @override
   void onAppBackgrounded() {
     if (_isDisposed) return;
     
@@ -1057,7 +1035,6 @@ class NostrService extends ChangeNotifier implements INostrService, BackgroundAw
     _reconnectionTimer?.cancel();
   }
 
-  @override
   void onExtendedBackground() {
     if (_isDisposed || _isBackgroundSuspended) return;
     
@@ -1081,7 +1058,6 @@ class NostrService extends ChangeNotifier implements INostrService, BackgroundAw
     }
   }
 
-  @override
   void onAppResumed() {
     if (_isDisposed) return;
     
@@ -1102,7 +1078,6 @@ class NostrService extends ChangeNotifier implements INostrService, BackgroundAw
     }
   }
 
-  @override
   void onPeriodicCleanup() {
     if (_isDisposed || _isInBackground) return;
     
@@ -1166,7 +1141,6 @@ class NostrService extends ChangeNotifier implements INostrService, BackgroundAw
     }
   }
 
-  @override
   void dispose() {
     if (_isDisposed) return;
 
@@ -1193,6 +1167,6 @@ class NostrService extends ChangeNotifier implements INostrService, BackgroundAw
     _relayAuthStates.clear();
     _relayAuthTimestamps.clear();
 
-    super.dispose();
+    
   }
 }

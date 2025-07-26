@@ -1,26 +1,32 @@
 // ABOUTME: Secure key storage service using hardware-backed security and memory-safe containers
 // ABOUTME: Replaces the vulnerable KeyStorageService with production-grade cryptographic key protection
 
+import 'package:flutter/foundation.dart';
 import 'dart:async';
+import 'package:flutter/foundation.dart';
 import 'dart:io' if (dart.library.html) 'stubs/platform_stub.dart';
 
 import 'package:flutter/foundation.dart';
 import 'package:openvine/services/platform_secure_storage.dart';
+import 'package:flutter/foundation.dart';
 import 'package:openvine/utils/nostr_encoding.dart';
+import 'package:flutter/foundation.dart';
 import 'package:openvine/utils/secure_key_container.dart';
+import 'package:flutter/foundation.dart';
 import 'package:openvine/utils/unified_logger.dart';
 
 /// Exception thrown by secure key storage operations
+/// REFACTORED: Removed ChangeNotifier - now uses pure state management via Riverpod
 class SecureKeyStorageException implements Exception {
   const SecureKeyStorageException(this.message, {this.code});
   final String message;
   final String? code;
 
-  @override
   String toString() => 'SecureKeyStorageException: $message';
 }
 
 /// Security configuration for key storage operations
+/// REFACTORED: Removed ChangeNotifier - now uses pure state management via Riverpod
 class SecurityConfig {
   const SecurityConfig({
     this.requireHardwareBacked = true,
@@ -61,7 +67,8 @@ class SecurityConfig {
 }
 
 /// Secure key storage service with hardware-backed protection
-class SecureKeyStorageService extends ChangeNotifier {
+/// REFACTORED: Removed ChangeNotifier - now uses pure state management via Riverpod
+class SecureKeyStorageService  {
   SecureKeyStorageService({SecurityConfig? securityConfig}) {
     if (securityConfig != null) {
       _securityConfig = securityConfig;
@@ -224,7 +231,7 @@ class SecureKeyStorageService extends ChangeNotifier {
       debugPrint(
           '🔒 Security level: ${result.securityLevel?.name ?? 'unknown'}');
 
-      notifyListeners();
+
       return keyContainer;
     } catch (e) {
       Log.error('Key generation error: $e',
@@ -282,7 +289,7 @@ class SecureKeyStorageService extends ChangeNotifier {
       debugPrint(
           '🔒 Security level: ${result.securityLevel?.name ?? 'unknown'}');
 
-      notifyListeners();
+
       return keyContainer;
     } catch (e) {
       Log.error('Import error: $e',
@@ -385,7 +392,7 @@ class SecureKeyStorageService extends ChangeNotifier {
       debugPrint(
           '🔒 Security level: ${result.securityLevel?.name ?? 'unknown'}');
 
-      notifyListeners();
+
       return keyContainer;
     } catch (e) {
       Log.error('Hex import error: $e',
@@ -463,7 +470,7 @@ class SecureKeyStorageService extends ChangeNotifier {
 
       Log.info('All keys deleted',
           name: 'SecureKeyStorageService', category: LogCategory.auth);
-      notifyListeners();
+
     } catch (e) {
       throw SecureKeyStorageException('Failed to delete keys: $e');
     }
@@ -564,7 +571,7 @@ class SecureKeyStorageService extends ChangeNotifier {
 
       Log.info('Switched to identity: ${NostrEncoding.maskKey(npub)}',
           name: 'SecureKeyStorageService', category: LogCategory.auth);
-      notifyListeners();
+
       return true;
     } catch (e) {
       Log.error('Error switching identity: $e',
@@ -653,13 +660,12 @@ class SecureKeyStorageService extends ChangeNotifier {
     }
   }
 
-  @override
   void dispose() {
     Log.debug('📱️ Disposing SecureKeyStorageService',
         name: 'SecureKeyStorageService', category: LogCategory.auth);
     // Dispose cached container when service is disposed (app shutdown)
     _cachedKeyContainer?.dispose();
     _clearCache();
-    super.dispose();
+    
   }
 }

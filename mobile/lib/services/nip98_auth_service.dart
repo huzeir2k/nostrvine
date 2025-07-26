@@ -5,18 +5,17 @@ import 'dart:async';
 import 'dart:convert';
 
 import 'package:crypto/crypto.dart';
-import 'package:flutter/foundation.dart';
 import 'package:nostr_sdk/event.dart';
 import 'package:openvine/services/auth_service.dart';
 import 'package:openvine/utils/unified_logger.dart';
 
 /// Exception thrown by NIP-98 authentication operations
+/// REFACTORED: Removed ChangeNotifier - now uses pure state management via Riverpod
 class Nip98AuthException implements Exception {
   const Nip98AuthException(this.message, {this.code});
   final String message;
   final String? code;
 
-  @override
   String toString() => 'Nip98AuthException: $message';
 }
 
@@ -33,6 +32,7 @@ enum HttpMethod {
 }
 
 /// NIP-98 authentication token containing the signed event
+/// REFACTORED: Removed ChangeNotifier - now uses pure state management via Riverpod
 class Nip98Token {
   const Nip98Token({
     required this.token,
@@ -51,12 +51,12 @@ class Nip98Token {
   /// Get the authorization header value
   String get authorizationHeader => 'Nostr $token';
 
-  @override
   String toString() => 'Nip98Token(expires: ${expiresAt.toIso8601String()})';
 }
 
 /// Service for creating NIP-98 HTTP authentication tokens
-class Nip98AuthService extends ChangeNotifier {
+/// REFACTORED: Removed ChangeNotifier - now uses pure state management via Riverpod
+class Nip98AuthService  {
   Nip98AuthService({required AuthService authService})
       : _authService = authService {
     // Start periodic cache cleanup
@@ -317,7 +317,6 @@ class Nip98AuthService extends ChangeNotifier {
   /// Get current user's public key for auth
   String? get currentUserPubkey => _authService.currentNpub;
 
-  @override
   void dispose() {
     Log.debug('📱️ Disposing Nip98AuthService',
         name: 'Nip98AuthService', category: LogCategory.system);
@@ -325,6 +324,6 @@ class Nip98AuthService extends ChangeNotifier {
     _cleanupTimer?.cancel();
     _tokenCache.clear();
 
-    super.dispose();
+    
   }
 }

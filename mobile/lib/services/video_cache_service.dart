@@ -3,7 +3,6 @@
 
 import 'dart:math';
 
-import 'package:flutter/foundation.dart';
 import 'package:openvine/constants/app_constants.dart';
 import 'package:openvine/models/video_event.dart';
 import 'package:openvine/utils/unified_logger.dart';
@@ -15,7 +14,8 @@ import 'package:openvine/utils/unified_logger.dart';
 /// - Duplicate detection and prevention
 /// - Query operations by author, hashtags, etc.
 /// - Cache management and clearing
-class VideoCacheService extends ChangeNotifier {
+/// REFACTORED: Removed ChangeNotifier - now uses pure state management via Riverpod
+class VideoCacheService  {
   final List<VideoEvent> _videoEvents = [];
   int _duplicateVideoEventCount = 0;
   DateTime? _lastDuplicateVideoLogTime;
@@ -77,7 +77,7 @@ class VideoCacheService extends ChangeNotifier {
           category: LogCategory.video);
     }
 
-    notifyListeners();
+
   }
 
   /// Add multiple videos to cache
@@ -122,13 +122,13 @@ class VideoCacheService extends ChangeNotifier {
     _videoEvents.clear();
     _duplicateVideoEventCount = 0;
     _lastDuplicateVideoLogTime = null;
-    notifyListeners();
+
   }
 
   /// Remove a specific video from cache
   void removeVideo(String id) {
     _videoEvents.removeWhere((event) => event.id == id);
-    notifyListeners();
+
   }
 
   /// Get cache statistics

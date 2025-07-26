@@ -25,7 +25,6 @@ class ProfileSetupScreen extends ConsumerStatefulWidget {
   });
   final bool isNewUser;
 
-  @override
   ConsumerState<ProfileSetupScreen> createState() => _ProfileSetupScreenState();
 }
 
@@ -45,18 +44,17 @@ class _ProfileSetupScreenState extends ConsumerState<ProfileSetupScreen> {
   File? _selectedImage;
   String? _uploadedImageUrl;
 
-  @override
   void initState() {
     super.initState();
     _loadExistingProfile();
   }
 
-  @override
   void dispose() {
     _nameController.dispose();
     _bioController.dispose();
     _pictureController.dispose();
     _nip05Controller.dispose();
+    
     super.dispose();
   }
 
@@ -113,7 +111,6 @@ class _ProfileSetupScreenState extends ConsumerState<ProfileSetupScreen> {
     }
   }
 
-  @override
   Widget build(BuildContext context) => Scaffold(
         backgroundColor: Colors.black,
         appBar: AppBar(

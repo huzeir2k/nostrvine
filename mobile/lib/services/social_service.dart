@@ -3,7 +3,6 @@
 
 import 'dart:async';
 
-import 'package:flutter/foundation.dart';
 import 'package:nostr_sdk/event.dart';
 import 'package:nostr_sdk/filter.dart';
 import 'package:openvine/services/auth_service.dart';
@@ -12,7 +11,8 @@ import 'package:openvine/services/subscription_manager.dart';
 import 'package:openvine/utils/unified_logger.dart';
 
 /// Service for managing social interactions on Nostr
-class SocialService extends ChangeNotifier {
+/// REFACTORED: Removed ChangeNotifier - now uses pure state management via Riverpod
+class SocialService  {
   SocialService(this._nostrService, this._authService,
       {required SubscriptionManager subscriptionManager})
       : _subscriptionManager = subscriptionManager {
@@ -163,7 +163,7 @@ class SocialService extends ChangeNotifier {
         }
       }
 
-      notifyListeners();
+
     } catch (e) {
       Log.error('Error toggling like: $e',
           name: 'SocialService', category: LogCategory.system);
@@ -416,7 +416,7 @@ class SocialService extends ChangeNotifier {
               break;
             }
           }
-          notifyListeners(); // Notify UI of repost changes
+
         },
         onError: (error) => Log.error('Error loading user reposts: $error',
             name: 'SocialService', category: LogCategory.system),
@@ -612,7 +612,7 @@ class SocialService extends ChangeNotifier {
       Log.info('Updated follow list: ${_followingPubkeys.length} following',
           name: 'SocialService', category: LogCategory.system);
 
-      notifyListeners();
+
     }
   }
 
@@ -672,7 +672,7 @@ class SocialService extends ChangeNotifier {
           'Successfully followed user: ${pubkeyToFollow.substring(0, 8)}...',
           name: 'SocialService',
           category: LogCategory.system);
-      notifyListeners();
+
     } catch (e) {
       Log.error('Error following user: $e',
           name: 'SocialService', category: LogCategory.system);
@@ -734,7 +734,7 @@ class SocialService extends ChangeNotifier {
           'Successfully unfollowed user: ${pubkeyToUnfollow.substring(0, 8)}...',
           name: 'SocialService',
           category: LogCategory.system);
-      notifyListeners();
+
     } catch (e) {
       Log.error('Error unfollowing user: $e',
           name: 'SocialService', category: LogCategory.system);
@@ -1274,7 +1274,7 @@ class SocialService extends ChangeNotifier {
 
       Log.info('Event reposted successfully: ${event.id.substring(0, 8)}...',
           name: 'SocialService', category: LogCategory.system);
-      notifyListeners(); // Notify UI of the change
+
     } catch (e) {
       Log.error('Error reposting event: $e',
           name: 'SocialService', category: LogCategory.system);
@@ -1333,7 +1333,6 @@ class SocialService extends ChangeNotifier {
     }
   }
 
-  @override
   void dispose() {
     Log.debug('📱️ Disposing SocialService',
         name: 'SocialService', category: LogCategory.system);
@@ -1360,6 +1359,6 @@ class SocialService extends ChangeNotifier {
       _userRepostsSubscriptionId = null;
     }
 
-    super.dispose();
+    
   }
 }

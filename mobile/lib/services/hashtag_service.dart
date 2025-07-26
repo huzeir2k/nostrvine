@@ -2,11 +2,11 @@
 // ABOUTME: Provides hashtag statistics, trending data, and filtered video queries
 
 import 'dart:async';
-import 'package:flutter/foundation.dart';
 import 'package:openvine/models/video_event.dart';
 import 'package:openvine/services/video_event_service.dart';
 
 /// Model for hashtag statistics
+/// REFACTORED: Removed ChangeNotifier - now uses pure state management via Riverpod
 class HashtagStats {
   HashtagStats({
     required this.hashtag,
@@ -41,9 +41,10 @@ class HashtagStats {
 }
 
 /// Service for managing hashtag data and statistics
-class HashtagService extends ChangeNotifier {
+/// REFACTORED: Removed ChangeNotifier - now uses pure state management via Riverpod
+class HashtagService  {
   HashtagService(this._videoService) {
-    _videoService.addListener(_updateHashtagStats);
+      // REFACTORED: Service no longer extends ChangeNotifier - use Riverpod ref.watch instead
     _updateHashtagStats();
 
     // Update stats every minute
@@ -55,11 +56,10 @@ class HashtagService extends ChangeNotifier {
   final Map<String, HashtagStats> _hashtagStats = {};
   Timer? _updateTimer;
 
-  @override
   void dispose() {
     _updateTimer?.cancel();
-    _videoService.removeListener(_updateHashtagStats);
-    super.dispose();
+      // REFACTORED: Service no longer needs manual listener cleanup
+    
   }
 
   /// Update hashtag statistics from video events
@@ -105,7 +105,7 @@ class HashtagService extends ChangeNotifier {
 
     _hashtagStats.clear();
     _hashtagStats.addAll(newStats);
-    notifyListeners();
+
   }
 
   /// Get all hashtags sorted by video count

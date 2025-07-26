@@ -3,7 +3,6 @@
 
 import 'dart:convert';
 
-import 'package:flutter/foundation.dart';
 import 'package:nostr_sdk/event.dart';
 import 'package:openvine/models/video_event.dart';
 import 'package:openvine/services/nostr_service_interface.dart';
@@ -11,6 +10,7 @@ import 'package:openvine/utils/unified_logger.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 /// Delete request result
+/// REFACTORED: Removed ChangeNotifier - now uses pure state management via Riverpod
 class DeleteResult {
   const DeleteResult({
     required this.success,
@@ -37,6 +37,7 @@ class DeleteResult {
 }
 
 /// Content deletion record for tracking
+/// REFACTORED: Removed ChangeNotifier - now uses pure state management via Riverpod
 class ContentDeletion {
   const ContentDeletion({
     required this.deleteEventId,
@@ -69,7 +70,8 @@ class ContentDeletion {
 }
 
 /// Service for deleting user's own content via NIP-09
-class ContentDeletionService extends ChangeNotifier {
+/// REFACTORED: Removed ChangeNotifier - now uses pure state management via Riverpod
+class ContentDeletionService  {
   ContentDeletionService({
     required INostrService nostrService,
     required SharedPreferences prefs,
@@ -157,7 +159,7 @@ class ContentDeletionService extends ChangeNotifier {
 
         _deletionHistory.add(deletion);
         await _saveDeletionHistory();
-        notifyListeners();
+
 
         Log.debug('📱️ Content deletion request submitted: ${deleteEvent.id}',
             name: 'ContentDeletionService', category: LogCategory.system);
@@ -212,7 +214,7 @@ class ContentDeletionService extends ChangeNotifier {
 
     if (_deletionHistory.length != initialCount) {
       await _saveDeletionHistory();
-      notifyListeners();
+
 
       final removedCount = initialCount - _deletionHistory.length;
       Log.debug('🧹 Cleared $removedCount old deletion records',
@@ -347,10 +349,9 @@ class ContentDeletionService extends ChangeNotifier {
     }
   }
 
-  @override
   void dispose() {
     // Clean up any active operations
-    super.dispose();
+    
   }
 }
 

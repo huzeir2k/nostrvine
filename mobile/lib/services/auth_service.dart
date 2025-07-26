@@ -77,7 +77,8 @@ class UserProfile {
 }
 
 /// Main authentication service for the OpenVine app
-class AuthService extends ChangeNotifier {
+/// REFACTORED: Removed ChangeNotifier - now uses pure state management via Riverpod
+class AuthService {
   AuthService({SecureKeyStorageService? keyStorage})
       : _keyStorage = keyStorage ?? SecureKeyStorageService();
   final SecureKeyStorageService _keyStorage;
@@ -300,7 +301,6 @@ class AuthService extends ChangeNotifier {
 
       // Notify listeners and stream
       _profileController.add(_currentProfile);
-      notifyListeners();
 
       Log.info('✅ AuthService profile updated',
           name: 'AuthService', category: LogCategory.auth);
@@ -621,7 +621,6 @@ class AuthService extends ChangeNotifier {
     if (_authState != newState) {
       _authState = newState;
       _authStateController.add(newState);
-      notifyListeners();
 
       Log.debug('Auth state changed: ${newState.name}',
           name: 'AuthService', category: LogCategory.auth);
@@ -640,7 +639,6 @@ class AuthService extends ChangeNotifier {
         'last_error': _lastError,
       };
 
-  @override
   void dispose() {
     Log.debug('📱️ Disposing SecureAuthService',
         name: 'AuthService', category: LogCategory.auth);
@@ -653,6 +651,6 @@ class AuthService extends ChangeNotifier {
     _profileController.close();
     _keyStorage.dispose();
 
-    super.dispose();
+    
   }
 }

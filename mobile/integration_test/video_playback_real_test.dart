@@ -38,10 +38,12 @@ void main() {
         config: VideoPlaybackConfig.feed,
       );
 
-      // Track state changes
+      // Track state changes via stream
       final states = <VideoPlaybackState>[];
-      controller.addListener(() {
-        states.add(controller.state);
+      final subscription = controller.events.listen((event) {
+        if (event is VideoStateChanged) {
+          states.add(event.state);
+        }
       });
 
       // Initialize controller
@@ -79,6 +81,7 @@ void main() {
       expect(controller.isPlaying, isTrue);
 
       // Cleanup
+      await subscription.cancel();
       controller.dispose();
       expect(controller.state, equals(VideoPlaybackState.disposed));
     });

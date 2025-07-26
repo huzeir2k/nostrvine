@@ -4,7 +4,6 @@
 import 'dart:async';
 import 'dart:io';
 
-import 'package:flutter/foundation.dart';
 import 'package:hive_flutter/hive_flutter.dart';
 import 'package:openvine/models/pending_upload.dart';
 import 'package:openvine/services/circuit_breaker_service.dart';
@@ -13,6 +12,7 @@ import 'package:openvine/utils/async_utils.dart';
 import 'package:openvine/utils/unified_logger.dart';
 
 /// Upload retry configuration
+/// REFACTORED: Removed ChangeNotifier - now uses pure state management via Riverpod
 class UploadRetryConfig {
   const UploadRetryConfig({
     this.maxRetries = 5,
@@ -29,6 +29,7 @@ class UploadRetryConfig {
 }
 
 /// Upload performance metrics
+/// REFACTORED: Removed ChangeNotifier - now uses pure state management via Riverpod
 class UploadMetrics {
   const UploadMetrics({
     required this.uploadId,
@@ -53,7 +54,8 @@ class UploadMetrics {
 }
 
 /// Manages video uploads and their persistent state with enhanced reliability
-class UploadManager extends ChangeNotifier {
+/// REFACTORED: Removed ChangeNotifier - now uses pure state management via Riverpod
+class UploadManager  {
   UploadManager({
     required DirectUploadService uploadService,
     VideoCircuitBreaker? circuitBreaker,
@@ -328,7 +330,7 @@ class UploadManager extends ChangeNotifier {
       }
 
       // Notify that upload is ready for immediate publishing
-      notifyListeners();
+
     } else {
       throw Exception(
           result.errorMessage ?? 'Upload failed with unknown error');
@@ -591,7 +593,7 @@ class UploadManager extends ChangeNotifier {
     // Remove from storage
     await _uploadsBox?.delete(uploadId);
 
-    notifyListeners();
+
     Log.info('Upload deleted permanently: $uploadId',
         name: 'UploadManager', category: LogCategory.video);
   }
@@ -615,7 +617,7 @@ class UploadManager extends ChangeNotifier {
     }
 
     if (completedUploads.isNotEmpty) {
-      notifyListeners();
+
     }
   }
 
@@ -647,7 +649,7 @@ class UploadManager extends ChangeNotifier {
     }
 
     await _uploadsBox!.put(upload.id, upload);
-    notifyListeners();
+
   }
 
   /// Update existing upload
@@ -655,7 +657,7 @@ class UploadManager extends ChangeNotifier {
     if (_uploadsBox == null) return;
 
     await _uploadsBox!.put(upload.id, upload);
-    notifyListeners();
+
   }
 
   /// Update upload status (public method for VideoEventPublisher)
@@ -722,7 +724,7 @@ class UploadManager extends ChangeNotifier {
     if (fixedCount > 0) {
       Log.error('Fixed $fixedCount stuck uploads - moved back to failed status',
           name: 'UploadManager', category: LogCategory.video);
-      notifyListeners();
+
     }
   }
 
@@ -892,7 +894,6 @@ class UploadManager extends ChangeNotifier {
     );
   }
 
-  @override
   void dispose() {
     // Cancel all progress subscriptions
     for (final subscription in _progressSubscriptions.values) {
@@ -912,6 +913,6 @@ class UploadManager extends ChangeNotifier {
     // Close Hive box
     _uploadsBox?.close();
 
-    super.dispose();
+    
   }
 }

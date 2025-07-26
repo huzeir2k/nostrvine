@@ -102,7 +102,12 @@ void main() {
         }
       }
       
-      videoEventService.addListener(onVideoEventChange);
+      // Note: VideoEventService no longer extends ChangeNotifier after refactor
+      // Using polling approach to check for new events instead of listener
+      Timer? eventPollingTimer;
+      eventPollingTimer = Timer.periodic(const Duration(milliseconds: 500), (_) {
+        onVideoEventChange();
+      });
       
       try {
         // Subscribe to video feed (same as app does)
@@ -145,7 +150,8 @@ void main() {
         
         rethrow;
       } finally {
-        videoEventService.removeListener(onVideoEventChange);
+        // Cancel the polling timer instead of removing listener
+        eventPollingTimer?.cancel();
       }
     });
   });

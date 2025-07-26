@@ -6,7 +6,8 @@ import 'package:flutter/material.dart';
 import 'package:openvine/utils/unified_logger.dart';
 
 /// Background activity manager to control network and battery usage
-class BackgroundActivityManager extends ChangeNotifier {
+/// REFACTORED: Removed ChangeNotifier - now uses pure state management via Riverpod
+class BackgroundActivityManager  {
   static final BackgroundActivityManager _instance = BackgroundActivityManager._internal();
   factory BackgroundActivityManager() => _instance;
   BackgroundActivityManager._internal();
@@ -84,7 +85,7 @@ class BackgroundActivityManager extends ChangeNotifier {
     }
 
     if (wasInForeground != _isAppInForeground) {
-      notifyListeners();
+
     }
   }
 
@@ -212,12 +213,11 @@ class BackgroundActivityManager extends ChangeNotifier {
     };
   }
 
-  @override
   void dispose() {
     _backgroundSuspensionTimer?.cancel();
     _periodicCleanupTimer?.cancel();
     _registeredServices.clear();
-    super.dispose();
+    
   }
 }
 

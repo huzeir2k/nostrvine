@@ -4,13 +4,13 @@
 import 'dart:async';
 import 'dart:convert';
 
-import 'package:flutter/foundation.dart';
 import 'package:openvine/services/secure_key_storage_service.dart';
 import 'package:openvine/utils/nostr_encoding.dart';
 import 'package:openvine/utils/unified_logger.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 /// Represents a saved Nostr identity
+/// REFACTORED: Removed ChangeNotifier - now uses pure state management via Riverpod
 class SavedIdentity {
   SavedIdentity({
     required this.npub,
@@ -45,7 +45,8 @@ class SavedIdentity {
 }
 
 /// Service for managing multiple Nostr identities
-class IdentityManagerService extends ChangeNotifier {
+/// REFACTORED: Removed ChangeNotifier - now uses pure state management via Riverpod
+class IdentityManagerService  {
   IdentityManagerService({SecureKeyStorageService? keyStorage})
       : _keyStorage = keyStorage ?? SecureKeyStorageService();
   static const String _identitiesKey = 'saved_nostr_identities';
@@ -81,7 +82,7 @@ class IdentityManagerService extends ChangeNotifier {
       // Load the active identity
       _activeIdentityNpub = prefs.getString(_activeIdentityKey);
 
-      notifyListeners();
+
       Log.debug('📱 Loaded ${_savedIdentities.length} saved identities',
           name: 'IdentityManagerService', category: LogCategory.system);
     } catch (e) {
@@ -233,7 +234,7 @@ class IdentityManagerService extends ChangeNotifier {
         await prefs.remove(_activeIdentityKey);
       }
 
-      notifyListeners();
+
     } catch (e) {
       Log.error('Error persisting identities: $e',
           name: 'IdentityManagerService', category: LogCategory.system);
@@ -250,7 +251,7 @@ class IdentityManagerService extends ChangeNotifier {
       _savedIdentities.clear();
       _activeIdentityNpub = null;
 
-      notifyListeners();
+
       Log.debug('📱️ Cleared all saved identities',
           name: 'IdentityManagerService', category: LogCategory.system);
     } catch (e) {

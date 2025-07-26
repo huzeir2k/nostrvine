@@ -3,7 +3,6 @@
 
 import 'dart:async';
 
-import 'package:flutter/foundation.dart';
 import 'package:nostr_sdk/event.dart';
 import 'package:nostr_sdk/filter.dart';
 import 'package:openvine/models/nip94_metadata.dart';
@@ -42,7 +41,8 @@ class NostrBroadcastResult {
 }
 
 /// Common interface for Nostr service implementations
-abstract class INostrService extends ChangeNotifier {
+/// REFACTORED: Removed ChangeNotifier - now uses pure state management via Riverpod
+abstract class INostrService {
   // Getters
   bool get isInitialized;
   bool get isDisposed;

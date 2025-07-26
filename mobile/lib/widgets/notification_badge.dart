@@ -18,7 +18,6 @@ class NotificationBadge extends StatelessWidget {
   final Color? badgeColor;
   final Color? textColor;
 
-  @override
   Widget build(BuildContext context) {
     if (!showBadge || count <= 0) {
       return child;
@@ -98,7 +97,6 @@ class AnimatedNotificationBadge extends StatefulWidget {
   final Color? badgeColor;
   final Color? textColor;
 
-  @override
   State<AnimatedNotificationBadge> createState() =>
       _AnimatedNotificationBadgeState();
 }
@@ -109,7 +107,6 @@ class _AnimatedNotificationBadgeState extends State<AnimatedNotificationBadge>
   late Animation<double> _scaleAnimation;
   int _previousCount = 0;
 
-  @override
   void initState() {
     super.initState();
     _previousCount = widget.count;
@@ -130,7 +127,6 @@ class _AnimatedNotificationBadgeState extends State<AnimatedNotificationBadge>
     );
   }
 
-  @override
   void didUpdateWidget(AnimatedNotificationBadge oldWidget) {
     super.didUpdateWidget(oldWidget);
 
@@ -142,13 +138,11 @@ class _AnimatedNotificationBadgeState extends State<AnimatedNotificationBadge>
     _previousCount = widget.count;
   }
 
-  @override
   void dispose() {
     _animationController.dispose();
-    super.dispose();
+    
   }
 
-  @override
   Widget build(BuildContext context) {
     if (!widget.showBadge || widget.count <= 0) {
       return widget.child;
@@ -214,5 +208,10 @@ class _AnimatedNotificationBadgeState extends State<AnimatedNotificationBadge>
         ),
       ],
     );
+  }
+  
+  @override
+  void dispose() {
+    super.dispose();
   }
 }

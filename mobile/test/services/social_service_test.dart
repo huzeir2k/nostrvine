@@ -21,7 +21,7 @@ void main() {
     setUp(() {
       mockNostrService = MockINostrService();
       mockAuthService = MockAuthService();
-      mockSubscriptionManager = MockSubscriptionManager();
+      mockSubscriptionManager = MockSubscriptionManager(TestNostrService());
 
       // Set up default stubs for AuthService
       when(mockAuthService.isAuthenticated).thenReturn(true);

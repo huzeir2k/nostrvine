@@ -6,13 +6,13 @@ import 'dart:convert';
 import 'dart:io';
 
 import 'package:cloudinary_public/cloudinary_public.dart';
-import 'package:flutter/foundation.dart';
 import 'package:http/http.dart' as http;
 import 'package:openvine/config/app_config.dart';
 import 'package:openvine/services/nip98_auth_service.dart';
 import 'package:openvine/utils/unified_logger.dart';
 
 /// Result of a Cloudinary upload operation
+/// REFACTORED: Removed ChangeNotifier - now uses pure state management via Riverpod
 class UploadResult {
   const UploadResult({
     required this.success,
@@ -46,6 +46,7 @@ class UploadResult {
 }
 
 /// Signed upload parameters from backend
+/// REFACTORED: Removed ChangeNotifier - now uses pure state management via Riverpod
 class SignedUploadParams {
   const SignedUploadParams({
     required this.cloudName,
@@ -75,7 +76,8 @@ class SignedUploadParams {
 }
 
 /// Service for uploading videos to Cloudinary
-class CloudinaryUploadService extends ChangeNotifier {
+/// REFACTORED: Removed ChangeNotifier - now uses pure state management via Riverpod
+class CloudinaryUploadService  {
   CloudinaryUploadService({Nip98AuthService? authService})
       : _authService = authService;
   static String get _baseUrl => AppConfig.backendBaseUrl;
@@ -284,7 +286,6 @@ class CloudinaryUploadService extends ChangeNotifier {
   /// Get current uploads in progress
   List<String> get activeUploads => _progressControllers.keys.toList();
 
-  @override
   void dispose() {
     // Cancel all active uploads and subscriptions
     for (final subscription in _progressSubscriptions.values) {
@@ -295,11 +296,12 @@ class CloudinaryUploadService extends ChangeNotifier {
     }
     _progressSubscriptions.clear();
     _progressControllers.clear();
-    super.dispose();
+    
   }
 }
 
 /// Exception thrown by CloudinaryUploadService
+/// REFACTORED: Removed ChangeNotifier - now uses pure state management via Riverpod
 class CloudinaryUploadException implements Exception {
   const CloudinaryUploadException(
     this.message, {
@@ -310,6 +312,5 @@ class CloudinaryUploadException implements Exception {
   final String? code;
   final dynamic originalError;
 
-  @override
   String toString() => 'CloudinaryUploadException: $message';
 }

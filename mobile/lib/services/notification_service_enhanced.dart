@@ -3,7 +3,6 @@
 
 import 'dart:async';
 
-import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
 import 'package:hive_flutter/hive_flutter.dart';
 import 'package:nostr_sdk/event.dart';
@@ -15,7 +14,8 @@ import 'package:openvine/services/video_event_service.dart';
 import 'package:openvine/utils/unified_logger.dart';
 
 /// Enhanced notification service with social features
-class NotificationServiceEnhanced extends ChangeNotifier {
+/// REFACTORED: Removed ChangeNotifier - now uses pure state management via Riverpod
+class NotificationServiceEnhanced  {
   /// Factory constructor that returns the singleton instance
   factory NotificationServiceEnhanced() => instance;
 
@@ -386,7 +386,7 @@ class NotificationServiceEnhanced extends ChangeNotifier {
       _notifications.removeRange(100, _notifications.length);
     }
 
-    notifyListeners();
+
   }
 
   /// Mark notification as read
@@ -396,7 +396,7 @@ class NotificationServiceEnhanced extends ChangeNotifier {
       _notifications[index] = _notifications[index].copyWith(isRead: true);
       _updateUnreadCount();
       await _saveNotificationToCache(_notifications[index]);
-      notifyListeners();
+
     }
   }
 
@@ -409,7 +409,7 @@ class NotificationServiceEnhanced extends ChangeNotifier {
       }
     }
     _updateUnreadCount();
-    notifyListeners();
+
   }
 
   /// Handle notification tap/click for navigation
@@ -520,7 +520,7 @@ class NotificationServiceEnhanced extends ChangeNotifier {
     // Clear cache
     await _notificationBox?.clear();
 
-    notifyListeners();
+
     Log.debug('📱️ Cleared all notifications',
         name: 'NotificationServiceEnhanced', category: LogCategory.system);
   }
@@ -550,13 +550,12 @@ class NotificationServiceEnhanced extends ChangeNotifier {
     final removedCount = initialCount - _notifications.length;
     if (removedCount > 0) {
       _updateUnreadCount();
-      notifyListeners();
+
       Log.debug('📱️ Cleared $removedCount old notifications',
           name: 'NotificationServiceEnhanced', category: LogCategory.system);
     }
   }
 
-  @override
   void dispose() {
     if (_disposed) return;
 
@@ -574,7 +573,7 @@ class NotificationServiceEnhanced extends ChangeNotifier {
     // Close Hive box
     _notificationBox?.close();
 
-    super.dispose();
+    
   }
 
   /// Check if this service is still mounted/active

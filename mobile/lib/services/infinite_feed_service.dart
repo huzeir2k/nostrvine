@@ -5,7 +5,6 @@ import 'dart:async';
 import 'dart:convert';
 import 'dart:math';
 
-import 'package:flutter/foundation.dart';
 import 'package:http/http.dart' as http;
 import 'package:nostr_sdk/filter.dart';
 import 'package:openvine/models/feed_type.dart';
@@ -15,7 +14,8 @@ import 'package:openvine/services/video_event_service.dart';
 import 'package:openvine/utils/unified_logger.dart';
 
 /// Service for infinite scroll video feeds
-class InfiniteFeedService extends ChangeNotifier {
+/// REFACTORED: Removed ChangeNotifier - now uses pure state management via Riverpod
+class InfiniteFeedService  {
   InfiniteFeedService({
     required INostrService nostrService,
     required VideoEventService videoEventService,
@@ -69,7 +69,7 @@ class InfiniteFeedService extends ChangeNotifier {
     }
 
     _isLoading[feedType] = true;
-    notifyListeners();
+
 
     try {
       List<VideoEvent> newVideos = [];
@@ -119,7 +119,7 @@ class InfiniteFeedService extends ChangeNotifier {
           name: 'InfiniteFeedService', category: LogCategory.system);
     } finally {
       _isLoading[feedType] = false;
-      notifyListeners();
+
     }
   }
 
@@ -304,9 +304,8 @@ class InfiniteFeedService extends ChangeNotifier {
     await loadMoreContent(feedType);
   }
 
-  @override
   void dispose() {
     _httpClient.close();
-    super.dispose();
+    
   }
 }

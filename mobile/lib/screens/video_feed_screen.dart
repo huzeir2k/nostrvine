@@ -54,7 +54,6 @@ class VideoFeedScreen extends ConsumerStatefulWidget {
   final FeedContext context;
   final String? contextValue;
 
-  @override
   ConsumerState<VideoFeedScreen> createState() => _VideoFeedScreenState();
 
   /// Static method to pause videos - called from external components
@@ -97,10 +96,8 @@ class _VideoFeedScreenState extends ConsumerState<VideoFeedScreen>
   int _currentIndex = 0;
   bool _isRefreshing = false; // Track if feed is currently refreshing
 
-  @override
   bool get wantKeepAlive => true; // Keep state alive when using IndexedStack
 
-  @override
   void initState() {
     super.initState();
     _pageController = PageController();
@@ -112,7 +109,6 @@ class _VideoFeedScreenState extends ConsumerState<VideoFeedScreen>
     });
   }
 
-  @override
   void dispose() {
     WidgetsBinding.instance.removeObserver(this);
     _pageController.dispose();
@@ -120,10 +116,10 @@ class _VideoFeedScreenState extends ConsumerState<VideoFeedScreen>
     // Pause all videos when screen is disposed
     _pauseAllVideos();
 
+    
     super.dispose();
   }
 
-  @override
   void didChangeAppLifecycleState(AppLifecycleState state) {
     super.didChangeAppLifecycleState(state);
 
@@ -348,7 +344,6 @@ class _VideoFeedScreenState extends ConsumerState<VideoFeedScreen>
     }
   }
 
-  @override
   Widget build(BuildContext context) {
     super.build(context); // Required for AutomaticKeepAliveClientMixin
     return Scaffold(
@@ -903,7 +898,6 @@ class VideoErrorWidget extends StatelessWidget {
   final VoidCallback? onRetry;
   final VoidCallback? onGoBack;
 
-  @override
   Widget build(BuildContext context) => ColoredBox(
         color: Colors.black,
         child: Center(

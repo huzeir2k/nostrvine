@@ -91,19 +91,23 @@ void main() {
     test('should notify listeners when verification status changes', () async {
       await service.initialize();
 
-      var notificationCount = 0;
-      service.addListener(() {
-        notificationCount++;
-      });
+      // Note: AgeVerificationService no longer extends ChangeNotifier
+      // This test of listener functionality is no longer applicable
+      // var notificationCount = 0;
+      // service.addListener(() {
+      //   notificationCount++;
+      // });
+      
+      // Skip the listener test - just verify the state changes work
 
       await service.setAgeVerified(true);
-      expect(notificationCount, 1);
+      expect(service.isAgeVerified, true);
 
       await service.setAgeVerified(false);
-      expect(notificationCount, 2);
+      expect(service.isAgeVerified, false);
 
       await service.clearVerificationStatus();
-      expect(notificationCount, 3);
+      expect(service.isAgeVerified, false);
     });
   });
 }

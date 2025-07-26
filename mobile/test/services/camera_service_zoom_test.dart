@@ -68,6 +68,9 @@ void main() {
     });
 
     group('Zoom State Notifications', () {
+      // Note: CameraService no longer extends ChangeNotifier after refactor
+      // Listener tests are no longer applicable
+      /*
       test('should notify listeners when zoom level changes', () async {
         bool notificationReceived = false;
         cameraService.addListener(() {
@@ -77,6 +80,7 @@ void main() {
         await cameraService.setZoomLevel(2.0);
         expect(notificationReceived, isTrue);
       });
+      */
 
       test('should provide zoom change stream', () async {
         final zoomChanges = <double>[];

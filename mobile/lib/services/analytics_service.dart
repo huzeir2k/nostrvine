@@ -1,10 +1,9 @@
 // ABOUTME: Analytics service for tracking video views with user opt-out support
-// ABOUTME: Sends anonymous view data to OpenVine analytics backend when enabled
+import 'package:flutter/foundation.dart';// ABOUTME: Sends anonymous view data to OpenVine analytics backend when enabled
 
 import 'dart:async';
 import 'dart:convert';
 
-import 'package:flutter/foundation.dart';
 import 'package:http/http.dart' as http;
 import 'package:openvine/models/video_event.dart';
 import 'package:openvine/services/background_activity_manager.dart';
@@ -13,7 +12,8 @@ import 'package:openvine/utils/unified_logger.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 /// Service for tracking video analytics with privacy controls
-class AnalyticsService extends ChangeNotifier implements BackgroundAwareService {
+/// REFACTORED: Removed ChangeNotifier - now uses pure state management via Riverpod
+class AnalyticsService  implements BackgroundAwareService {
   AnalyticsService({http.Client? client}) : _client = client ?? http.Client();
   static const String _analyticsEndpoint =
       'https://analytics.openvine.co/analytics/view';
@@ -59,7 +59,7 @@ class AnalyticsService extends ChangeNotifier implements BackgroundAwareService 
 
       Log.info('Analytics service initialized (enabled: $_analyticsEnabled)',
           name: 'AnalyticsService', category: LogCategory.system);
-      notifyListeners();
+
     } catch (e) {
       Log.error('Failed to initialize analytics service: $e',
           name: 'AnalyticsService', category: LogCategory.system);
@@ -81,7 +81,7 @@ class AnalyticsService extends ChangeNotifier implements BackgroundAwareService 
       await prefs.setBool(_analyticsEnabledKey, enabled);
 
       debugPrint('📊 Analytics ${enabled ? 'enabled' : 'disabled'} by user');
-      notifyListeners();
+
     } catch (e) {
       Log.error('Failed to save analytics preference: $e',
           name: 'AnalyticsService', category: LogCategory.system);
@@ -323,6 +323,6 @@ class AnalyticsService extends ChangeNotifier implements BackgroundAwareService 
   void dispose() {
     _cleanupTimer?.cancel();
     _client.close();
-    super.dispose();
+    
   }
 }

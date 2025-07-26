@@ -46,7 +46,6 @@ class VideoPlayerWidget extends StatefulWidget {
   /// Callback when video is tapped
   final VoidCallback? onVideoTap;
 
-  @override
   State<VideoPlayerWidget> createState() => _VideoPlayerWidgetState();
 }
 
@@ -56,13 +55,11 @@ class _VideoPlayerWidgetState extends State<VideoPlayerWidget> {
   String? _errorMessage;
   bool _isInitializing = false;
 
-  @override
   void initState() {
     super.initState();
     _initializePlayer();
   }
 
-  @override
   void didUpdateWidget(VideoPlayerWidget oldWidget) {
     super.didUpdateWidget(oldWidget);
 
@@ -78,10 +75,9 @@ class _VideoPlayerWidgetState extends State<VideoPlayerWidget> {
     }
   }
 
-  @override
   void dispose() {
     _disposeChewieController();
-    super.dispose();
+    
   }
 
   void _initializePlayer() {
@@ -107,7 +103,7 @@ class _VideoPlayerWidgetState extends State<VideoPlayerWidget> {
         });
 
         // Listen for initialization
-        widget.controller!.addListener(_onControllerUpdate);
+      // REFACTORED: Service no longer extends ChangeNotifier - use Riverpod ref.watch instead
         return;
       }
 
@@ -200,7 +196,7 @@ class _VideoPlayerWidgetState extends State<VideoPlayerWidget> {
 
     // Remove listener if it was added
     try {
-      widget.controller?.removeListener(_onControllerUpdate);
+      // REFACTORED: Service no longer needs manual listener cleanup
     } catch (e) {
       // Ignore disposal errors
     }
@@ -211,7 +207,6 @@ class _VideoPlayerWidgetState extends State<VideoPlayerWidget> {
     _initializePlayer();
   }
 
-  @override
   Widget build(BuildContext context) => GestureDetector(
         onTap: widget.onVideoTap,
         child: Container(

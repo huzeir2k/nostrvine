@@ -11,7 +11,6 @@ import 'package:openvine/utils/unified_logger.dart';
 class WebAuthScreen extends ConsumerStatefulWidget {
   const WebAuthScreen({super.key});
 
-  @override
   ConsumerState<WebAuthScreen> createState() => _WebAuthScreenState();
 }
 
@@ -24,7 +23,6 @@ class _WebAuthScreenState extends ConsumerState<WebAuthScreen>
   late AnimationController _fadeController;
   late Animation<double> _fadeAnimation;
 
-  @override
   void initState() {
     super.initState();
 
@@ -45,10 +43,10 @@ class _WebAuthScreenState extends ConsumerState<WebAuthScreen>
     });
   }
 
-  @override
   void dispose() {
     _bunkerUriController.dispose();
     _fadeController.dispose();
+    
     super.dispose();
   }
 
@@ -183,7 +181,6 @@ class _WebAuthScreenState extends ConsumerState<WebAuthScreen>
     }
   }
 
-  @override
   Widget build(BuildContext context) => Scaffold(
         backgroundColor: Colors.black,
         body: Consumer(

@@ -4,15 +4,14 @@
 
 // ignore_for_file: no_leading_underscores_for_library_prefixes
 import 'dart:async' as _i3;
-import 'dart:ui' as _i5;
 
 import 'package:mockito/mockito.dart' as _i1;
 import 'package:nostr_sdk/event.dart' as _i4;
-import 'package:openvine/models/video_event.dart' as _i7;
-import 'package:openvine/models/video_state.dart' as _i8;
+import 'package:openvine/models/video_event.dart' as _i6;
+import 'package:openvine/models/video_state.dart' as _i7;
 import 'package:openvine/services/social_service.dart' as _i2;
-import 'package:openvine/services/video_manager_interface.dart' as _i6;
-import 'package:video_player/video_player.dart' as _i9;
+import 'package:openvine/services/video_manager_interface.dart' as _i5;
+import 'package:video_player/video_player.dart' as _i8;
 
 // ignore_for_file: type=lint
 // ignore_for_file: avoid_redundant_argument_values
@@ -47,12 +46,6 @@ class MockSocialService extends _i1.Mock implements _i2.SocialService {
         Invocation.getter(#followingPubkeys),
         returnValue: <String>[],
       ) as List<String>);
-
-  @override
-  bool get hasListeners => (super.noSuchMethod(
-        Invocation.getter(#hasListeners),
-        returnValue: false,
-      ) as bool);
 
   @override
   bool isLiked(String? eventId) => (super.noSuchMethod(
@@ -274,54 +267,27 @@ class MockSocialService extends _i1.Mock implements _i2.SocialService {
         ),
         returnValueForMissingStub: null,
       );
-
-  @override
-  void addListener(_i5.VoidCallback? listener) => super.noSuchMethod(
-        Invocation.method(
-          #addListener,
-          [listener],
-        ),
-        returnValueForMissingStub: null,
-      );
-
-  @override
-  void removeListener(_i5.VoidCallback? listener) => super.noSuchMethod(
-        Invocation.method(
-          #removeListener,
-          [listener],
-        ),
-        returnValueForMissingStub: null,
-      );
-
-  @override
-  void notifyListeners() => super.noSuchMethod(
-        Invocation.method(
-          #notifyListeners,
-          [],
-        ),
-        returnValueForMissingStub: null,
-      );
 }
 
 /// A class which mocks [IVideoManager].
 ///
 /// See the documentation for Mockito's code generation for more information.
-class MockIVideoManager extends _i1.Mock implements _i6.IVideoManager {
+class MockIVideoManager extends _i1.Mock implements _i5.IVideoManager {
   MockIVideoManager() {
     _i1.throwOnMissingStub(this);
   }
 
   @override
-  List<_i7.VideoEvent> get videos => (super.noSuchMethod(
+  List<_i6.VideoEvent> get videos => (super.noSuchMethod(
         Invocation.getter(#videos),
-        returnValue: <_i7.VideoEvent>[],
-      ) as List<_i7.VideoEvent>);
+        returnValue: <_i6.VideoEvent>[],
+      ) as List<_i6.VideoEvent>);
 
   @override
-  List<_i7.VideoEvent> get readyVideos => (super.noSuchMethod(
+  List<_i6.VideoEvent> get readyVideos => (super.noSuchMethod(
         Invocation.getter(#readyVideos),
-        returnValue: <_i7.VideoEvent>[],
-      ) as List<_i7.VideoEvent>);
+        returnValue: <_i6.VideoEvent>[],
+      ) as List<_i6.VideoEvent>);
 
   @override
   int get primaryVideoCount => (super.noSuchMethod(
@@ -342,21 +308,21 @@ class MockIVideoManager extends _i1.Mock implements _i6.IVideoManager {
       ) as _i3.Stream<void>);
 
   @override
-  _i8.VideoState? getVideoState(String? videoId) =>
+  _i7.VideoState? getVideoState(String? videoId) =>
       (super.noSuchMethod(Invocation.method(
         #getVideoState,
         [videoId],
-      )) as _i8.VideoState?);
+      )) as _i7.VideoState?);
 
   @override
-  _i9.VideoPlayerController? getController(String? videoId) =>
+  _i8.VideoPlayerController? getController(String? videoId) =>
       (super.noSuchMethod(Invocation.method(
         #getController,
         [videoId],
-      )) as _i9.VideoPlayerController?);
+      )) as _i8.VideoPlayerController?);
 
   @override
-  _i3.Future<void> addVideoEvent(_i7.VideoEvent? event) => (super.noSuchMethod(
+  _i3.Future<void> addVideoEvent(_i6.VideoEvent? event) => (super.noSuchMethod(
         Invocation.method(
           #addVideoEvent,
           [event],

@@ -26,7 +26,7 @@ void main() {
 
     setUp(() {
       mockNostrService = MockINostrService();
-      mockSubscriptionManager = MockSubscriptionManager();
+      mockSubscriptionManager = MockSubscriptionManager(TestNostrService());
       eventStreamController = StreamController<Event>.broadcast();
 
       // Setup default mock behaviors
