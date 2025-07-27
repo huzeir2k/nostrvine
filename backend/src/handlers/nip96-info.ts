@@ -113,6 +113,89 @@ export function isSupportedContentType(contentType: string): boolean {
 }
 
 /**
+ * Get file extension from URL pathname
+ */
+export function getFileExtension(url: string): string {
+  try {
+    const parsedUrl = new URL(url);
+    const pathname = parsedUrl.pathname;
+    const lastDotIndex = pathname.lastIndexOf('.');
+    
+    if (lastDotIndex === -1) {
+      return '';
+    }
+    
+    return pathname.slice(lastDotIndex).toLowerCase();
+  } catch {
+    return '';
+  }
+}
+
+/**
+ * Check if file extension is supported for video content
+ */
+export function isSupportedVideoExtension(extension: string): boolean {
+  const supportedExtensions = [
+    '.mp4', '.webm', '.mov', '.avi', '.quicktime'
+  ];
+  
+  return supportedExtensions.includes(extension.toLowerCase());
+}
+
+/**
+ * Check if URL is from a trusted Google Cloud Storage domain
+ */
+export function isGoogleCloudStorageUrl(url: string): boolean {
+  try {
+    const parsedUrl = new URL(url);
+    const trustedGCSDomains = [
+      'storage.googleapis.com',
+      'storage.cloud.google.com'
+    ];
+    
+    return trustedGCSDomains.includes(parsedUrl.hostname);
+  } catch {
+    return false;
+  }
+}
+
+/**
+ * Enhanced content type validation that handles GCS MIME type issues
+ * Validates based on content type header AND file extension for trusted sources
+ */
+export function isValidVideoContent(url: string, contentType: string): boolean {
+  // First, try standard content type validation
+  if (isSupportedContentType(contentType)) {
+    return true;
+  }
+  
+  // Handle Google Cloud Storage URLs with incorrect MIME types
+  if (isGoogleCloudStorageUrl(url)) {
+    const extension = getFileExtension(url);
+    
+    // For GCS URLs, allow application/octet-stream or application/binary 
+    // if the file extension indicates it's a video
+    if ((contentType === 'application/octet-stream' || 
+         contentType === 'application/binary' ||
+         contentType === 'application/octet-stream; charset=utf-8') && 
+        isSupportedVideoExtension(extension)) {
+      console.log(`🔧 GCS MIME type override: ${url} (${contentType} -> video based on ${extension})`);
+      return true;
+    }
+  }
+  
+  // For other URLs, check if it has a valid video extension
+  // This handles cases where servers return generic MIME types
+  const extension = getFileExtension(url);
+  if (isSupportedVideoExtension(extension)) {
+    console.log(`🔧 Extension-based validation: ${url} (${contentType} -> video based on ${extension})`);
+    return true;
+  }
+  
+  return false;
+}
+
+/**
  * Get max file size for user plan
  */
 export function getMaxFileSize(plan: string = 'free'): number {

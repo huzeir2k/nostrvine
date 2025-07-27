@@ -15,6 +15,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - NIP-98 authentication required
   - Returns NIP-94 event data compatible with existing upload flow
 
+### Fixed
+- **GCS MIME Type Issue**: URL import now handles Google Cloud Storage files with incorrect MIME types
+  - Accepts `application/octet-stream` and `application/binary` for GCS domains when file extension indicates video
+  - Enhanced content type validation with extension-based fallback for trusted sources
+  - Automatic content type correction during processing (e.g., octet-stream → video/mp4)
+  - Addresses issue where Vine archive videos were rejected due to missing Content-Type metadata
+
 ### Changed
 - Video dimensions now correctly set to 640x640 for square Vine format
 - Thumbnail generation creates square thumbnails (320x320, 640x640, 1280x1280)

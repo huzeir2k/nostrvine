@@ -9,7 +9,9 @@ import {
 } from '../types/nip96';
 import { 
   isSupportedContentType, 
-  getMaxFileSize
+  getMaxFileSize,
+  isValidVideoContent,
+  getFileExtension
 } from './nip96-info';
 import { 
   calculateSHA256
@@ -104,12 +106,19 @@ export async function handleURLImport(
 
     // Get content type from response
     const contentType = fetchResponse.headers.get('content-type') || 'video/mp4';
-    if (!isSupportedContentType(contentType)) {
+    console.log(`📋 Content-Type header: ${contentType} for ${videoUrl.href}`);
+    
+    // Enhanced validation that handles GCS MIME type issues
+    if (!isValidVideoContent(videoUrl.href, contentType)) {
+      const extension = getFileExtension(videoUrl.href);
+      console.log(`❌ Content validation failed: ${contentType} not supported for ${videoUrl.href} (extension: ${extension})`);
       return createErrorResponse(
         NIP96ErrorCode.INVALID_FILE_TYPE,
-        `Content type ${contentType} not supported`
+        `Content type ${contentType} not supported for URL ${videoUrl.href} (extension: ${extension})`
       );
     }
+    
+    console.log(`✅ Content validation passed for ${videoUrl.href}`);
 
     // Get content length
     const contentLength = fetchResponse.headers.get('content-length');
@@ -132,6 +141,21 @@ export async function handleURLImport(
 
     // Download video data
     const fileData = await fetchResponse.arrayBuffer();
+    
+    // If content type was generic but we validated based on extension, 
+    // use proper MIME type for processing
+    let actualContentType = contentType;
+    if (contentType === 'application/octet-stream' || contentType === 'application/binary') {
+      const extension = getFileExtension(videoUrl.href);
+      if (extension === '.mp4') {
+        actualContentType = 'video/mp4';
+      } else if (extension === '.webm') {
+        actualContentType = 'video/webm';
+      } else if (extension === '.mov') {
+        actualContentType = 'video/quicktime';
+      }
+      console.log(`🔧 Content type corrected: ${contentType} -> ${actualContentType} for ${videoUrl.href}`);
+    }
     
     // Validate actual size after download
     const actualSize = fileData.byteLength;
@@ -167,7 +191,7 @@ export async function handleURLImport(
               ['url', mediaUrl],
               ['x', sha256Hash],
               ['size', actualSize.toString()],
-              ['m', contentType],
+              ['m', actualContentType],
               ['dim', '640x640'], // Vines are square
               ['alt', importRequest.alt || `Video imported from ${videoUrl.hostname}`]
             ],
@@ -198,7 +222,7 @@ export async function handleURLImport(
       const cloudinaryResponse = await uploadToCloudinary(
         fileData,
         filename,
-        contentType,
+        actualContentType,
         authResult.pubkey,
         env
       );
@@ -209,7 +233,7 @@ export async function handleURLImport(
           const metadata: FileMetadata = {
             id: fileId,
             filename: filename,
-            content_type: contentType,
+            content_type: actualContentType,
             size: actualSize,
             sha256: sha256Hash,
             uploaded_at: Date.now(),
@@ -228,11 +252,11 @@ export async function handleURLImport(
       } else {
         // Fallback to R2 if Cloudinary fails
         console.warn('Cloudinary upload failed, falling back to R2');
-        mediaUrl = await storeInR2(fileData, fileId, filename, contentType, sha256Hash, videoUrl.href, authResult.pubkey, env, request);
+        mediaUrl = await storeInR2(fileData, fileId, filename, actualContentType, sha256Hash, videoUrl.href, authResult.pubkey, env, request);
       }
     } else {
       // Direct R2 storage
-      mediaUrl = await storeInR2(fileData, fileId, filename, contentType, sha256Hash, videoUrl.href, authResult.pubkey, env, request);
+      mediaUrl = await storeInR2(fileData, fileId, filename, actualContentType, sha256Hash, videoUrl.href, authResult.pubkey, env, request);
     }
 
     // Trigger thumbnail generation in the background
@@ -251,7 +275,7 @@ export async function handleURLImport(
           ['url', mediaUrl],
           ['x', sha256Hash],
           ['size', actualSize.toString()],
-          ['m', contentType],
+          ['m', actualContentType],
           ['dim', '640x640'], // Vines are square
           ['alt', importRequest.alt || `Video imported from ${videoUrl.hostname}`]
         ],
