@@ -33,23 +33,25 @@ class VideoExploreTile extends ConsumerWidget {
           debugPrint('🎯 VideoExploreTile tapped for video ${video.id.substring(0, 8)}...');
           onTap?.call();
         },
-        child: DecoratedBox(
-          decoration: BoxDecoration(
-            color: Colors.black,
-            borderRadius: BorderRadius.circular(8),
-          ),
-          child: ClipRRect(
-            borderRadius: BorderRadius.circular(8),
-            child: Stack(
-              fit: StackFit.expand,
-              children: [
-                // Smart thumbnail with automatic API generation
-                VideoThumbnailWidget(
-                  video: video,
-                  fit: BoxFit.cover,
-                  showPlayIcon: false,
-                  borderRadius: BorderRadius.circular(8),
-                ),
+        child: AspectRatio(
+          aspectRatio: 1.0, // Ensure square aspect ratio matching videos
+          child: DecoratedBox(
+            decoration: BoxDecoration(
+              color: Colors.black,
+              borderRadius: BorderRadius.circular(8),
+            ),
+            child: ClipRRect(
+              borderRadius: BorderRadius.circular(8),
+              child: Stack(
+                fit: StackFit.expand,
+                children: [
+                  // Smart thumbnail with automatic API generation
+                  VideoThumbnailWidget(
+                    video: video,
+                    fit: BoxFit.cover,
+                    showPlayIcon: false,
+                    borderRadius: BorderRadius.circular(8),
+                  ),
 
                 // Video info overlay
                 Positioned(
@@ -110,7 +112,8 @@ class VideoExploreTile extends ConsumerWidget {
             ),
           ),
         ),
-      );
+      ),
+    );
 
   Widget _buildCreatorInfo(WidgetRef ref) {
     final profileService = ref.watch(userProfileServiceProvider);

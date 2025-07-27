@@ -1091,9 +1091,11 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen>
                   );
                 }
 
-                return GestureDetector(
-                  onTap: () => _openVine(videoEvent),
-                  child: DecoratedBox(
+                return AspectRatio(
+                  aspectRatio: 1.0, // Ensure square thumbnails matching video display
+                  child: GestureDetector(
+                    onTap: () => _openVine(videoEvent),
+                    child: DecoratedBox(
                     decoration: BoxDecoration(
                       color: VineTheme.cardBackground,
                       borderRadius: BorderRadius.circular(4),
@@ -1210,7 +1212,8 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen>
                       ],
                     ),
                   ),
-                );
+                ),
+              );
               },
             ),
           );
@@ -1326,15 +1329,17 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen>
                   crossAxisCount: 3,
                   crossAxisSpacing: 2,
                   mainAxisSpacing: 2,
-                  childAspectRatio: 0.7,
+                  childAspectRatio: 1.0, // Square aspect ratio matching video display
                 ),
                 itemCount: videoEvents.length,
                 itemBuilder: (context, index) {
                   final videoEvent = videoEvents[index];
 
-                  return GestureDetector(
-                    onTap: () => _openLikedVideo(videoEvent),
-                    child: DecoratedBox(
+                  return AspectRatio(
+                    aspectRatio: 1.0, // Ensure square thumbnails matching video display
+                    child: GestureDetector(
+                      onTap: () => _openLikedVideo(videoEvent),
+                      child: DecoratedBox(
                       decoration: BoxDecoration(
                         color: Colors.grey[800],
                         borderRadius: BorderRadius.circular(4),
@@ -1402,7 +1407,8 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen>
                         ],
                       ),
                     ),
-                  );
+                  ),
+                );
                 },
               );
             },
@@ -1465,15 +1471,17 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen>
               crossAxisCount: 3,
               crossAxisSpacing: 2,
               mainAxisSpacing: 2,
-              childAspectRatio: 0.7,
+              childAspectRatio: 1.0, // Square aspect ratio matching video display
             ),
             itemCount: userReposts.length,
             itemBuilder: (context, index) {
               final videoEvent = userReposts[index];
 
-              return GestureDetector(
-                onTap: () => _openVine(videoEvent),
-                child: DecoratedBox(
+              return AspectRatio(
+                aspectRatio: 1.0, // Ensure square thumbnails matching video display
+                child: GestureDetector(
+                  onTap: () => _openVine(videoEvent),
+                  child: DecoratedBox(
                   decoration: BoxDecoration(
                     color: VineTheme.cardBackground,
                     borderRadius: BorderRadius.circular(4),
@@ -1602,7 +1610,8 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen>
                     ],
                   ),
                 ),
-              );
+              ),
+            );
             },
           );
   }

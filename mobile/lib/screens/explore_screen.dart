@@ -98,6 +98,14 @@ class ExploreScreenState extends ConsumerState<ExploreScreen>
     Log.debug('🔄 Tab tapped: index=$index, current=${_tabController.index}, isInFeedMode=$_isInFeedMode',
         name: 'ExploreScreen', category: LogCategory.ui);
     
+    // Always pause videos when tapping any tab (whether switching or not)
+    final exploreVideoManager = ref.read(exploreVideoManagerProvider);
+    exploreVideoManager.pauseAllVideos();
+    
+    // Also pause all videos through the main VideoManager
+    final videoManager = ref.read(videoManagerProvider.notifier);
+    videoManager.pauseAllVideos();
+    
     // Check if tapping on the already selected tab
     if (index == _tabController.index) {
       // If we're in feed mode, exit to grid mode
@@ -173,6 +181,14 @@ class ExploreScreenState extends ConsumerState<ExploreScreen>
 
   /// Exit feed mode and return to grid view
   void _exitFeedMode() {
+    // Pause any playing videos when exiting feed mode
+    final exploreVideoManager = ref.read(exploreVideoManagerProvider);
+    exploreVideoManager.pauseAllVideos();
+    
+    // Also pause all videos through the main VideoManager
+    final videoManager = ref.read(videoManagerProvider.notifier);
+    videoManager.pauseAllVideos();
+    
     setState(() {
       _isInFeedMode = false;
       _playingVideoId = null;

@@ -196,7 +196,11 @@ class _ExploreVideoFeedScreenState extends ConsumerState<ExploreVideoFeedScreen>
           elevation: 0,
           leading: IconButton(
             icon: const Icon(Icons.arrow_back, color: Colors.white),
-            onPressed: () => Navigator.of(context).pop(),
+            onPressed: () {
+              // Pause videos before navigating back
+              _pauseAllVideos();
+              Navigator.of(context).pop();
+            },
           ),
           title: Text(
             widget.title,
