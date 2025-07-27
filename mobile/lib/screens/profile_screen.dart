@@ -356,14 +356,21 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen>
                       ),
                     ),
                   ],
-                  body: TabBarView(
-                    key: ValueKey('tab_view_${_targetPubkey ?? 'unknown'}'),
-                    controller: _tabController,
-                    children: [
-                      _buildVinesGrid(),
-                      _buildLikedGrid(),
-                      _buildRepostsGrid(),
-                    ],
+                  body: MediaQuery.removePadding(
+                    context: context,
+                    removeTop: true,
+                    removeBottom: true,
+                    removeLeft: true,
+                    removeRight: true,
+                    child: TabBarView(
+                      key: ValueKey('tab_view_${_targetPubkey ?? 'unknown'}'),
+                      controller: _tabController,
+                      children: [
+                        _buildVinesGrid(),
+                        _buildLikedGrid(),
+                        _buildRepostsGrid(),
+                      ],
+                    ),
                   ),
                 ),
 
@@ -881,8 +888,11 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen>
         ),
       );
 
-  Widget _buildVinesGrid() => Consumer(
-        builder: (context, ref, child) {
+  Widget _buildVinesGrid() => Container(
+        margin: EdgeInsets.zero,
+        padding: EdgeInsets.zero,
+        child: Consumer(
+          builder: (context, ref, child) {
           final profileVideosState = ref.watch(profileVideosNotifierProvider);
           Log.error(
               '📱 ProfileVideosProvider state: loading=${profileVideosState.isLoading}, hasVideos=${profileVideosState.hasVideos}, hasError=${profileVideosState.hasError}, videoCount=${profileVideosState.videoCount}',
@@ -894,7 +904,7 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen>
               profileVideosState.videoCount == 0) {
             return Center(
               child: GridView.builder(
-                padding: const EdgeInsets.all(1),
+                padding: EdgeInsets.zero,
                 gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
                   crossAxisCount: 3,
                   childAspectRatio: 1,
@@ -1217,12 +1227,17 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen>
               },
             ),
           );
-        },
+          },
+        ),
       );
 
-  Widget _buildLikedGrid() {
-    // Watch Riverpod providers directly
-    final socialService = ref.watch(socialServiceProvider);
+  Widget _buildLikedGrid() => Container(
+        margin: EdgeInsets.zero,
+        padding: EdgeInsets.zero,
+        child: Builder(
+          builder: (context) {
+            // Watch Riverpod providers directly
+            final socialService = ref.watch(socialServiceProvider);
 
     if (_targetPubkey == null) {
       return const Center(
@@ -1413,11 +1428,17 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen>
               );
             },
           );
-  }
+          },
+        ),
+      );
 
-  Widget _buildRepostsGrid() {
-    // Watch Riverpod providers directly
-    final videoEventService = ref.watch(videoEventServiceProvider);
+  Widget _buildRepostsGrid() => Container(
+        margin: EdgeInsets.zero,
+        padding: EdgeInsets.zero,
+        child: Builder(
+          builder: (context) {
+            // Watch Riverpod providers directly
+            final videoEventService = ref.watch(videoEventServiceProvider);
 
     if (_targetPubkey == null) {
       return const Center(
@@ -1614,7 +1635,9 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen>
             );
             },
           );
-  }
+          },
+        ),
+      );
 
   void _createNewVine() {
     // Navigate to universal camera screen for recording a new vine
