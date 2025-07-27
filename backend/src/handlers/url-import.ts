@@ -228,24 +228,10 @@ export async function handleURLImport(
       );
 
       if (cloudinaryResponse.success && cloudinaryResponse.url) {
-        // Store minimal metadata pointing to Cloudinary
+        // Store SHA256 mapping for deduplication
         if (env.METADATA_CACHE) {
-          const metadata: FileMetadata = {
-            id: fileId,
-            filename: filename,
-            content_type: actualContentType,
-            size: actualSize,
-            sha256: sha256Hash,
-            uploaded_at: Date.now(),
-            uploader_pubkey: authResult.pubkey,
-            url: cloudinaryResponse.url,
-            dimensions: `${cloudinaryResponse.width || 640}x${cloudinaryResponse.height || 640}`,
-            moderation_status: 'pending'
-          };
-
           const metadataStore = new MetadataStore(env.METADATA_CACHE);
-          await metadataStore.setMetadata(fileId, metadata);
-          await metadataStore.setSha256Mapping(sha256Hash, fileId);
+          await metadataStore.setFileIdBySha256(sha256Hash, fileId);
         }
 
         mediaUrl = cloudinaryResponse.url;
@@ -368,23 +354,10 @@ async function storeInR2(
 
   console.log(`✅ Video stored in R2: ${r2Key}`);
 
-  // Store metadata
+  // Store SHA256 mapping for deduplication
   if (env.METADATA_CACHE) {
-    const metadata: FileMetadata = {
-      id: fileId,
-      filename: filename,
-      content_type: contentType,
-      size: fileData.byteLength,
-      sha256: sha256Hash,
-      uploaded_at: Date.now(),
-      uploader_pubkey: uploaderPubkey,
-      url: `${new URL(request.url).origin}/media/${fileId}`,
-      dimensions: '640x640' // Vines are square
-    };
-
     const metadataStore = new MetadataStore(env.METADATA_CACHE);
-    await metadataStore.setMetadata(fileId, metadata);
-    await metadataStore.setSha256Mapping(sha256Hash, fileId);
+    await metadataStore.setFileIdBySha256(sha256Hash, fileId);
   }
 
   return `${new URL(request.url).origin}/media/${fileId}`;

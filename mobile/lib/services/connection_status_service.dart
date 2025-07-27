@@ -18,6 +18,8 @@ class ConnectionStatusService {
 
   final Connectivity _connectivity = Connectivity();
   StreamSubscription<List<ConnectivityResult>>? _connectivitySubscription;
+  Timer? _periodicTimer;
+  bool _isInitialized = false;
 
   bool _isOnline = true;
   bool _hasInternetAccess = true;
@@ -48,6 +50,12 @@ class ConnectionStatusService {
 
   /// Initialize connection monitoring
   Future<void> initialize() async {
+    if (_isInitialized) {
+      Log.debug('⚠️ Connection status service already initialized, skipping...',
+          name: 'ConnectionStatusService', category: LogCategory.system);
+      return;
+    }
+
     try {
       Log.debug('🔧 Initializing connection status service...',
           name: 'ConnectionStatusService', category: LogCategory.system);
@@ -64,6 +72,7 @@ class ConnectionStatusService {
       // Start periodic internet access checks
       _startPeriodicChecks();
 
+      _isInitialized = true;
       Log.info('Connection status service initialized',
           name: 'ConnectionStatusService', category: LogCategory.system);
     } catch (e) {
@@ -182,8 +191,12 @@ class ConnectionStatusService {
             name: 'ConnectionStatusService', category: LogCategory.system);
       }
 
-      debugPrint(
-          '🌐 Internet access check: $hasAccess (platform: ${kIsWeb ? 'web' : 'native'})');
+      // Only log status changes, not every check to avoid spam
+      if (hasAccess != hadAccess) {
+        Log.debug(
+            '🌐 Internet access check: $hasAccess (platform: ${kIsWeb ? 'web' : 'native'})',
+            name: 'ConnectionStatusService', category: LogCategory.system);
+      }
     } catch (e) {
       Log.error('Error checking internet access: $e',
           name: 'ConnectionStatusService', category: LogCategory.system);
@@ -195,7 +208,10 @@ class ConnectionStatusService {
 
   /// Start periodic connectivity checks
   void _startPeriodicChecks() {
-    Timer.periodic(const Duration(seconds: 30), (timer) {
+    // Cancel any existing timer to prevent leaks
+    _periodicTimer?.cancel();
+    
+    _periodicTimer = Timer.periodic(const Duration(seconds: 30), (timer) {
       if (_isOnline) {
         _checkInternetAccess();
       }
@@ -254,7 +270,8 @@ class ConnectionStatusService {
 
   void dispose() {
     _connectivitySubscription?.cancel();
-    
+    _periodicTimer?.cancel();
+    _isInitialized = false;
   }
 }
 
