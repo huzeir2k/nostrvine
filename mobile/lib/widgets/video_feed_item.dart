@@ -2423,7 +2423,7 @@ class _RevineOptionsSheetState extends ConsumerState<_RevineOptionsSheet> {
                 // Add video to the newly created list
                 final success = await curatedListService.addVideoToList(newList.id, widget.video.id);
                 
-                if (success && context.mounted) {
+                if (success && mounted) {
                   ScaffoldMessenger.of(context).showSnackBar(
                     SnackBar(
                       content: Row(
@@ -2439,7 +2439,7 @@ class _RevineOptionsSheetState extends ConsumerState<_RevineOptionsSheet> {
                     ),
                   );
                 }
-              } else if (context.mounted) {
+              } else if (mounted) {
                 ScaffoldMessenger.of(context).showSnackBar(
                   const SnackBar(
                     content: Row(

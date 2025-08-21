@@ -6,7 +6,7 @@ part of 'latest_videos_provider.dart';
 // RiverpodGenerator
 // **************************************************************************
 
-String _$latestVideosHash() => r'6ae3258223c7e2e0ef8b97d8c6208d157b113d6f';
+String _$latestVideosHash() => r'4720f1bfae1af82216203b0e87bbc6a0fd14cd2a';
 
 /// Provider for the latest videos from the network
 ///

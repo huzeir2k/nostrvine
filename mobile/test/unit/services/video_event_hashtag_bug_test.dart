@@ -52,12 +52,12 @@ void main() {
       }
       
       // Print debug info
-      print('Event lists:');
+      UnifiedLogger.info('Event lists:');
       eventLists.forEach((key, value) {
-        print('  $key: ${value.length} videos');
+        UnifiedLogger.info('  $key: ${value.length} videos');
       });
-      print('Result count: ${result.length}');
-      print('Result IDs: ${result.map((v) => v.id).toList()}');
+      UnifiedLogger.info('Result count: ${result.length}');
+      UnifiedLogger.info('Result IDs: ${result.map((v) => v.id).toList()}');
       
       // BUG DEMONSTRATION: This will show 2 instead of 1
       expect(result.length, equals(2), 

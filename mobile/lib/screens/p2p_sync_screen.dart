@@ -102,7 +102,7 @@ class _P2PSyncScreenState extends ConsumerState<P2PSyncScreen> {
                   decoration: BoxDecoration(
                     color: status.isEnabled
                         ? Theme.of(context).colorScheme.primaryContainer
-                        : Theme.of(context).colorScheme.surfaceVariant,
+                        : Theme.of(context).colorScheme.surfaceContainerHighest,
                     borderRadius: BorderRadius.circular(12),
                   ),
                   child: Text(
@@ -313,7 +313,7 @@ class _P2PSyncScreenState extends ConsumerState<P2PSyncScreen> {
       margin: const EdgeInsets.only(bottom: 8),
       child: ListTile(
         leading: CircleAvatar(
-          backgroundColor: transportColor.withOpacity(0.1),
+          backgroundColor: transportColor.withValues(alpha: 0.1),
           child: Icon(
             transportIcon,
             color: transportColor,
@@ -361,6 +361,8 @@ class _P2PSyncScreenState extends ConsumerState<P2PSyncScreen> {
 
   Future<void> _connectToPeer(P2PPeer peer, P2PActions actions) async {
     final messenger = ScaffoldMessenger.of(context);
+    final primaryColor = Theme.of(context).colorScheme.primary;
+    final errorColor = Theme.of(context).colorScheme.error;
     
     try {
       final success = await actions.connectToPeer(peer);
@@ -369,7 +371,7 @@ class _P2PSyncScreenState extends ConsumerState<P2PSyncScreen> {
         messenger.showSnackBar(
           SnackBar(
             content: Text('Connected to ${peer.name}'),
-            backgroundColor: Theme.of(context).colorScheme.primary,
+            backgroundColor: primaryColor,
           ),
         );
         
@@ -385,7 +387,7 @@ class _P2PSyncScreenState extends ConsumerState<P2PSyncScreen> {
         messenger.showSnackBar(
           SnackBar(
             content: Text('Failed to connect to ${peer.name}'),
-            backgroundColor: Theme.of(context).colorScheme.error,
+            backgroundColor: errorColor,
           ),
         );
       }
@@ -393,7 +395,7 @@ class _P2PSyncScreenState extends ConsumerState<P2PSyncScreen> {
       messenger.showSnackBar(
         SnackBar(
           content: Text('Connection error: $e'),
-          backgroundColor: Theme.of(context).colorScheme.error,
+          backgroundColor: errorColor,
         ),
       );
     }

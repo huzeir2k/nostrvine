@@ -53,7 +53,9 @@ class WidgetTestHelper {
   /// Initialize platform channel mocking to prevent UnimplementedError
   static void initializePlatformChannels() {
     // Mock video_player channel to prevent initialization errors
-    const MethodChannel('flutter.io/videoPlayer').setMockMethodCallHandler((call) async {
+    TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger.setMockMethodCallHandler(
+      const MethodChannel('flutter.io/videoPlayer'),
+      (call) async {
       switch (call.method) {
         case 'init':
           return null;
@@ -81,7 +83,9 @@ class WidgetTestHelper {
     });
 
     // Mock camera channel to prevent camera-related errors  
-    const MethodChannel('plugins.flutter.io/camera').setMockMethodCallHandler((call) async {
+    TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger.setMockMethodCallHandler(
+      const MethodChannel('plugins.flutter.io/camera'),
+      (call) async {
       switch (call.method) {
         case 'availableCameras':
           return [];
@@ -95,7 +99,9 @@ class WidgetTestHelper {
     });
 
     // Mock path_provider for file operations
-    const MethodChannel('plugins.flutter.io/path_provider').setMockMethodCallHandler((call) async {
+    TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger.setMockMethodCallHandler(
+      const MethodChannel('plugins.flutter.io/path_provider'),
+      (call) async {
       switch (call.method) {
         case 'getTemporaryDirectory':
           return '/tmp';
@@ -257,9 +263,12 @@ class WidgetTestHelper {
   /// Clean up after tests - call this in tearDown() if needed
   static void tearDown() {
     // Clear method channel handlers
-    const MethodChannel('flutter.io/videoPlayer').setMockMethodCallHandler(null);
-    const MethodChannel('plugins.flutter.io/camera').setMockMethodCallHandler(null);
-    const MethodChannel('plugins.flutter.io/path_provider').setMockMethodCallHandler(null);
+    TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger.setMockMethodCallHandler(
+      const MethodChannel('flutter.io/videoPlayer'), null);
+    TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger.setMockMethodCallHandler(
+      const MethodChannel('plugins.flutter.io/camera'), null);
+    TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger.setMockMethodCallHandler(
+      const MethodChannel('plugins.flutter.io/path_provider'), null);
   }
 
   /// Create a widget test wrapper that handles common test scenarios

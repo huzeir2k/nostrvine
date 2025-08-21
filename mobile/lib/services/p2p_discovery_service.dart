@@ -165,7 +165,7 @@ class P2PDiscoveryService extends ChangeNotifier {
     debugPrint('P2P: Connecting to peer ${peer.name} via ${peer.transportType.name}');
     
     try {
-      embedded.TransportConnection? transportConnection;
+      embedded.TransportConnection transportConnection;
       
       // Choose appropriate transport
       switch (peer.transportType) {
@@ -177,26 +177,24 @@ class P2PDiscoveryService extends ChangeNotifier {
           break;
       }
       
-      if (transportConnection != null) {
-        final connection = P2PConnection(
-          peer: peer,
-          transport: transportConnection,
-        );
-        
-        _activeConnections[peer.id] = connection;
-        notifyListeners();
-        
-        // Listen for disconnection
-        connection.transport.isConnected.listen((connected) {
-          if (!connected) {
-            _activeConnections.remove(peer.id);
-            notifyListeners();
-          }
-        });
-        
-        debugPrint('P2P: Successfully connected to ${peer.name}');
-        return connection;
-      }
+      final connection = P2PConnection(
+        peer: peer,
+        transport: transportConnection,
+      );
+      
+      _activeConnections[peer.id] = connection;
+      notifyListeners();
+      
+      // Listen for disconnection
+      connection.transport.isConnected.listen((connected) {
+        if (!connected) {
+          _activeConnections.remove(peer.id);
+          notifyListeners();
+        }
+      });
+      
+      debugPrint('P2P: Successfully connected to ${peer.name}');
+      return connection;
     } catch (e) {
       debugPrint('P2P: Failed to connect to ${peer.name}: $e');
     }

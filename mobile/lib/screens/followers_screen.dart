@@ -23,7 +23,7 @@ class FollowersScreen extends ConsumerStatefulWidget {
 }
 
 class _FollowersScreenState extends ConsumerState<FollowersScreen> {
-  List<String> _followers = [];
+  final List<String> _followers = [];
   bool _isLoading = true;
   String? _error;
 

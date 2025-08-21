@@ -1,4 +1,5 @@
 // ABOUTME: Integration test for flutter_embedded_nostr_relay package
+import 'package:openvine/utils/unified_logger.dart';
 // ABOUTME: Verifies SQLite persistence and event storage functionality
 
 import 'package:flutter/services.dart';
@@ -240,7 +241,7 @@ void main() {
       // Verify relays were discovered and added
       // Note: Some relays might fail to connect in test environment
       final relays = nostrService.relays;
-      print('Discovered relays: $relays');
+      UnifiedLogger.info('Discovered relays: $relays');
       
       // Should still have at least the default relays
       expect(relays.contains('ws://localhost:7447'), isTrue);

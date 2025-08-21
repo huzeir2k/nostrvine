@@ -1,19 +1,45 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:openvine/services/nostr_service.dart';
+import 'package:openvine/services/nostr_key_manager.dart';
+import 'package:flutter_embedded_nostr_relay/flutter_embedded_nostr_relay.dart'
+    as embedded;
+import 'package:flutter_embedded_nostr_relay/src/models/subscription.dart'
+    as embedded_models;
+import 'package:mockito/mockito.dart';
 import 'package:nostr_sdk/filter.dart';
 import 'package:nostr_sdk/event.dart';
 
 void main() {
   group('NostrService Subscription Deduplication', () {
     late NostrService nostrService;
+    late embedded.EmbeddedNostrRelay mockRelay;
 
     setUp(() async {
-      nostrService = NostrService();
-      // Initialize with test configuration
-      await nostrService.initialize(
-        privateKey: 'test_private_key',
-        relays: ['wss://relay.test'],
-      );
+      mockRelay = _MockEmbeddedRelay();
+
+      // Stub methods used by NostrService
+      when(mockRelay.initialize(enableGarbageCollection: anyNamed('enableGarbageCollection')))
+          .thenAnswer((_) async {});
+      when(mockRelay.addExternalRelay(any)).thenAnswer((_) async {});
+      when(mockRelay.removeExternalRelay(any)).thenAnswer((_) async {});
+      when(mockRelay.connectedRelays).thenReturn(['wss://relay.test']);
+
+      final mockSub = _MockSubscription();
+      when(mockRelay.subscribe(
+        subscriptionId: anyNamed('subscriptionId'),
+        filters: anyNamed('filters'),
+        onEvent: anyNamed('onEvent'),
+        onError: anyNamed('onError'),
+        onEose: anyNamed('onEose'),
+      )).thenReturn(mockSub);
+
+      when(mockRelay.publish(any)).thenAnswer((_) async => true);
+      when(mockRelay.queryEvents(any)).thenAnswer((_) async => <embedded.NostrEvent>[]);
+
+      final keyManager = NostrKeyManager();
+      await keyManager.initialize();
+      nostrService = NostrService(keyManager, embeddedRelay: mockRelay);
+      await nostrService.initialize(customRelays: ['wss://relay.test']);
     });
 
     tearDown(() {
@@ -140,3 +166,7 @@ void main() {
     });
   });
 }
+
+// Mockito-based mocks of embedded relay types
+class _MockEmbeddedRelay extends Mock implements embedded.EmbeddedNostrRelay {}
+class _MockSubscription extends Mock implements embedded_models.Subscription {}

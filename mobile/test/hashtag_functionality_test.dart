@@ -4,9 +4,11 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:openvine/services/hashtag_service.dart';
 import 'package:openvine/services/video_event_service.dart';
-import 'package:openvine/services/top_hashtags_service.dart';
 import 'package:openvine/models/video_event.dart';
 import 'package:mocktail/mocktail.dart';
+
+// Mock class for VideoEventService
+class MockVideoEventService extends Mock implements VideoEventService {}
 
 void main() {
   group('Hashtag Sorting Tests', () {
@@ -115,22 +117,16 @@ void main() {
 
 // Helper function to create test video events
 VideoEvent _createVideoWithHashtags(List<String> hashtags) {
-  final timestamp = DateTime.now().millisecondsSinceEpoch ~/ 1000;
+  final now = DateTime.now();
+  final timestamp = now.millisecondsSinceEpoch ~/ 1000;
   return VideoEvent(
     id: 'test_${DateTime.now().microsecondsSinceEpoch}',
     pubkey: 'test_pubkey',
     createdAt: timestamp,
-    kind: 32222,
-    tags: [
-      ['imeta', 'url https://example.com/video.mp4'],
-      ...hashtags.map((tag) => ['t', tag]),
-    ],
+    timestamp: now, // Required parameter - DateTime type
     content: 'Test video',
-    sig: 'test_sig',
     videoUrl: 'https://example.com/video.mp4',
     hashtags: hashtags,
-    mentions: [],
-    gifUrl: null,
     thumbnailUrl: null,
     blurhash: null,
     vineId: 'test_vine_${timestamp}',

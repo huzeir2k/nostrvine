@@ -806,6 +806,7 @@ class _VideoMetadataScreenState extends ConsumerState<VideoMetadataScreen> {
         );
         
         // Show progress indicator
+        if (!mounted) return;
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(
             content: Row(

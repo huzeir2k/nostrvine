@@ -633,7 +633,7 @@ class MainNavigationScreenState extends ConsumerState<MainNavigationScreen> {
         onTap: _onTabTapped,
         backgroundColor: VineTheme.vineGreen,
         selectedItemColor: VineTheme.whiteText,
-        unselectedItemColor: VineTheme.whiteText.withOpacity(0.7),
+        unselectedItemColor: VineTheme.whiteText.withValues(alpha: 0.7),
         type: BottomNavigationBarType.fixed,
         elevation: 8,
         items: const [

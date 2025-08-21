@@ -43,7 +43,7 @@ void main() {
         ));
       }
       
-      print('Buggy implementation results: ${buggyResult.length}');
+      UnifiedLogger.info('Buggy implementation results: ${buggyResult.length}');
       expect(buggyResult.length, equals(2), 
         reason: 'Old implementation returns duplicates');
 
@@ -62,7 +62,7 @@ void main() {
         }
       }
       
-      print('Fixed implementation results: ${fixedResult.length}');
+      UnifiedLogger.info('Fixed implementation results: ${fixedResult.length}');
       expect(fixedResult.length, equals(1), 
         reason: 'Fixed implementation deduplicates correctly');
       expect(fixedResult.first.id, equals('video-1'));

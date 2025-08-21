@@ -5,6 +5,7 @@ import 'package:flutter/foundation.dart';
 import 'package:openvine/services/nostr_key_manager.dart';
 import 'package:openvine/services/nostr_service_interface.dart';
 import 'package:openvine/services/nostr_service.dart';
+import 'package:openvine/utils/unified_logger.dart';
 
 /// Factory class for creating platform-appropriate NostrService implementations
 class NostrServiceFactory {
@@ -12,7 +13,7 @@ class NostrServiceFactory {
   static INostrService create(NostrKeyManager keyManager) {
     // Use NostrService with embedded relay for all platforms (including web)
     // The embedded relay handles platform differences internally
-    print('NostrServiceFactory: Creating NostrService with embedded relay support');
+    UnifiedLogger.info('Creating NostrService with embedded relay support', name: 'NostrServiceFactory');
     return NostrService(keyManager);
   }
 

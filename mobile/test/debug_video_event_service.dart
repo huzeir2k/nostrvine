@@ -68,9 +68,9 @@ class TestableNostrService extends NostrService {
   }
 
   @override
-  void dispose() {
+  Future<void> dispose() async {
     _testStreamController?.close();
-    super.dispose();
+    await super.dispose();
   }
 }
 

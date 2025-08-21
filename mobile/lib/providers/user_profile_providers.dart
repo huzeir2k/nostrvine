@@ -271,6 +271,16 @@ class UserProfileNotifier extends _$UserProfileNotifier {
 
   /// Aggressively pre-fetch profiles for immediate display (no debouncing)
   Future<void> prefetchProfilesImmediately(List<String> pubkeys) async {
+    // Only prefetch when a relevant UI tab is active to avoid background churn
+    final isFeedActive = ref.read(isFeedTabActiveProvider);
+    final isExploreActive = ref.read(isExploreTabActiveProvider);
+    final isProfileActive = ref.read(isProfileTabActiveProvider);
+    if (!(isFeedActive || isExploreActive || isProfileActive)) {
+      Log.debug('Prefetch suppressed: no active video/profile tab',
+          name: 'UserProfileNotifier', category: LogCategory.system);
+      return;
+    }
+
     if (!state.isInitialized) {
       await initialize();
     }

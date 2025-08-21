@@ -1644,6 +1644,7 @@ class ExploreScreenState extends ConsumerState<ExploreScreen>
   }
 
   Widget _buildTrendingVideoGrid() {
+    final isExploreActive = ref.watch(isExploreTabActiveProvider);
     // Use analytics trending provider for data sorted by actual popularity
     final analyticsTrendingVideos = ref.watch(curation_providers.analyticsTrendingProvider);
     
@@ -1679,38 +1680,43 @@ class ExploreScreenState extends ConsumerState<ExploreScreen>
       
       // Also trigger discovery subscription to get more videos from relays
       // This will populate hashtag statistics with fresh data
-      WidgetsBinding.instance.addPostFrameCallback((_) {
-        // Check relay connectivity status first
-        final nostrService = ref.read(nostrServiceProvider);
-        final connectedRelays = nostrService.connectedRelayCount;
-        
-        Log.info('📡 Relay Status: $connectedRelays relays connected',
-            name: 'ExploreScreen', category: LogCategory.ui);
-        
-        if (connectedRelays == 0) {
-          Log.warning('⚠️ No relays connected! Cannot fetch remote videos',
+      if (isExploreActive) {
+        WidgetsBinding.instance.addPostFrameCallback((_) {
+          // Check relay connectivity status first
+          final nostrService = ref.read(nostrServiceProvider);
+          final connectedRelays = nostrService.connectedRelayCount;
+          
+          Log.info('📡 Relay Status: $connectedRelays relays connected',
               name: 'ExploreScreen', category: LogCategory.ui);
-        }
-        
-        // Start discovery subscription to get videos from relays
-        Log.info('📡 Starting discovery subscription to fetch hashtags from relays',
-            name: 'ExploreScreen', category: LogCategory.ui);
-        ref.read(videoEventsProvider.notifier).startDiscoverySubscription();
-        
-        // Also trigger a force refresh to ensure we're fetching fresh data
-        final videoEventService = ref.read(videoEventServiceProvider);
-        videoEventService.loadMoreContentUnlimited(
-          subscriptionType: SubscriptionType.discovery,
-          limit: 300
-        ).then((_) {
-          Log.info('📡 Unlimited content query started for hashtag discovery',
+          
+          if (connectedRelays == 0) {
+            Log.warning('⚠️ No relays connected! Cannot fetch remote videos',
+                name: 'ExploreScreen', category: LogCategory.ui);
+          }
+          
+          // Start discovery subscription to get videos from relays
+          Log.info('📡 Starting discovery subscription to fetch hashtags from relays',
               name: 'ExploreScreen', category: LogCategory.ui);
-          // Refresh hashtag statistics after fetching
-          Future.delayed(const Duration(seconds: 3), () {
-            hashtagService.refreshHashtagStats();
+          ref.read(videoEventsProvider.notifier).startDiscoverySubscription();
+          
+          // Also trigger a force refresh to ensure we're fetching fresh data
+          final videoEventService = ref.read(videoEventServiceProvider);
+          videoEventService.loadMoreContentUnlimited(
+            subscriptionType: SubscriptionType.discovery,
+            limit: 300
+          ).then((_) {
+            Log.info('📡 Unlimited content query started for hashtag discovery',
+                name: 'ExploreScreen', category: LogCategory.ui);
+            // Refresh hashtag statistics after fetching
+            Future.delayed(const Duration(seconds: 3), () {
+              hashtagService.refreshHashtagStats();
+            });
           });
         });
-      });
+      } else {
+        Log.debug('Explore inactive; skipping subscription/unlimited content kick-off',
+            name: 'ExploreScreen', category: LogCategory.ui);
+      }
       
       // Show loading state while fetching initial videos
       final isLoading = videoEventsAsync.when(
@@ -1848,12 +1854,14 @@ class ExploreScreenState extends ConsumerState<ExploreScreen>
                             // Refresh stats after a delay
                             Future.delayed(const Duration(seconds: 5), () {
                               hashtagService.refreshHashtagStats();
-                              ScaffoldMessenger.of(context).showSnackBar(
-                                const SnackBar(
-                                  content: Text('Hashtag data refreshed'),
-                                  backgroundColor: VineTheme.vineGreen,
-                                ),
-                              );
+                              if (mounted) {
+                                ScaffoldMessenger.of(context).showSnackBar(
+                                  const SnackBar(
+                                    content: Text('Hashtag data refreshed'),
+                                    backgroundColor: VineTheme.vineGreen,
+                                  ),
+                                );
+                              }
                             });
                           });
                         },

@@ -5,7 +5,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:openvine/models/video_event.dart';
 import 'package:openvine/providers/curation_providers.dart';
-import 'package:openvine/services/analytics_api_service.dart';
 import 'package:openvine/theme/vine_theme.dart';
 import 'package:openvine/utils/unified_logger.dart';
 import 'package:openvine/widgets/video_explore_tile.dart';
@@ -188,7 +187,7 @@ class _RelatedVideosWidgetState extends ConsumerState<RelatedVideosWidget> {
                 Container(
                   padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
                   decoration: BoxDecoration(
-                    color: VineTheme.vineGreen.withOpacity(0.1),
+                    color: VineTheme.vineGreen.withValues(alpha: 0.1),
                     borderRadius: BorderRadius.circular(12),
                   ),
                   child: Text(

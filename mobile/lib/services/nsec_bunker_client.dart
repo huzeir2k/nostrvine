@@ -3,7 +3,6 @@
 
 import 'dart:async';
 import 'dart:convert';
-import 'package:flutter/foundation.dart';
 import 'package:http/http.dart' as http;
 import 'package:openvine/utils/unified_logger.dart';
 import 'package:web_socket_channel/web_socket_channel.dart';

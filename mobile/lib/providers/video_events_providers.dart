@@ -95,6 +95,12 @@ class VideoEvents extends _$VideoEvents {
 
   /// Start discovery subscription when Explore tab is visible
   void startDiscoverySubscription() {
+    final isExploreActive = ref.read(isExploreTabActiveProvider);
+    if (!isExploreActive) {
+      Log.debug('VideoEvents: Ignoring discovery start; Explore inactive',
+          name: 'VideoEventsProvider', category: LogCategory.video);
+      return;
+    }
     final videoEventService = ref.read(videoEventServiceProvider);
     
     Log.info(

@@ -49,5 +49,9 @@
 	<string>This app needs access to camera to record vine videos.</string>
 	<key>NSMicrophoneUsageDescription</key>
 	<string>This app needs access to microphone to record audio for vine videos.</string>
+	<key>NSBluetoothAlwaysUsageDescription</key>
+	<string>This app uses Bluetooth to discover and sync videos with nearby OpenVine users for offline sharing.</string>
+	<key>NSBluetoothPeripheralUsageDescription</key>
+	<string>This app uses Bluetooth to share videos directly with other OpenVine users nearby.</string>
 </dict>
 </plist>

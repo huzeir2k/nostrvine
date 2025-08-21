@@ -48,7 +48,7 @@ class MinimalMockNostrService implements INostrService {
   void removeListener(listener) {}
 
   @override
-  void dispose() {}
+  Future<void> dispose() async {}
 
   @override
   bool get hasListeners => false;

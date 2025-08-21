@@ -1,4 +1,5 @@
 // ABOUTME: Integration test to verify embedded relay forwards subscriptions correctly
+import 'package:openvine/utils/unified_logger.dart';
 // ABOUTME: Tests that the embedded relay actually sends REQ messages to external relays
 
 import 'package:flutter_test/flutter_test.dart';
@@ -28,16 +29,16 @@ void main() {
     });
 
     test('should forward subscription to external relay and receive events', () async {
-      print('\n=== EMBEDDED RELAY SUBSCRIPTION TEST ===\n');
+      UnifiedLogger.info('\n=== EMBEDDED RELAY SUBSCRIPTION TEST ===\n');
       
       // Test 1: Check relay connection
-      print('1. Checking relay connection status...');
+      UnifiedLogger.info('1. Checking relay connection status...');
       final connectedRelays = nostrService.connectedRelays;
-      print('   Connected relays: $connectedRelays');
+      UnifiedLogger.info('   Connected relays: $connectedRelays');
       expect(connectedRelays, isNotEmpty, reason: 'Should be connected to at least one relay');
       
       // Test 2: Create a subscription for known authors with videos
-      print('\n2. Creating subscription for known video authors...');
+      UnifiedLogger.info('\n2. Creating subscription for known video authors...');
       
       // These are authors we know have videos from the discovery feed logs
       final knownVideoAuthors = [
@@ -52,10 +53,10 @@ void main() {
         limit: 10,
       );
       
-      print('   Filter: kinds=${filter.kinds}, authors=${filter.authors?.length} (first=${filter.authors?.first?.substring(0, 8)})');
+      UnifiedLogger.info('   Filter: kinds=${filter.kinds}, authors=${filter.authors?.length} (first=${filter.authors?.first?.substring(0, 8)})');
       
       // Test 3: Subscribe and collect events
-      print('\n3. Subscribing and waiting for events...');
+      UnifiedLogger.info('\n3. Subscribing and waiting for events...');
       final events = <Event>[];
       final subscription = nostrService.subscribeToEvents(filters: [filter]);
       
@@ -65,41 +66,41 @@ void main() {
           .take(5) // Take up to 5 events
           .toList()
           .catchError((error) {
-            print('   Timeout or error: $error');
+            UnifiedLogger.info('   Timeout or error: $error');
             return events;
           });
       
       // Wait for events
       final receivedEvents = await eventFuture;
       
-      print('   Received ${receivedEvents.length} events');
+      UnifiedLogger.info('   Received ${receivedEvents.length} events');
       
       // Test 4: Analyze results
-      print('\n4. Analyzing results...');
+      UnifiedLogger.info('\n4. Analyzing results...');
       
       if (receivedEvents.isEmpty) {
-        print('   ❌ NO EVENTS RECEIVED!');
-        print('   This means either:');
-        print('   - The embedded relay is NOT forwarding subscriptions to external relays');
-        print('   - The external relay is not returning events');
-        print('   - The embedded relay is not passing events back to the app');
+        UnifiedLogger.info('   ❌ NO EVENTS RECEIVED!');
+        UnifiedLogger.info('   This means either:');
+        UnifiedLogger.info('   - The embedded relay is NOT forwarding subscriptions to external relays');
+        UnifiedLogger.info('   - The external relay is not returning events');
+        UnifiedLogger.info('   - The embedded relay is not passing events back to the app');
       } else {
-        print('   ✅ Received ${receivedEvents.length} events');
+        UnifiedLogger.info('   ✅ Received ${receivedEvents.length} events');
         for (var i = 0; i < receivedEvents.length && i < 3; i++) {
           final event = receivedEvents[i];
-          print('   Event $i: kind=${event.kind}, author=${event.pubkey.substring(0, 8)}');
+          UnifiedLogger.info('   Event $i: kind=${event.kind}, author=${event.pubkey.substring(0, 8)}');
         }
       }
       
       // Test 5: Try a subscription with NO author filter
-      print('\n5. Testing subscription with no author filter...');
+      UnifiedLogger.info('\n5. Testing subscription with no author filter...');
       
       final openFilter = Filter(
         kinds: [32222],
         limit: 10,
       );
       
-      print('   Filter: kinds=${openFilter.kinds}, no author filter');
+      UnifiedLogger.info('   Filter: kinds=${openFilter.kinds}, no author filter');
       
       final openSubscription = nostrService.subscribeToEvents(filters: [openFilter]);
       final openEvents = await openSubscription
@@ -107,23 +108,23 @@ void main() {
           .take(5)
           .toList()
           .catchError((error) {
-            print('   Timeout or error: $error');
+            UnifiedLogger.info('   Timeout or error: $error');
             return <Event>[];
           });
       
-      print('   Received ${openEvents.length} events with open filter');
+      UnifiedLogger.info('   Received ${openEvents.length} events with open filter');
       
       // Compare results
-      print('\n=== TEST RESULTS ===');
-      print('With author filter: ${receivedEvents.length} events');
-      print('Without author filter: ${openEvents.length} events');
+      UnifiedLogger.info('\n=== TEST RESULTS ===');
+      UnifiedLogger.info('With author filter: ${receivedEvents.length} events');
+      UnifiedLogger.info('Without author filter: ${openEvents.length} events');
       
       if (receivedEvents.isEmpty && openEvents.isNotEmpty) {
-        print('❌ PROBLEM IDENTIFIED: Embedded relay works but fails with author filters!');
+        UnifiedLogger.info('❌ PROBLEM IDENTIFIED: Embedded relay works but fails with author filters!');
       } else if (receivedEvents.isEmpty && openEvents.isEmpty) {
-        print('❌ PROBLEM IDENTIFIED: Embedded relay is not forwarding ANY subscriptions!');
+        UnifiedLogger.info('❌ PROBLEM IDENTIFIED: Embedded relay is not forwarding ANY subscriptions!');
       } else {
-        print('✅ Embedded relay appears to be working correctly');
+        UnifiedLogger.info('✅ Embedded relay appears to be working correctly');
       }
       
       // We expect to receive SOME events for known authors
@@ -132,7 +133,7 @@ void main() {
     });
 
     test('should receive events for followed users if they exist', () async {
-      print('\n=== TESTING FOLLOWED USERS ===\n');
+      UnifiedLogger.info('\n=== TESTING FOLLOWED USERS ===\n');
       
       // The actual followed users from your account
       final followedUsers = [
@@ -147,7 +148,7 @@ void main() {
         limit: 50,
       );
       
-      print('Testing with ${followedUsers.length} followed users...');
+      UnifiedLogger.info('Testing with ${followedUsers.length} followed users...');
       
       final subscription = nostrService.subscribeToEvents(filters: [filter]);
       final events = await subscription
@@ -156,16 +157,16 @@ void main() {
           .toList()
           .catchError((error) => <Event>[]);
       
-      print('Received ${events.length} events from followed users');
+      UnifiedLogger.info('Received ${events.length} events from followed users');
       
       if (events.isEmpty) {
-        print('❌ No videos found from followed users');
-        print('Possible reasons:');
-        print('1. These users have never posted kind 32222 video events');
-        print('2. The relay doesn\'t have their video events');
-        print('3. There\'s a bug in author filtering');
+        UnifiedLogger.info('❌ No videos found from followed users');
+        UnifiedLogger.info('Possible reasons:');
+        UnifiedLogger.info('1. These users have never posted kind 32222 video events');
+        UnifiedLogger.info('2. The relay doesn\'t have their video events');
+        UnifiedLogger.info('3. There\'s a bug in author filtering');
       } else {
-        print('✅ Found ${events.length} videos from followed users');
+        UnifiedLogger.info('✅ Found ${events.length} videos from followed users');
       }
     });
   });

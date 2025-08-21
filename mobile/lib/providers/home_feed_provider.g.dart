@@ -63,7 +63,7 @@ final hasHomeFeedVideosProvider = AutoDisposeProvider<bool>.internal(
 @Deprecated('Will be removed in 3.0. Use Ref instead')
 // ignore: unused_element
 typedef HasHomeFeedVideosRef = AutoDisposeProviderRef<bool>;
-String _$homeFeedHash() => r'db5754d6d0beacd7ef98298e71e602835062ba5b';
+String _$homeFeedHash() => r'c49d074c64a4a09ffa922bc7eb73a3b8c79b330e';
 
 /// Home feed provider - shows videos only from people you follow
 ///

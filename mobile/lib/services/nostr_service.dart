@@ -18,7 +18,12 @@ import 'package:openvine/utils/unified_logger.dart';
 /// Production implementation of NostrService using EmbeddedNostrRelay directly
 /// Manages external relay connections and provides unified API to the app
 class NostrService implements INostrService {
-  NostrService(this._keyManager);
+  NostrService(this._keyManager, {embedded.EmbeddedNostrRelay? embeddedRelay}) {
+    // Allow injecting an embedded relay for testing
+    if (embeddedRelay != null) {
+      _embeddedRelay = embeddedRelay;
+    }
+  }
   
   final NostrKeyManager _keyManager;
   final Map<String, StreamController<Event>> _subscriptions = {};
@@ -50,8 +55,8 @@ class NostrService implements INostrService {
     Log.info('Starting initialization with embedded relay', name: 'NostrService', category: LogCategory.relay);
     
     try {
-      // Initialize embedded relay
-      _embeddedRelay = embedded.EmbeddedNostrRelay();
+      // Initialize embedded relay (use injected instance if provided)
+      _embeddedRelay ??= embedded.EmbeddedNostrRelay();
       await _embeddedRelay!.initialize(
         enableGarbageCollection: true,
       );
@@ -255,12 +260,12 @@ class NostrService implements INostrService {
       Log.debug('Stream cancelled for subscription $id - closing embedded relay subscription', name: 'NostrService', category: LogCategory.relay);
       try {
         subscription.close();
-        print('NostrService: Successfully closed embedded relay subscription $id');
+        UnifiedLogger.info('Successfully closed embedded relay subscription $id', name: 'NostrService');
       } catch (e) {
-        print('NostrService: Error closing embedded relay subscription $id: $e');
+        UnifiedLogger.error('Error closing embedded relay subscription $id: $e', name: 'NostrService');
       }
       _subscriptions.remove(id);
-      print('NostrService: Active subscriptions after removal: ${_subscriptions.length}');
+      UnifiedLogger.debug('Active subscriptions after removal: ${_subscriptions.length}', name: 'NostrService');
     };
     
     return controller.stream;
@@ -362,10 +367,10 @@ class NostrService implements INostrService {
     try {
       await _embeddedRelay!.addExternalRelay(relayUrl);
       _configuredRelays.add(relayUrl);
-      print('NostrService: Added external relay: $relayUrl');
+      UnifiedLogger.info('Added external relay: $relayUrl', name: 'NostrService');
       return true;
     } catch (e) {
-      print('NostrService: Failed to add relay $relayUrl: $e');
+      UnifiedLogger.error('Failed to add relay $relayUrl: $e', name: 'NostrService');
       return false;
     }
   }
@@ -376,13 +381,13 @@ class NostrService implements INostrService {
       try {
         await _embeddedRelay!.removeExternalRelay(relayUrl);
       } catch (e) {
-        print('NostrService: Failed to remove relay $relayUrl: $e');
+        UnifiedLogger.error('Failed to remove relay $relayUrl: $e', name: 'NostrService');
       }
     }
     
     _configuredRelays.remove(relayUrl);
     _relayAuthStates.remove(relayUrl);
-    print('NostrService: Removed external relay: $relayUrl');
+    UnifiedLogger.info('Removed external relay: $relayUrl', name: 'NostrService');
   }
 
   @override
@@ -521,7 +526,7 @@ class NostrService implements INostrService {
       await _p2pService!.startDiscovery();
       return true;
     } catch (e) {
-      print('Failed to start P2P discovery: $e');
+      UnifiedLogger.error('Failed to start P2P discovery: $e', name: 'NostrService');
       return false;
     }
   }
@@ -544,7 +549,7 @@ class NostrService implements INostrService {
       await _p2pService!.startAdvertising();
       return true;
     } catch (e) {
-      print('Failed to start P2P advertising: $e');
+      UnifiedLogger.error('Failed to start P2P advertising: $e', name: 'NostrService');
       return false;
     }
   }
@@ -574,12 +579,12 @@ class NostrService implements INostrService {
         // Setup event sync inline instead of separate method
         connection.dataStream.listen(
           (data) => _handleP2PMessage(connection.peer.id, data),
-          onError: (error) => print('P2P: Data stream error from ${connection.peer.name}: $error'),
+          onError: (error) => UnifiedLogger.error('P2P: Data stream error from ${connection.peer.name}: $error', name: 'NostrService'),
         );
         return true;
       }
     } catch (e) {
-      print('Failed to connect to P2P peer ${peer.name}: $e');
+      UnifiedLogger.error('Failed to connect to P2P peer ${peer.name}: $e', name: 'NostrService');
     }
     
     return false;
@@ -591,9 +596,9 @@ class NostrService implements INostrService {
     
     try {
       await _videoSyncService!.syncWithAllPeers();
-      print('P2P: Video sync completed with all peers');
+      UnifiedLogger.info('P2P: Video sync completed with all peers', name: 'NostrService');
     } catch (e) {
-      print('Failed to sync with P2P peers: $e');
+      UnifiedLogger.error('Failed to sync with P2P peers: $e', name: 'NostrService');
     }
   }
   
@@ -602,14 +607,14 @@ class NostrService implements INostrService {
     if (!_p2pEnabled || _videoSyncService == null) return;
     
     await _videoSyncService!.startAutoSync(interval: interval);
-    print('P2P: Auto video sync started');
+    UnifiedLogger.info('P2P: Auto video sync started', name: 'NostrService');
   }
   
   /// Stop automatic P2P video syncing
   Future<void> stopAutoP2PSync() async {
     if (_videoSyncService != null) {
       _videoSyncService!.stopAutoSync();
-      print('P2P: Auto video sync stopped');
+      UnifiedLogger.info('P2P: Auto video sync stopped', name: 'NostrService');
     }
   }
 
@@ -617,7 +622,7 @@ class NostrService implements INostrService {
   Future<void> dispose() async {
     if (_isDisposed) return;
     
-    print('NostrService: Starting disposal...');
+    UnifiedLogger.info('Starting disposal...', name: 'NostrService');
     
     // Close all active subscriptions
     await closeAllSubscriptions();
@@ -630,7 +635,7 @@ class NostrService implements INostrService {
     if (_embeddedRelay != null) {
       await _embeddedRelay!.shutdown();
       _embeddedRelay = null;
-      print('NostrService: Shutdown embedded relay');
+      UnifiedLogger.info('Shutdown embedded relay', name: 'NostrService');
     }
     
     // Clean up P2P services
@@ -640,7 +645,7 @@ class NostrService implements INostrService {
     _videoSyncService = null;
     
     _isDisposed = true;
-    print('NostrService: Disposal complete');
+    UnifiedLogger.info('Disposal complete', name: 'NostrService');
   }
 
   /// Get events from the embedded relay (which caches from external relays)
@@ -833,16 +838,16 @@ class NostrService implements INostrService {
         // Initialize video sync service
         _videoSyncService = P2PVideoSyncService(_embeddedRelay!, _p2pService!);
         
-        print('P2P: Sync initialized successfully');
+        UnifiedLogger.info('P2P: Sync initialized successfully', name: 'NostrService');
         
         // Auto-start advertising when P2P is enabled
         await _p2pService!.startAdvertising();
       } else {
-        print('P2P: Initialization failed - permissions not granted');
+        UnifiedLogger.warning('P2P: Initialization failed - permissions not granted', name: 'NostrService');
         _p2pService = null;
       }
     } catch (e) {
-      print('P2P: Initialization error: $e');
+      UnifiedLogger.error('P2P: Initialization error: $e', name: 'NostrService');
       _p2pService = null;
     }
   }
@@ -857,10 +862,10 @@ class NostrService implements INostrService {
       if (_videoSyncService != null) {
         await _videoSyncService!.handleIncomingSync(peerId, message);
       } else {
-        print('P2P: Video sync service not initialized');
+        UnifiedLogger.warning('P2P: Video sync service not initialized', name: 'NostrService');
       }
     } catch (e) {
-      print('P2P: Failed to handle message from $peerId: $e');
+      UnifiedLogger.error('P2P: Failed to handle message from $peerId: $e', name: 'NostrService');
     }
   }
 
@@ -898,7 +903,7 @@ class NostrService implements INostrService {
               final isRead = tag.length > 2 && tag[2] == 'read';
               
               await addRelay(relayUrl);
-              print('NostrService: Discovered relay from NIP-65: $relayUrl (write: $isWrite, read: $isRead)');
+              UnifiedLogger.debug('Discovered relay from NIP-65: $relayUrl (write: $isWrite, read: $isRead)', name: 'NostrService');
             }
           }
         }
@@ -926,16 +931,16 @@ class NostrService implements INostrService {
               final relayUrl = match.group(0);
               if (relayUrl != null && !_configuredRelays.contains(relayUrl)) {
                 await addRelay(relayUrl);
-                print('NostrService: Discovered relay from contact list: $relayUrl');
+                UnifiedLogger.debug('Discovered relay from contact list: $relayUrl', name: 'NostrService');
               }
             }
           }
         } catch (e) {
-          print('NostrService: Error parsing contact list for relays: $e');
+          UnifiedLogger.error('Error parsing contact list for relays: $e', name: 'NostrService');
         }
       }
     } catch (e) {
-      print('NostrService: Error discovering user relays: $e');
+      UnifiedLogger.error('Error discovering user relays: $e', name: 'NostrService');
     }
   }
 
@@ -972,11 +977,11 @@ class NostrService implements INostrService {
       for (final relayUrl in discoveredRelays) {
         if (!_configuredRelays.contains(relayUrl)) {
           await addRelay(relayUrl);
-          print('NostrService: Discovered relay from event hints: $relayUrl');
+          UnifiedLogger.debug('Discovered relay from event hints: $relayUrl', name: 'NostrService');
         }
       }
     } catch (e) {
-      print('NostrService: Error discovering relays from event hints: $e');
+      UnifiedLogger.error('Error discovering relays from event hints: $e', name: 'NostrService');
     }
   }
 }

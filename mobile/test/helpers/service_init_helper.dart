@@ -5,7 +5,6 @@ import 'dart:async';
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:mockito/mockito.dart';
 import 'package:openvine/providers/app_providers.dart';
 import 'package:openvine/providers/video_events_providers.dart';
 import 'package:openvine/providers/home_feed_provider.dart';
@@ -23,8 +22,10 @@ class ServiceInitHelper {
     TestWidgetsFlutterBinding.ensureInitialized();
     
     // Mock SharedPreferences for tests
-    const MethodChannel('plugins.flutter.io/shared_preferences')
-        .setMockMethodCallHandler((MethodCall methodCall) async {
+    TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
+        .setMockMethodCallHandler(
+      const MethodChannel('plugins.flutter.io/shared_preferences'),
+      (MethodCall methodCall) async {
       if (methodCall.method == 'getAll') {
         return <String, Object>{}; // Return empty preferences
       }
@@ -32,8 +33,10 @@ class ServiceInitHelper {
     });
     
     // Mock connectivity plugin
-    const MethodChannel('dev.fluttercommunity.plus/connectivity')
-        .setMockMethodCallHandler((MethodCall methodCall) async {
+    TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
+        .setMockMethodCallHandler(
+      const MethodChannel('dev.fluttercommunity.plus/connectivity'),
+      (MethodCall methodCall) async {
       if (methodCall.method == 'check') {
         return 'wifi'; // Always return connected
       }
@@ -41,8 +44,10 @@ class ServiceInitHelper {
     });
     
     // Mock flutter_secure_storage plugin
-    const MethodChannel('plugins.it_nomads.com/flutter_secure_storage')
-        .setMockMethodCallHandler((MethodCall methodCall) async {
+    TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
+        .setMockMethodCallHandler(
+      const MethodChannel('plugins.it_nomads.com/flutter_secure_storage'),
+      (MethodCall methodCall) async {
       // Simple in-memory store for test data
       switch (methodCall.method) {
         case 'read':

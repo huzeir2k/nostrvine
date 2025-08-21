@@ -32,7 +32,7 @@ void main() {
       expect(service, isNotNull);
       expect(instantiationTime, lessThan(10)); // Should be nearly instantaneous
       
-      print('Service instantiation time: ${instantiationTime}ms');
+      UnifiedLogger.info('Service instantiation time: ${instantiationTime}ms');
       service.dispose();
     });
 
@@ -56,7 +56,7 @@ void main() {
       final queryTime = stopwatch.elapsedMilliseconds;
       
       expect(queryTime, lessThan(50)); // 100 queries should be very fast
-      print('100 status queries time: ${queryTime}ms (${queryTime/100}ms per query)');
+      UnifiedLogger.info('100 status queries time: ${queryTime}ms (${queryTime/100}ms per query)');
     });
 
     test('auth state queries are fast', () {
@@ -77,7 +77,7 @@ void main() {
       final authQueryTime = stopwatch.elapsedMilliseconds;
       
       expect(authQueryTime, lessThan(50)); // Should be very fast
-      print('100 auth queries time: ${authQueryTime}ms (${authQueryTime/100}ms per query)');
+      UnifiedLogger.info('100 auth queries time: ${authQueryTime}ms (${authQueryTime/100}ms per query)');
     });
 
     test('subscription stream creation is fast', () {
@@ -104,7 +104,7 @@ void main() {
       
       // Subscription attempt should be fast even if it fails
       expect(subscriptionTime, lessThan(10)); 
-      print('Subscription stream creation time: ${subscriptionTime}ms');
+      UnifiedLogger.info('Subscription stream creation time: ${subscriptionTime}ms');
     });
 
     test('multiple relay operations are efficient', () {
@@ -136,7 +136,7 @@ void main() {
       
       // 10 complete operation cycles should be very fast
       expect(operationsTime, lessThan(100));
-      print('10 operation cycles time: ${operationsTime}ms (${operationsTime/10}ms per cycle)');
+      UnifiedLogger.info('10 operation cycles time: ${operationsTime}ms (${operationsTime/10}ms per cycle)');
     });
 
     test('search interface responds quickly', () {
@@ -153,7 +153,7 @@ void main() {
       
       expect(searchStream, isA<Stream>());
       expect(searchTime, lessThan(5)); // Should be nearly instantaneous
-      print('Search interface response time: ${searchTime}ms');
+      UnifiedLogger.info('Search interface response time: ${searchTime}ms');
     });
 
     test('P2P interface responds quickly', () {
@@ -167,7 +167,7 @@ void main() {
       final p2pTime = stopwatch.elapsedMilliseconds;
       
       expect(p2pTime, lessThan(5)); // Should be nearly instantaneous
-      print('P2P interface response time: ${p2pTime}ms');
+      UnifiedLogger.info('P2P interface response time: ${p2pTime}ms');
     });
 
     test('service disposal is fast', () {
@@ -179,7 +179,7 @@ void main() {
       
       final disposeTime = stopwatch.elapsedMilliseconds;
       expect(disposeTime, lessThan(10)); // Should be very fast
-      print('Service disposal time: ${disposeTime}ms');
+      UnifiedLogger.info('Service disposal time: ${disposeTime}ms');
     });
 
     test('performance comparison demonstrates embedded relay speed advantage', () {
@@ -212,9 +212,9 @@ void main() {
       // These operations should be extremely fast with embedded relay
       expect(totalTime, lessThan(10));
       
-      print('Embedded relay operations time: ${totalTime}ms');
-      print('Expected external relay time: 200-1000ms (20-100x slower)');
-      print('Embedded relay speed advantage: ${200/totalTime.clamp(1, 1000)}x to ${1000/totalTime.clamp(1, 1000)}x faster');
+      UnifiedLogger.info('Embedded relay operations time: ${totalTime}ms');
+      UnifiedLogger.info('Expected external relay time: 200-1000ms (20-100x slower)');
+      UnifiedLogger.info('Embedded relay speed advantage: ${200/totalTime.clamp(1, 1000)}x to ${1000/totalTime.clamp(1, 1000)}x faster');
       
       // Verify we meet the performance target
       expect(totalTime, lessThan(100)); // Well under 100ms target
