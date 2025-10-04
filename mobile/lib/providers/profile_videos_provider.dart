@@ -120,143 +120,9 @@ void clearAllProfileVideosCache() {
       name: 'ProfileVideosProvider', category: LogCategory.ui);
 }
 
-/// Async provider for loading profile videos
-@riverpod
-Future<List<VideoEvent>> fetchProfileVideos(Ref ref, String pubkey) async {
-  // Check cache first
-  final cached = _getCachedProfileVideos(pubkey);
-  if (cached != null) {
-    return cached;
-  }
-
-  // Get services from app providers
-  final nostrService = ref.watch(nostrServiceProvider);
-  final videoEventService = ref.watch(videoEventServiceProvider);
-
-  Log.info(
-      '📱 Loading videos for user: ${pubkey.substring(0, 8)}... (full: ${pubkey.substring(0, 16)})',
-      name: 'ProfileVideosProvider',
-      category: LogCategory.ui);
-
-  try {
-    // First check VideoEventService cache for any videos by this author
-    final cachedVideos = videoEventService.getVideosByAuthor(pubkey);
-    if (cachedVideos.isNotEmpty) {
-      Log.info(
-          '📱 Found ${cachedVideos.length} cached videos for ${pubkey.substring(0, 8)} in VideoEventService',
-          name: 'ProfileVideosProvider',
-          category: LogCategory.ui);
-    }
-
-    // Fetch complete profile videos from network to augment cache
-    final filter = Filter(
-      authors: [pubkey],
-      kinds: NIP71VideoKinds.getAllVideoKinds(), // NIP-71 video events
-      limit: _profileVideosPageSize,
-    );
-
-    Log.info(
-        '📱 Querying for videos: authors=[${pubkey.substring(0, 16)}], kinds=${NIP71VideoKinds.getAllVideoKinds()}, limit=$_profileVideosPageSize',
-        name: 'ProfileVideosProvider',
-        category: LogCategory.ui);
-
-    final completer = Completer<List<VideoEvent>>();
-    // Start with cached videos to show immediately
-    final videos = <VideoEvent>[...cachedVideos];
-    final seenIds = <String>{...cachedVideos.map((v) => v.id)};
-
-    final subscription = nostrService.subscribeToEvents(
-      filters: [filter],
-      onEose: () {
-        Log.info(
-            '📱 Streaming EOSE: received ${videos.length} events for ${pubkey.substring(0, 8)}',
-            name: 'ProfileVideosProvider',
-            category: LogCategory.ui);
-        if (!completer.isCompleted) {
-          completer.complete(videos);
-        }
-      },
-    );
-
-    subscription.listen(
-      (event) {
-        // Process events immediately as they arrive
-        try {
-          final videoEvent = VideoEvent.fromNostrEvent(event);
-          // Only add if we haven't seen this video before
-          if (!seenIds.contains(videoEvent.id)) {
-            videos.add(videoEvent);
-            seenIds.add(videoEvent.id);
-
-            Log.debug(
-                '📱 Received new video event ${videoEvent.id.substring(0, 8)} for ${pubkey.substring(0, 8)}',
-                name: 'ProfileVideosProvider',
-                category: LogCategory.ui);
-          } else {
-            Log.debug(
-                '📱 Skipping duplicate video event ${videoEvent.id.substring(0, 8)}',
-                name: 'ProfileVideosProvider',
-                category: LogCategory.ui);
-          }
-        } catch (e) {
-          Log.warning('Failed to parse video event: $e',
-              name: 'ProfileVideosProvider', category: LogCategory.ui);
-        }
-      },
-      onError: (error) {
-        Log.error('Error fetching profile videos: $error',
-            name: 'ProfileVideosProvider', category: LogCategory.ui);
-        if (!completer.isCompleted) {
-          completer.complete(videos);
-        }
-      },
-      onDone: () {
-        Log.info(
-            '📱 Query completed: received ${videos.length} events for ${pubkey.substring(0, 8)}',
-            name: 'ProfileVideosProvider',
-            category: LogCategory.ui);
-
-        if (!completer.isCompleted) {
-          completer.complete(videos);
-        }
-      },
-    );
-
-    // Timeout for fetching - complete with whatever we have so far
-    Timer(const Duration(seconds: 10), () {
-      if (!completer.isCompleted) {
-        Log.info(
-            '📱 Timeout reached: completing with ${videos.length} videos for ${pubkey.substring(0, 8)}',
-            name: 'ProfileVideosProvider',
-            category: LogCategory.ui);
-        completer.complete(videos);
-      }
-    });
-
-    final finalVideos = await completer.future;
-
-    // Sort using loops-first policy
-    finalVideos.sort(VideoEvent.compareByLoopsThenTime);
-
-    // Cache the results
-    _cacheProfileVideos(
-        pubkey, finalVideos, finalVideos.length >= _profileVideosPageSize);
-
-    Log.info(
-        '📱 Loaded ${finalVideos.length} videos for ${pubkey.substring(0, 8)}',
-        name: 'ProfileVideosProvider',
-        category: LogCategory.ui);
-
-    return finalVideos;
-  } catch (e) {
-    Log.error('Error loading profile videos: $e',
-        name: 'ProfileVideosProvider', category: LogCategory.ui);
-    rethrow;
-  }
-}
-
 /// Notifier for managing profile videos state
-@Riverpod(keepAlive: true)
+/// keepAlive: false allows disposal when profile not visible - prevents ghost video playback
+@Riverpod(keepAlive: false)
 class ProfileVideosNotifier extends _$ProfileVideosNotifier {
   String? _currentPubkey;
   Completer<void>? _loadingCompleter;
@@ -648,7 +514,6 @@ class ProfileVideosNotifier extends _$ProfileVideosNotifier {
   Future<void> refreshVideos() async {
     if (_currentPubkey != null) {
       _clearProfileVideosCache(_currentPubkey!);
-      ref.invalidate(fetchProfileVideosProvider(_currentPubkey!));
       await loadVideosForUser(_currentPubkey!);
     }
   }

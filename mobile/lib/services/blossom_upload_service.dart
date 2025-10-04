@@ -297,9 +297,19 @@ class BlossomUploadService {
           Log.info('✅ File already exists on Blossom server (hash: $fileHash)',
               name: 'BlossomUploadService', category: LogCategory.video);
 
-          // File exists, fetch its metadata
-          final existingUrl = 'https://cdn.divine.video/$fileHash';
+          // Try to extract URL from response, fall back to cdn.divine.video
+          String existingUrl;
+          if (response.data is Map) {
+            final urlRaw = response.data['url'];
+            existingUrl = urlRaw?.toString() ?? 'https://cdn.divine.video/$fileHash';
+          } else {
+            existingUrl = 'https://cdn.divine.video/$fileHash';
+          }
+
           onProgress?.call(1.0);
+
+          Log.info('  Using existing URL: $existingUrl',
+              name: 'BlossomUploadService', category: LogCategory.video);
 
           return BlossomUploadResult(
             success: true,
@@ -314,16 +324,24 @@ class BlossomUploadService {
           onProgress?.call(0.95);
 
           // Parse Blossom BUD-01 response: {sha256, url, size, type, uploaded}
+          // Apply Postel's Law: be liberal in what we accept
           final blobData = response.data;
 
           if (blobData is Map) {
-            final sha256 = blobData['sha256'] as String?;
-            final mediaUrl = blobData['url'] as String?;
-            final uploadedTimestamp = blobData['uploaded'] as String?;
+            // Robustly extract fields - handle different types and missing fields
+            final sha256Raw = blobData['sha256'];
+            final sha256 = sha256Raw?.toString();
 
+            final urlRaw = blobData['url'];
+            final mediaUrl = urlRaw?.toString();
+
+            final uploadedRaw = blobData['uploaded'];
+            final uploadedTimestamp = uploadedRaw?.toString();
+
+            // URL is the only required field
             if (mediaUrl != null && mediaUrl.isNotEmpty) {
-              // Extract video ID from hash
-              final videoId = sha256 ?? fileHash;
+              // Extract video ID from hash, fallback to our calculated hash
+              final videoId = (sha256 != null && sha256.isNotEmpty) ? sha256 : fileHash;
 
               onProgress?.call(1.0);
 
@@ -331,7 +349,7 @@ class BlossomUploadService {
                   name: 'BlossomUploadService', category: LogCategory.video);
               Log.info('  URL: $mediaUrl',
                   name: 'BlossomUploadService', category: LogCategory.video);
-              Log.info('  SHA256: $sha256',
+              Log.info('  SHA256: ${sha256 ?? fileHash} ${sha256 == null ? "(calculated)" : ""}',
                   name: 'BlossomUploadService', category: LogCategory.video);
               Log.info('  Uploaded: ${uploadedTimestamp ?? "unknown"}',
                   name: 'BlossomUploadService', category: LogCategory.video);
@@ -342,15 +360,21 @@ class BlossomUploadService {
                 videoId: videoId,
               );
             } else {
+              // Log full response for debugging
+              Log.error('Missing or empty URL field in response. Full response: $blobData',
+                  name: 'BlossomUploadService', category: LogCategory.video);
               return BlossomUploadResult(
                 success: false,
-                errorMessage: 'Invalid Blossom response: missing URL field',
+                errorMessage: 'Invalid Blossom response: missing or empty URL field',
               );
             }
           } else {
+            // Log unexpected response type
+            Log.error('Expected JSON object, got: ${blobData.runtimeType}. Response: $blobData',
+                name: 'BlossomUploadService', category: LogCategory.video);
             return BlossomUploadResult(
               success: false,
-              errorMessage: 'Invalid Blossom response format: expected JSON object',
+              errorMessage: 'Invalid Blossom response format: expected JSON object, got ${blobData.runtimeType}',
             );
           }
         } else if (response.statusCode == 401) {

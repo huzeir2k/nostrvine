@@ -4,14 +4,9 @@
 import 'dart:io';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:openvine/models/pending_upload.dart';
-import 'package:openvine/services/upload_manager.dart';
-import 'package:openvine/services/video_event_publisher.dart';
-import 'package:openvine/services/blossom_upload_service.dart';
 
 void main() {
   group('Video Upload → Publish Flow', () {
-    late UploadManager uploadManager;
-    late VideoEventPublisher publisher;
     late File testVideoFile;
 
     setUp(() async {

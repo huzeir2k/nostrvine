@@ -1,12 +1,10 @@
 // ABOUTME: Tests for VideoPageView tab visibility behavior
 // ABOUTME: Ensures videos don't set active state when in background tabs
 
-import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:openvine/providers/individual_video_providers.dart';
 import 'package:openvine/providers/tab_visibility_provider.dart';
-import 'package:openvine/widgets/video_page_view.dart';
 
 void main() {
   group('VideoPageView Tab Visibility Logic', () {

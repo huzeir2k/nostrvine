@@ -6,15 +6,25 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:mockito/annotations.dart';
 import 'package:mockito/mockito.dart';
 import 'package:openvine/models/video_event.dart';
+import 'package:openvine/providers/app_providers.dart';
 import 'package:openvine/providers/home_feed_provider.dart';
 import 'package:openvine/providers/seen_videos_notifier.dart';
 import 'package:openvine/providers/social_providers.dart';
 import 'package:openvine/services/video_event_service.dart';
 import 'package:openvine/state/social_state.dart';
-import 'package:openvine/state/seen_videos_state.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import 'home_feed_seen_videos_test.mocks.dart';
+
+/// Test notifier that returns a fixed social state
+class _TestSocialNotifier extends SocialNotifier {
+  final SocialState _state;
+
+  _TestSocialNotifier(this._state);
+
+  @override
+  SocialState build() => _state;
+}
 
 @GenerateMocks([VideoEventService])
 void main() {
@@ -28,23 +38,27 @@ void main() {
 
     test('orders unseen videos before seen videos', () async {
       // Create test videos
-      final video1 = VideoEvent.forTesting(
+      final now = DateTime.now();
+      final video1 = VideoEvent(
         id: 'video1',
         pubkey: 'author1',
         content: 'Test video 1',
-        createdAt: DateTime.now().subtract(const Duration(hours: 3)),
+        createdAt: now.subtract(const Duration(hours: 3)).millisecondsSinceEpoch ~/ 1000,
+        timestamp: now.subtract(const Duration(hours: 3)),
       );
-      final video2 = VideoEvent.forTesting(
+      final video2 = VideoEvent(
         id: 'video2',
         pubkey: 'author1',
         content: 'Test video 2',
-        createdAt: DateTime.now().subtract(const Duration(hours: 2)),
+        createdAt: now.subtract(const Duration(hours: 2)).millisecondsSinceEpoch ~/ 1000,
+        timestamp: now.subtract(const Duration(hours: 2)),
       );
-      final video3 = VideoEvent.forTesting(
+      final video3 = VideoEvent(
         id: 'video3',
         pubkey: 'author1',
         content: 'Test video 3',
-        createdAt: DateTime.now().subtract(const Duration(hours: 1)),
+        createdAt: now.subtract(const Duration(hours: 1)).millisecondsSinceEpoch ~/ 1000,
+        timestamp: now.subtract(const Duration(hours: 1)),
       );
 
       // Setup mock service
@@ -57,12 +71,11 @@ void main() {
       final container = ProviderContainer(
         overrides: [
           videoEventServiceProvider.overrideWithValue(mockVideoService),
-          socialProvider.overrideWith((ref) {
-            return SocialState(
-              followingPubkeys: {'author1'},
-              followersPubkeys: {},
+          socialProvider.overrideWith(() {
+            return _TestSocialNotifier(SocialState(
+              followingPubkeys: ['author1'],
               isInitialized: true,
-            );
+            ));
           }),
         ],
       );
@@ -105,15 +118,20 @@ void main() {
     });
 
     test('all unseen videos when none are marked seen', () async {
-      final video1 = VideoEvent.forTesting(
+      final now = DateTime.now();
+      final video1 = VideoEvent(
         id: 'video1',
         pubkey: 'author1',
-        createdAt: DateTime.now(),
+        content: '',
+        createdAt: now.millisecondsSinceEpoch ~/ 1000,
+        timestamp: now,
       );
-      final video2 = VideoEvent.forTesting(
+      final video2 = VideoEvent(
         id: 'video2',
         pubkey: 'author1',
-        createdAt: DateTime.now(),
+        content: '',
+        createdAt: now.millisecondsSinceEpoch ~/ 1000,
+        timestamp: now,
       );
 
       when(mockVideoService.homeFeedVideos).thenReturn([video1, video2]);
@@ -124,12 +142,11 @@ void main() {
       final container = ProviderContainer(
         overrides: [
           videoEventServiceProvider.overrideWithValue(mockVideoService),
-          socialProvider.overrideWith((ref) {
-            return SocialState(
-              followingPubkeys: {'author1'},
-              followersPubkeys: {},
+          socialProvider.overrideWith(() {
+            return _TestSocialNotifier(SocialState(
+              followingPubkeys: ['author1'],
               isInitialized: true,
-            );
+            ));
           }),
         ],
       );
@@ -146,15 +163,20 @@ void main() {
     });
 
     test('all seen videos show in correct order', () async {
-      final video1 = VideoEvent.forTesting(
+      final now = DateTime.now();
+      final video1 = VideoEvent(
         id: 'video1',
         pubkey: 'author1',
-        createdAt: DateTime.now().subtract(const Duration(hours: 2)),
+        content: '',
+        createdAt: now.subtract(const Duration(hours: 2)).millisecondsSinceEpoch ~/ 1000,
+        timestamp: now.subtract(const Duration(hours: 2)),
       );
-      final video2 = VideoEvent.forTesting(
+      final video2 = VideoEvent(
         id: 'video2',
         pubkey: 'author1',
-        createdAt: DateTime.now().subtract(const Duration(hours: 1)),
+        content: '',
+        createdAt: now.subtract(const Duration(hours: 1)).millisecondsSinceEpoch ~/ 1000,
+        timestamp: now.subtract(const Duration(hours: 1)),
       );
 
       when(mockVideoService.homeFeedVideos).thenReturn([video1, video2]);
@@ -165,12 +187,11 @@ void main() {
       final container = ProviderContainer(
         overrides: [
           videoEventServiceProvider.overrideWithValue(mockVideoService),
-          socialProvider.overrideWith((ref) {
-            return SocialState(
-              followingPubkeys: {'author1'},
-              followersPubkeys: {},
+          socialProvider.overrideWith(() {
+            return _TestSocialNotifier(SocialState(
+              followingPubkeys: ['author1'],
               isInitialized: true,
-            );
+            ));
           }),
         ],
       );

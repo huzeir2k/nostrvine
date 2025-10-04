@@ -870,6 +870,8 @@ class MainNavigationScreenState extends ConsumerState<MainNavigationScreen> {
   late List<Widget> _screens; // Created once to preserve state
   final GlobalKey<State<ExploreScreen>> _exploreScreenKey =
       GlobalKey<State<ExploreScreen>>();
+  final GlobalKey<State<profile.ProfileScreenScrollable>> _profileScreenKey =
+      GlobalKey<State<profile.ProfileScreenScrollable>>();
 
   // Profile viewing state
   String? _viewingProfilePubkey; // null means viewing own profile
@@ -908,7 +910,7 @@ class MainNavigationScreenState extends ConsumerState<MainNavigationScreen> {
       ExploreScreen(key: _exploreScreenKey),
       // If starting on profile tab, create it immediately; otherwise use placeholder
       widget.initialTabIndex == 3
-          ? const profile.ProfileScreenScrollable(profilePubkey: null)
+          ? profile.ProfileScreenScrollable(key: _profileScreenKey, profilePubkey: null)
           : Container(),
     ];
 
@@ -963,7 +965,7 @@ class MainNavigationScreenState extends ConsumerState<MainNavigationScreen> {
       // Reset to current user's profile when tapping the tab
       _viewingProfilePubkey = null;
       setState(() {
-        _screens[3] = const profile.ProfileScreenScrollable(profilePubkey: null);
+        _screens[3] = profile.ProfileScreenScrollable(key: _profileScreenKey, profilePubkey: null);
       });
     }
 
@@ -1060,7 +1062,7 @@ class MainNavigationScreenState extends ConsumerState<MainNavigationScreen> {
 
     setState(() {
       _viewingProfilePubkey = profilePubkey;
-      _screens[3] = profile.ProfileScreenScrollable(profilePubkey: _viewingProfilePubkey);
+      _screens[3] = profile.ProfileScreenScrollable(key: _profileScreenKey, profilePubkey: _viewingProfilePubkey);
       _currentIndex = 3;
     });
   }
@@ -1168,7 +1170,11 @@ class MainNavigationScreenState extends ConsumerState<MainNavigationScreen> {
         );
         break;
       case 3:
-        title = 'Profile';
+        // Check if ProfileScreen has a custom title
+        final profileState = _profileScreenKey.currentState as dynamic;
+        final customTitle = profileState?.customTitle as String?;
+
+        title = customTitle ?? 'Profile';
         titleWidget = Text(
           title,
           style: const TextStyle(

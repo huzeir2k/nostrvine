@@ -79,7 +79,7 @@ class _VideoGridWidgetState extends ConsumerState<VideoGridWidget> {
       body: ExploreVideoScreenPure(
         startingVideo: widget.videos[_feedStartIndex],
         videoList: widget.videos,
-        contextTitle: 'Videos',
+        contextTitle: '', // Don't show generic "Videos" label
         startingIndex: _feedStartIndex,
       ),
     );

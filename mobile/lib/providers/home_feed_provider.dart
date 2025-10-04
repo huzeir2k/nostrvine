@@ -16,7 +16,7 @@ import 'package:riverpod_annotation/riverpod_annotation.dart';
 part 'home_feed_provider.g.dart';
 
 /// Home feed provider - shows videos only from people you follow
-/// keepAlive: true prevents disposal and unnecessary rebuilds during navigation
+/// keepAlive: true ensures videos persist across tab switches and rebuilds
 ///
 /// Rebuilds occur when:
 /// - Contact list changes (follow/unfollow)

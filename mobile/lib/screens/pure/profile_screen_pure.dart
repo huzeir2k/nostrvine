@@ -3,6 +3,7 @@
 
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:openvine/models/video_event.dart';
 import 'package:openvine/providers/profile_videos_provider.dart';
 import 'package:openvine/providers/app_providers.dart';
 import 'package:openvine/widgets/pure/video_grid_widget.dart';
@@ -67,6 +68,11 @@ class _ProfileScreenPureState extends ConsumerState<ProfileScreenPure>
         : _targetPubkey ?? 'unknown';
     Log.info('👤 ProfileScreenPure: Initialized for ${_isOwnProfile ? "own" : "other"} profile: $pubkeyPreview',
         category: LogCategory.video);
+
+    // Load videos for this profile
+    if (_targetPubkey != null) {
+      ref.read(profileVideosProvider.notifier).loadVideosForUser(_targetPubkey!);
+    }
   }
 
   @override
@@ -118,8 +124,15 @@ class _ProfileScreenPureState extends ConsumerState<ProfileScreenPure>
   }
 
   Widget _buildVideosTab() {
-    // Watch user's videos from profile provider
-    final videosAsync = ref.watch(fetchProfileVideosProvider(_targetPubkey!));
+    // Watch user's videos from profile notifier
+    final videosState = ref.watch(profileVideosProvider);
+
+    // Convert to AsyncValue for compatibility
+    final videosAsync = videosState.isLoading && videosState.videos.isEmpty
+        ? const AsyncValue<List<VideoEvent>>.loading()
+        : videosState.hasError
+            ? AsyncValue<List<VideoEvent>>.error(videosState.error!, StackTrace.current)
+            : AsyncValue.data(videosState.videos);
 
     return videosAsync.when(
       loading: () => const Center(

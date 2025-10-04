@@ -12,13 +12,12 @@ import 'package:openvine/providers/app_providers.dart';
 import 'package:openvine/widgets/user_avatar.dart';
 import 'package:openvine/providers/profile_stats_provider.dart';
 import 'package:openvine/providers/profile_videos_provider.dart';
-import 'package:openvine/screens/pure/universal_camera_screen_pure.dart';
-import 'package:openvine/screens/settings_screen.dart';
+import 'package:openvine/providers/individual_video_providers.dart';
+import 'package:openvine/providers/user_profile_providers.dart';
 import 'package:openvine/screens/vine_drafts_screen.dart';
 import 'package:openvine/screens/profile_setup_screen.dart';
 import 'package:openvine/services/auth_service.dart';
 import 'package:openvine/services/social_service.dart';
-import 'package:openvine/services/user_profile_service.dart';
 import 'package:openvine/theme/vine_theme.dart';
 import 'package:openvine/utils/nostr_encoding.dart';
 import 'package:openvine/utils/unified_logger.dart';
@@ -44,6 +43,24 @@ class _ProfileScreenScrollableState
   String? _targetPubkey;
   bool _isInitializing = true;
   final ScrollController _scrollController = ScrollController();
+
+  // Feed mode state (like ExploreScreen)
+  bool _isInFeedMode = false;
+  List<VideoEvent>? _feedVideos;
+  int _feedStartIndex = 0;
+
+  // Custom title for AppBar (like ExploreScreen pattern)
+  String? get customTitle {
+    if (_isInitializing || _targetPubkey == null) return null;
+
+    final authService = ref.read(authServiceProvider);
+    final userProfileService = ref.read(userProfileServiceProvider);
+
+    final authProfile = _isOwnProfile ? authService.currentProfile : null;
+    final cachedProfile = !_isOwnProfile ? userProfileService.getCachedProfile(_targetPubkey!) : null;
+
+    return authProfile?.displayName ?? cachedProfile?.displayName;
+  }
 
   @override
   void initState() {
@@ -181,6 +198,39 @@ class _ProfileScreenScrollableState
     super.dispose();
   }
 
+  void _enterFeedMode(List<VideoEvent> videos, int startIndex) {
+    if (!mounted) return;
+
+    setState(() {
+      _isInFeedMode = true;
+      _feedVideos = videos;
+      _feedStartIndex = startIndex;
+    });
+
+    // Set active video
+    if (startIndex >= 0 && startIndex < videos.length) {
+      ref.read(activeVideoProvider.notifier).setActiveVideo(videos[startIndex].id);
+    }
+
+    Log.info('🎯 ProfileScreen: Entered feed mode at index $startIndex',
+        category: LogCategory.video);
+  }
+
+  void _exitFeedMode() {
+    if (!mounted) return;
+
+    setState(() {
+      _isInFeedMode = false;
+      _feedVideos = null;
+    });
+
+    // Clear active video on exit
+    ref.read(activeVideoProvider.notifier).clearActiveVideo();
+
+    Log.info('🎯 ProfileScreen: Exited feed mode',
+        category: LogCategory.video);
+  }
+
   @override
   Widget build(BuildContext context) {
     // Show loading screen during initialization
@@ -203,22 +253,127 @@ class _ProfileScreenScrollableState
       );
     }
 
+    // If in feed mode, show full-screen video player (covers parent AppBar)
+    if (_isInFeedMode && _feedVideos != null) {
+      final authSvc = ref.watch(authServiceProvider);
+      final targetPubkey = _targetPubkey ?? authSvc.currentPublicKeyHex ?? '';
+
+      // Watch profile from embedded relay
+      final profileAsync = ref.watch(fetchUserProfileProvider(targetPubkey));
+      final displayName = profileAsync.value?.displayName ?? 'User';
+
+      // Get current video for edit/delete actions
+      final currentVideo = _feedVideos![_feedStartIndex];
+      final isOwnVideo = currentVideo.pubkey == authSvc.currentPublicKeyHex;
+
+      // Return full Scaffold to cover parent AppBar with gesture support
+      return Scaffold(
+        backgroundColor: Colors.black,
+        body: GestureDetector(
+          // Support swipe-down to exit (like TikTok/Instagram)
+          onVerticalDragEnd: (details) {
+            // Swipe down with sufficient velocity = exit
+            if (details.primaryVelocity != null && details.primaryVelocity! > 500) {
+              _exitFeedMode();
+            }
+          },
+          child: Stack(
+            children: [
+              // Video player (full screen)
+              ExploreVideoScreenPure(
+                startingVideo: currentVideo,
+                videoList: _feedVideos!,
+                contextTitle: displayName,
+                startingIndex: _feedStartIndex,
+              ),
+              // Clean header: [Profile Name] [Edit/Delete] - tappable to exit
+              Positioned(
+                top: 0,
+                left: 0,
+                right: 0,
+                child: SafeArea(
+                  bottom: false,
+                  child: GestureDetector(
+                    // Tap header to exit (Option 1)
+                    onTap: _exitFeedMode,
+                    child: Container(
+                      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                      decoration: BoxDecoration(
+                        gradient: LinearGradient(
+                          begin: Alignment.topCenter,
+                          end: Alignment.bottomCenter,
+                          colors: [
+                            Colors.black.withValues(alpha: 0.7),
+                            Colors.black.withValues(alpha: 0.4),
+                            Colors.transparent,
+                          ],
+                        ),
+                      ),
+                      child: Row(
+                        children: [
+                          // Profile name (tap to exit)
+                          Expanded(
+                            child: Text(
+                              displayName,
+                              style: const TextStyle(
+                                color: Colors.white,
+                                fontSize: 18,
+                                fontWeight: FontWeight.w600,
+                              ),
+                              overflow: TextOverflow.ellipsis,
+                            ),
+                          ),
+                          // Edit/Delete buttons for own videos
+                          if (isOwnVideo) ...[
+                            IconButton(
+                              icon: const Icon(Icons.edit, color: Colors.white, size: 22),
+                              onPressed: () {
+                                // TODO: Implement edit video
+                                ScaffoldMessenger.of(context).showSnackBar(
+                                  const SnackBar(content: Text('Edit video - coming soon')),
+                                );
+                              },
+                              tooltip: 'Edit video',
+                            ),
+                            IconButton(
+                              icon: const Icon(Icons.delete, color: Colors.white, size: 22),
+                              onPressed: () {
+                                // TODO: Implement delete video with confirmation
+                                ScaffoldMessenger.of(context).showSnackBar(
+                                  const SnackBar(content: Text('Delete video - coming soon')),
+                                );
+                              },
+                              tooltip: 'Delete video',
+                            ),
+                          ],
+                        ],
+                      ),
+                    ),
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ),
+      );
+    }
+
     final authService = ref.watch(authServiceProvider);
-    final userProfileService = ref.watch(userProfileServiceProvider);
     final socialService = ref.watch(socialServiceProvider);
 
     // Get the current user's pubkey for stats/videos
     final targetPubkey = _targetPubkey ?? authService.currentPublicKeyHex ?? '';
     final profileStatsAsync = ref.watch(fetchProfileStatsProvider(targetPubkey));
-    final profileVideosAsync = ref.watch(fetchProfileVideosProvider(targetPubkey));
 
-    final authProfile = _isOwnProfile ? authService.currentProfile : null;
-    final cachedProfile = !_isOwnProfile
-        ? userProfileService.getCachedProfile(_targetPubkey!)
-        : null;
-    final userName = authProfile?.displayName ??
-        cachedProfile?.displayName ??
-        'Loading user information';
+    // Watch the profile videos notifier state for reactive updates
+    final profileVideosState = ref.watch(profileVideosProvider);
+
+    // Convert notifier state to AsyncValue for compatibility with existing UI code
+    final profileVideosAsync = profileVideosState.isLoading && profileVideosState.videos.isEmpty
+        ? const AsyncValue<List<VideoEvent>>.loading()
+        : profileVideosState.hasError
+            ? AsyncValue<List<VideoEvent>>.error(profileVideosState.error!, StackTrace.current)
+            : AsyncValue.data(profileVideosState.videos);
 
     return Stack(
       children: [
@@ -227,59 +382,10 @@ class _ProfileScreenScrollableState
           child: NestedScrollView(
             controller: _scrollController,
             headerSliverBuilder: (context, innerBoxIsScrolled) => [
-              // Profile-specific header (no AppBar since we have a global one)
-              SliverToBoxAdapter(
-                child: Container(
-                  color: VineTheme.vineGreen,
-                  padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-                  child: Row(
-                    children: [
-                      const Icon(Icons.lock_outline,
-                          color: VineTheme.whiteText, size: 16),
-                      const SizedBox(width: 4),
-                      Text(
-                        userName,
-                        style: const TextStyle(
-                          color: Colors.white,
-                          fontWeight: FontWeight.bold,
-                          fontSize: 18,
-                        ),
-                      ),
-                      const Spacer(),
-                      if (_isOwnProfile) ...[
-                        IconButton(
-                          icon: const Icon(Icons.add_box_outlined,
-                              color: Colors.white),
-                          onPressed: _createNewVine,
-                        ),
-                        IconButton(
-                          icon: const Icon(
-                            Icons.menu,
-                            color: Colors.white,
-                            size: 24,
-                          ),
-                          onPressed: () {
-                            Log.debug('📱 Hamburger menu tapped',
-                                name: 'ProfileScreen',
-                                category: LogCategory.ui);
-                            _showOptionsMenu();
-                          },
-                        ),
-                      ] else ...[
-                        IconButton(
-                          icon: const Icon(Icons.more_vert, color: Colors.white),
-                          onPressed: _showUserOptions,
-                        ),
-                      ],
-                    ],
-                  ),
-                ),
-              ),
-
                 // Profile Header
                 SliverToBoxAdapter(
                   child: _buildScrollableProfileHeader(
-                      authService, userProfileService, profileStatsAsync),
+                      authService, profileStatsAsync),
                 ),
 
                 // Stats Row
@@ -327,16 +433,15 @@ class _ProfileScreenScrollableState
 
   Widget _buildScrollableProfileHeader(
     AuthService authService,
-    UserProfileService userProfileService,
     AsyncValue<ProfileStats> profileStatsAsync,
   ) {
-    final authProfile = _isOwnProfile ? authService.currentProfile : null;
-    final cachedProfile = !_isOwnProfile
-        ? userProfileService.getCachedProfile(_targetPubkey!)
-        : null;
+    // Watch profile from embedded relay (reactive)
+    final targetPubkey = _targetPubkey ?? authService.currentPublicKeyHex ?? '';
+    final profileAsync = ref.watch(fetchUserProfileProvider(targetPubkey));
+    final profile = profileAsync.value;
 
-    final profilePictureUrl = authProfile?.picture ?? cachedProfile?.picture;
-    final displayName = authProfile?.displayName ?? cachedProfile?.displayName;
+    final profilePictureUrl = profile?.picture;
+    final displayName = profile?.displayName;
     final hasCustomName = displayName != null &&
         !displayName.startsWith('npub1') &&
         displayName != 'Loading user information';
@@ -488,9 +593,7 @@ class _ProfileScreenScrollableState
                       ),
                     ),
                     // Add NIP-05 verification badge if verified
-                    if ((authProfile?.nip05 ?? cachedProfile?.nip05) != null &&
-                        (authProfile?.nip05 ?? cachedProfile?.nip05)!
-                            .isNotEmpty) ...[
+                    if (profile?.nip05 != null && profile!.nip05!.isNotEmpty) ...[
                       const SizedBox(width: 8),
                       Container(
                         padding: const EdgeInsets.all(3),
@@ -509,20 +612,18 @@ class _ProfileScreenScrollableState
                 ),
                 const SizedBox(height: 4),
                 // Show NIP-05 identifier if present
-                if ((authProfile?.nip05 ?? cachedProfile?.nip05) != null &&
-                    (authProfile?.nip05 ?? cachedProfile?.nip05)!.isNotEmpty)
+                if (profile?.nip05 != null && profile!.nip05!.isNotEmpty)
                   Text(
-                    authProfile?.nip05 ?? cachedProfile?.nip05 ?? '',
+                    profile.nip05!,
                     style: TextStyle(
                       color: Colors.grey[400],
                       fontSize: 13,
                     ),
                   ),
                 const SizedBox(height: 4),
-                if ((authProfile?.about ?? cachedProfile?.about) != null &&
-                    (authProfile?.about ?? cachedProfile?.about)!.isNotEmpty)
+                if (profile?.about != null && profile!.about!.isNotEmpty)
                   SelectableText(
-                    (authProfile?.about ?? cachedProfile?.about)!,
+                    profile.about!,
                     style: const TextStyle(
                       color: Colors.white,
                       fontSize: 14,
@@ -720,52 +821,9 @@ class _ProfileScreenScrollableState
                 return GestureDetector(
                   onTap: () {
                     final videos = profileVideosAsync.value ?? const <VideoEvent>[];
-
-                    // Get profile information for context (reconstruct profile data)
-                    final authSvc = ref.read(authServiceProvider);
-                    final userProfileSvc = ref.read(userProfileServiceProvider);
-                    final authProfile = _isOwnProfile ? authSvc.currentProfile : null;
-                    final cachedProfile = !_isOwnProfile
-                        ? userProfileSvc.getCachedProfile(_targetPubkey!)
-                        : null;
-                    final displayName = authProfile?.displayName ?? cachedProfile?.displayName ?? 'User';
-                    final profileTitle = _isOwnProfile ? 'Your Videos' : '$displayName\'s Videos';
-
-                    Navigator.of(context).push(
-                      MaterialPageRoute(
-                        builder: (context) => Scaffold(
-                          backgroundColor: Colors.black,
-                          appBar: AppBar(
-                            backgroundColor: Colors.black,
-                            leading: IconButton(
-                              icon: const Icon(Icons.arrow_back, color: Colors.white),
-                              onPressed: () => Navigator.of(context).pop(),
-                            ),
-                            title: Text(
-                              profileTitle,
-                              style: const TextStyle(color: Colors.white, fontSize: 16),
-                            ),
-                            actions: [
-                              // Show profile icon to indicate we're viewing someone's profile
-                              IconButton(
-                                icon: const Icon(Icons.person, color: Colors.white),
-                                onPressed: () {
-                                  // Pop back to profile screen
-                                  Navigator.of(context).pop();
-                                },
-                                tooltip: 'Back to Profile',
-                              ),
-                            ],
-                          ),
-                          body: ExploreVideoScreenPure(
-                            startingVideo: videoEvent,
-                            videoList: videos,
-                            contextTitle: profileTitle,
-                            startingIndex: index,
-                          ),
-                        ),
-                      ),
-                    );
+                    Log.info('🎯 ProfileScreen: Tapped video tile at index $index',
+                        category: LogCategory.video);
+                    _enterFeedMode(videos, index);
                   },
                   child: DecoratedBox(
                     decoration: BoxDecoration(
@@ -1168,77 +1226,6 @@ class _ProfileScreenScrollableState
       );
 
   // All the action methods
-  void _createNewVine() {
-    Navigator.push(
-      context,
-      MaterialPageRoute(
-        builder: (context) => const UniversalCameraScreenPure(),
-      ),
-    );
-  }
-
-  void _showOptionsMenu() {
-    showModalBottomSheet(
-      context: context,
-      backgroundColor: Colors.grey[900],
-      builder: (context) => SafeArea(
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            ListTile(
-              leading: const Icon(Icons.settings, color: VineTheme.vineGreen),
-              title: const Text(
-                'Settings',
-                style: TextStyle(color: Colors.white),
-              ),
-              onTap: () {
-                Navigator.pop(context);
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                    builder: (context) => const SettingsScreen(),
-                  ),
-                );
-              },
-            ),
-            ListTile(
-              leading: const Icon(Icons.copy, color: VineTheme.vineGreen),
-              title: const Text(
-                'Copy Public Key',
-                style: TextStyle(color: Colors.white),
-              ),
-              onTap: () {
-                Navigator.pop(context);
-                _copyNpubToClipboard();
-              },
-            ),
-            if (_isOwnProfile)
-              ListTile(
-                leading:
-                    const Icon(Icons.video_call, color: VineTheme.vineGreen),
-                title: const Text(
-                  'Record Video',
-                  style: TextStyle(color: Colors.white),
-                ),
-                onTap: () {
-                  Navigator.pop(context);
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                      builder: (context) => const UniversalCameraScreenPure(),
-                    ),
-                  );
-                },
-              ),
-          ],
-        ),
-      ),
-    );
-  }
-
-  void _showUserOptions() {
-    // Implementation from original file
-  }
 
   Future<void> _setupProfile() async {
     await Navigator.push(

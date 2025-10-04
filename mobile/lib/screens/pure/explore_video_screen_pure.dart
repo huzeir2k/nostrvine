@@ -51,8 +51,8 @@ class _ExploreVideoScreenPureState extends ConsumerState<ExploreVideoScreenPure>
     // CRITICAL: Clear active video when leaving to stop playback
     // This MUST happen to prevent background audio playing
     try {
-      final activeId = ref.read(activeVideoProvider);
-      Log.info('🛑 ExploreVideoScreenPure disposing - clearing active video: ${activeId?.substring(0, 8) ?? "none"}',
+      final activeId = ref.read(activeVideoProvider).currentVideoId;
+      Log.info('🛑 ExploreVideoScreenPure disposing - clearing active video: ${activeId != null ? activeId.substring(0, 8) : "none"}',
           name: 'ExploreVideoScreen', category: LogCategory.video);
 
       ref.read(activeVideoProvider.notifier).clearActiveVideo();
@@ -76,7 +76,7 @@ class _ExploreVideoScreenPureState extends ConsumerState<ExploreVideoScreenPure>
       hasBottomNavigation: false, // Explore feed mode has no bottom navigation
       enablePrewarming: true,
       enablePreloading: false, // Explore screen doesn't need preloading
-      enableLifecycleManagement: false, // Parent screen handles lifecycle
+      enableLifecycleManagement: true, // Enable lifecycle management for autoplay
       contextTitle: widget.contextTitle,
       onPageChanged: (index, video) {
         Log.debug('📄 Page changed to index $index (${video.id.substring(0, 8)}...)',

@@ -16,6 +16,18 @@ import 'package:openvine/services/video_event_service.dart';
 import '../helpers/test_helpers.dart';
 import 'search_screen_hybrid_search_test.mocks.dart';
 
+/// Test VideoEvents notifier that returns a fixed stream
+class _TestVideoEvents extends VideoEvents {
+  final List<VideoEvent> _videos;
+
+  _TestVideoEvents(this._videos);
+
+  @override
+  Stream<List<VideoEvent>> build() {
+    return Stream.value(_videos);
+  }
+}
+
 @GenerateNiceMocks([
   MockSpec<VideoEventService>(),
   MockSpec<UserProfileService>(),
@@ -78,7 +90,7 @@ void main() {
             userProfileServiceProvider
                 .overrideWithValue(mockUserProfileService),
             videoEventsProvider.overrideWith(
-                (ref) => Stream.value([localVideo]).asyncValue()),
+                () => _TestVideoEvents([localVideo])),
           ],
           child: const MaterialApp(
             home: SearchScreenPure(),
@@ -149,8 +161,8 @@ void main() {
             videoEventServiceProvider.overrideWithValue(mockVideoEventService),
             userProfileServiceProvider
                 .overrideWithValue(mockUserProfileService),
-            videoEventsProvider.overrideWith((ref) =>
-                Stream.value([video1, video2, video3]).asyncValue()),
+            videoEventsProvider.overrideWith(() =>
+                _TestVideoEvents([video1, video2, video3])),
           ],
           child: const MaterialApp(
             home: SearchScreenPure(),
@@ -189,7 +201,7 @@ void main() {
             userProfileServiceProvider
                 .overrideWithValue(mockUserProfileService),
             videoEventsProvider
-                .overrideWith((ref) => Stream.value([]).asyncValue()),
+                .overrideWith(() => _TestVideoEvents([])),
           ],
           child: const MaterialApp(
             home: SearchScreenPure(),
@@ -245,7 +257,7 @@ void main() {
             userProfileServiceProvider
                 .overrideWithValue(mockUserProfileService),
             videoEventsProvider.overrideWith(
-                (ref) => Stream.value([video1, video2, video3]).asyncValue()),
+                () => _TestVideoEvents([video1, video2, video3])),
           ],
           child: const MaterialApp(
             home: SearchScreenPure(),
@@ -309,7 +321,7 @@ void main() {
             userProfileServiceProvider
                 .overrideWithValue(mockUserProfileService),
             videoEventsProvider.overrideWith(
-                (ref) => Stream.value([localVideo]).asyncValue()),
+                () => _TestVideoEvents([localVideo])),
           ],
           child: const MaterialApp(
             home: SearchScreenPure(),

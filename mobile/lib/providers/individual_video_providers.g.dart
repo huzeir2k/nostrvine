@@ -81,7 +81,7 @@ final class IndividualVideoControllerProvider
 }
 
 String _$individualVideoControllerHash() =>
-    r'70a4b082306bd8d53e0489e7aa911de35db210b3';
+    r'590f7cf9f018c641ed9cc701dfe75ea19ffd99d6';
 
 /// Provider for individual video controllers with autoDispose
 /// Each video gets its own controller instance
@@ -264,7 +264,7 @@ final class IsVideoActiveProvider extends $FunctionalProvider<bool, bool, bool>
   }
 }
 
-String _$isVideoActiveHash() => r'd5fa4709a64fd373a99ad5da32e09c44d0d96cc0';
+String _$isVideoActiveHash() => r'86924348acd0f3d501cda46ce176f79aa3814511';
 
 /// Provider for checking if a specific video is currently active
 

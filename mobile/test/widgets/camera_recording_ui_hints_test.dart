@@ -8,6 +8,16 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:openvine/providers/vine_recording_provider.dart';
 import 'package:openvine/services/vine_recording_controller.dart';
 
+/// Test notifier that returns a fixed state
+class _TestVineRecordingNotifier extends VineRecordingNotifier {
+  final VineRecordingUIState _state;
+
+  _TestVineRecordingNotifier(this._state, VineRecordingController controller, Ref ref)
+      : super(controller, ref) {
+    state = _state; // Set the initial state
+  }
+}
+
 void main() {
   group('Camera Recording UI Hints Tests', () {
     testWidgets('should show "Tap to record" hint on web platform', (tester) async {
@@ -24,7 +34,8 @@ void main() {
       await tester.pumpWidget(
         ProviderScope(
           overrides: [
-            vineRecordingProvider.overrideWith((ref) => mockState),
+            vineRecordingProvider.overrideWith((ref) =>
+                _TestVineRecordingNotifier(mockState, VineRecordingController(), ref)),
           ],
           child: MaterialApp(
             home: Scaffold(
@@ -89,7 +100,8 @@ void main() {
       await tester.pumpWidget(
         ProviderScope(
           overrides: [
-            vineRecordingProvider.overrideWith((ref) => mockState),
+            vineRecordingProvider.overrideWith((ref) =>
+                _TestVineRecordingNotifier(mockState, VineRecordingController(), ref)),
           ],
           child: MaterialApp(
             home: Scaffold(
@@ -140,7 +152,8 @@ void main() {
       await tester.pumpWidget(
         ProviderScope(
           overrides: [
-            vineRecordingProvider.overrideWith((ref) => mockState),
+            vineRecordingProvider.overrideWith((ref) =>
+                _TestVineRecordingNotifier(mockState, VineRecordingController(), ref)),
           ],
           child: MaterialApp(
             home: Scaffold(
@@ -180,7 +193,8 @@ void main() {
       await tester.pumpWidget(
         ProviderScope(
           overrides: [
-            vineRecordingProvider.overrideWith((ref) => mockState),
+            vineRecordingProvider.overrideWith((ref) =>
+                _TestVineRecordingNotifier(mockState, VineRecordingController(), ref)),
           ],
           child: MaterialApp(
             home: Scaffold(
@@ -228,7 +242,8 @@ void main() {
       await tester.pumpWidget(
         ProviderScope(
           overrides: [
-            vineRecordingProvider.overrideWith((ref) => mockState),
+            vineRecordingProvider.overrideWith((ref) =>
+                _TestVineRecordingNotifier(mockState, VineRecordingController(), ref)),
           ],
           child: MaterialApp(
             home: Scaffold(

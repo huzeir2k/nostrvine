@@ -9,7 +9,7 @@ part of 'home_feed_provider.dart';
 // GENERATED CODE - DO NOT MODIFY BY HAND
 // ignore_for_file: type=lint, type=warning
 /// Home feed provider - shows videos only from people you follow
-/// keepAlive: true prevents disposal and unnecessary rebuilds during navigation
+/// keepAlive: true ensures videos persist across tab switches and rebuilds
 ///
 /// Rebuilds occur when:
 /// - Contact list changes (follow/unfollow)
@@ -20,7 +20,7 @@ part of 'home_feed_provider.dart';
 const homeFeedProvider = HomeFeedProvider._();
 
 /// Home feed provider - shows videos only from people you follow
-/// keepAlive: true prevents disposal and unnecessary rebuilds during navigation
+/// keepAlive: true ensures videos persist across tab switches and rebuilds
 ///
 /// Rebuilds occur when:
 /// - Contact list changes (follow/unfollow)
@@ -29,7 +29,7 @@ const homeFeedProvider = HomeFeedProvider._();
 final class HomeFeedProvider
     extends $AsyncNotifierProvider<HomeFeed, VideoFeedState> {
   /// Home feed provider - shows videos only from people you follow
-  /// keepAlive: true prevents disposal and unnecessary rebuilds during navigation
+  /// keepAlive: true ensures videos persist across tab switches and rebuilds
   ///
   /// Rebuilds occur when:
   /// - Contact list changes (follow/unfollow)
@@ -57,7 +57,7 @@ final class HomeFeedProvider
 String _$homeFeedHash() => r'0321bbbe7d72d313234ed6575118155f14ee96dc';
 
 /// Home feed provider - shows videos only from people you follow
-/// keepAlive: true prevents disposal and unnecessary rebuilds during navigation
+/// keepAlive: true ensures videos persist across tab switches and rebuilds
 ///
 /// Rebuilds occur when:
 /// - Contact list changes (follow/unfollow)

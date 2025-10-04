@@ -1,7 +1,6 @@
 // ABOUTME: Integration test to reproduce and fix the "Cannot add new events after calling close" race condition
 // ABOUTME: Tests that embedded relay properly handles disposal while external relay events are still arriving
 
-import 'dart:async';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:openvine/services/nostr_service.dart';
 import 'package:openvine/services/nostr_key_manager.dart';

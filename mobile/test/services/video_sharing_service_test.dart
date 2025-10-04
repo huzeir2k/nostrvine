@@ -37,7 +37,6 @@ void main() {
       nostrService: mockNostrService,
       authService: mockAuthService,
       userProfileService: mockUserProfileService,
-      socialService: mockSocialService,
     );
   });
 

@@ -1,7 +1,6 @@
 // ABOUTME: Manual test script to verify Blossom upload works against real cf-stream-service-prod server
 // ABOUTME: Run with: dart run test/manual/test_blossom_upload_live.dart
 
-import 'dart:io';
 import 'dart:convert';
 import 'package:crypto/crypto.dart';
 import 'package:http/http.dart' as http;

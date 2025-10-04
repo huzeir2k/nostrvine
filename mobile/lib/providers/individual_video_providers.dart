@@ -105,8 +105,8 @@ VideoPlayerController individualVideoController(
   void rescheduleDrop() {
     dropTimer?.cancel();
     // Re-evaluate current activity/prewarm state at the moment of scheduling
-    final currentActiveId = ref.read(activeVideoProvider);
-    final isActiveNow = currentActiveId == params.videoId;
+    final currentActiveState = ref.read(activeVideoProvider);
+    final isActiveNow = currentActiveState.currentVideoId == params.videoId;
     final isPrewarmedNow = ref.read(prewarmManagerProvider).contains(params.videoId);
 
     // Give a small grace period before releasing when neither active nor prewarmed
@@ -120,7 +120,7 @@ VideoPlayerController individualVideoController(
   }
 
   // React to active/prewarm changes to adjust lifetime
-  ref.listen<String?>(activeVideoProvider, (_, __) => rescheduleDrop());
+  ref.listen<ActiveVideoState>(activeVideoProvider, (_, __) => rescheduleDrop());
   ref.listen<Set<String>>(prewarmManagerProvider, (_, __) => rescheduleDrop());
 
   // Ensure timer is cleared on dispose
@@ -283,34 +283,75 @@ VideoLoadingState videoLoadingState(
   );
 }
 
-/// Active video state notifier
-class ActiveVideoNotifier extends StateNotifier<String?> {
-  ActiveVideoNotifier() : super(null);
+/// Active video state with previous video tracking for proper pause handling
+class ActiveVideoState {
+  const ActiveVideoState({this.currentVideoId, this.previousVideoId});
+
+  final String? currentVideoId;
+  final String? previousVideoId;
+
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      other is ActiveVideoState &&
+          currentVideoId == other.currentVideoId &&
+          previousVideoId == other.previousVideoId;
+
+  @override
+  int get hashCode => currentVideoId.hashCode ^ previousVideoId.hashCode;
+}
+
+/// Active video state notifier that tracks transitions
+class ActiveVideoNotifier extends StateNotifier<ActiveVideoState> {
+  ActiveVideoNotifier() : super(const ActiveVideoState());
 
   void setActiveVideo(String videoId) {
-    Log.info('🎯 Setting active video to ${videoId.length > 8 ? videoId.substring(0, 8) : videoId}...',
+    // If setting the same video as active, do nothing
+    if (state.currentVideoId == videoId) {
+      Log.debug('🔄 Video ${videoId.length > 8 ? videoId.substring(0, 8) : videoId}... already active, skipping',
+          name: 'ActiveVideoNotifier', category: LogCategory.system);
+      return;
+    }
+
+    final videoIdDisplay = videoId.length > 8 ? videoId.substring(0, 8) : videoId;
+    final previousIdDisplay = state.currentVideoId != null && state.currentVideoId!.length > 8
+        ? state.currentVideoId!.substring(0, 8)
+        : state.currentVideoId ?? 'none';
+    Log.info('🎯 Setting active video to $videoIdDisplay... (previous: $previousIdDisplay...)',
         name: 'ActiveVideoNotifier', category: LogCategory.system);
-    state = videoId;
+
+    // Update state with new current and track previous
+    state = ActiveVideoState(
+      currentVideoId: videoId,
+      previousVideoId: state.currentVideoId,
+    );
   }
 
   void clearActiveVideo() {
-    Log.info('🔄 Clearing active video',
+    final previousIdDisplay = state.currentVideoId != null && state.currentVideoId!.length > 8
+        ? state.currentVideoId!.substring(0, 8)
+        : state.currentVideoId ?? 'none';
+    Log.info('🔄 Clearing active video (was: $previousIdDisplay...)',
         name: 'ActiveVideoNotifier', category: LogCategory.system);
-    state = null;
+
+    state = ActiveVideoState(
+      currentVideoId: null,
+      previousVideoId: state.currentVideoId,
+    );
   }
 }
 
 /// Provider for tracking which video is currently active
-final activeVideoProvider = StateNotifierProvider<ActiveVideoNotifier, String?>((ref) {
+final activeVideoProvider = StateNotifierProvider<ActiveVideoNotifier, ActiveVideoState>((ref) {
   return ActiveVideoNotifier();
 });
 
 /// Provider for checking if a specific video is currently active
 @riverpod
 bool isVideoActive(Ref ref, String videoId) {
-  final activeVideoId = ref.watch(activeVideoProvider);
-  final isActive = activeVideoId == videoId;
-  Log.debug('🔍 isVideoActive: videoId=${videoId.length > 8 ? videoId.substring(0, 8) : videoId}..., activeVideoId=${activeVideoId != null && activeVideoId.length > 8 ? activeVideoId.substring(0, 8) : activeVideoId ?? 'null'}, isActive=$isActive',
+  final activeVideoState = ref.watch(activeVideoProvider);
+  final isActive = activeVideoState.currentVideoId == videoId;
+  Log.debug('🔍 isVideoActive: videoId=${videoId.length > 8 ? videoId.substring(0, 8) : videoId}..., activeVideoId=${activeVideoState.currentVideoId != null && activeVideoState.currentVideoId!.length > 8 ? activeVideoState.currentVideoId!.substring(0, 8) : activeVideoState.currentVideoId ?? 'null'}, isActive=$isActive',
       name: 'IsVideoActive', category: LogCategory.system);
   return isActive;
 }

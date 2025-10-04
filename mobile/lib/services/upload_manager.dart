@@ -11,7 +11,6 @@ import 'package:openvine/services/circuit_breaker_service.dart';
 import 'package:openvine/services/blossom_upload_service.dart';
 import 'package:openvine/services/crash_reporting_service.dart';
 import 'package:openvine/services/upload_initialization_helper.dart';
-import 'package:openvine/services/video_thumbnail_service.dart';
 import 'package:openvine/utils/async_utils.dart';
 import 'package:openvine/utils/unified_logger.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -552,80 +551,6 @@ class UploadManager {
     } else {
       throw Exception(
           result.errorMessage ?? 'Upload failed with unknown error');
-    }
-  }
-
-  /// Generate thumbnail from video and upload to Blossom server
-  Future<String?> _generateAndUploadThumbnail({
-    required File videoFile,
-    required String nostrPubkey,
-    required PendingUpload upload,
-  }) async {
-    try {
-      Log.info('📸 Extracting thumbnail from video: ${videoFile.path}',
-          name: 'UploadManager', category: LogCategory.video);
-
-      // Generate thumbnail at optimal timestamp
-      final thumbnailPath = await VideoThumbnailService.extractThumbnail(
-        videoPath: videoFile.path,
-        timeMs: 500, // Extract at 500ms
-        quality: 85,
-      );
-
-      if (thumbnailPath == null) {
-        Log.warning('❌ Failed to extract thumbnail from video',
-            name: 'UploadManager', category: LogCategory.video);
-        return null;
-      }
-
-      final thumbnailFile = File(thumbnailPath);
-      if (!thumbnailFile.existsSync()) {
-        Log.warning('❌ Thumbnail file not found after extraction',
-            name: 'UploadManager', category: LogCategory.video);
-        return null;
-      }
-
-      Log.info('✅ Thumbnail extracted, uploading to Blossom server',
-          name: 'UploadManager', category: LogCategory.video);
-
-      _updateUploadProgress(upload.id, 0.85);
-
-      // Upload thumbnail to Blossom server
-      final thumbnailResult = await _blossomService.uploadImage(
-        imageFile: thumbnailFile,
-        nostrPubkey: nostrPubkey,
-        mimeType: 'image/jpeg',
-        onProgress: (progress) {
-          // Map thumbnail progress to 85%-100% of total upload
-          _updateUploadProgress(upload.id, 0.85 + (progress * 0.15));
-        },
-      );
-
-      // Clean up local thumbnail file
-      try {
-        await thumbnailFile.delete();
-        Log.debug('🧹 Cleaned up local thumbnail file',
-            name: 'UploadManager', category: LogCategory.video);
-      } catch (e) {
-        Log.warning('Failed to delete local thumbnail file: $e',
-            name: 'UploadManager', category: LogCategory.video);
-      }
-
-      if (thumbnailResult.success && thumbnailResult.cdnUrl != null) {
-        Log.info('✅ Thumbnail uploaded successfully: ${thumbnailResult.cdnUrl}',
-            name: 'UploadManager', category: LogCategory.video);
-        return thumbnailResult.cdnUrl;
-      } else {
-        Log.warning('❌ Thumbnail upload failed: ${thumbnailResult.errorMessage}',
-            name: 'UploadManager', category: LogCategory.video);
-        return null;
-      }
-    } catch (e, stackTrace) {
-      Log.error('❌ Thumbnail generation/upload error: $e',
-          name: 'UploadManager', category: LogCategory.video);
-      Log.verbose('Stack trace: $stackTrace',
-          name: 'UploadManager', category: LogCategory.video);
-      return null;
     }
   }
 

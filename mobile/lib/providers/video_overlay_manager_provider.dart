@@ -88,7 +88,7 @@ class VideoOverlayManager {
   /// Toggle play/pause for specific video (VideoOverlayModal expects this method)
   void togglePlayPause(VideoEvent video) {
     try {
-      final currentActive = _ref.read(activeVideoProvider);
+      final currentActive = _ref.read(activeVideoProvider).currentVideoId;
 
       if (currentActive == video.id) {
         // Currently active - pause by clearing
@@ -135,7 +135,7 @@ class VideoOverlayManager {
   Set<String> get registeredVideos => Set.unmodifiable(_registeredVideos);
 
   /// Get currently active video ID
-  String? get activeVideoId => _ref.read(activeVideoProvider);
+  String? get activeVideoId => _ref.read(activeVideoProvider).currentVideoId;
 }
 
 /// Provider for VideoOverlayManager that VideoOverlayModal can use

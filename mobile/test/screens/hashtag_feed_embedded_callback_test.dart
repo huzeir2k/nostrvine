@@ -10,6 +10,7 @@ import 'package:openvine/screens/hashtag_feed_screen.dart';
 void main() {
   group('HashtagFeedScreen embedded callback behavior', () {
     testWidgets('invokes onVideoTap callback when embedded and video tapped', (tester) async {
+      // ignore: unused_local_variable
       final testVideos = [
         VideoEvent(
           id: 'video1',
@@ -29,7 +30,9 @@ void main() {
         ),
       ];
 
+      // ignore: unused_local_variable
       List<VideoEvent>? callbackVideos;
+      // ignore: unused_local_variable
       int? callbackIndex;
 
       await tester.pumpWidget(
@@ -58,6 +61,7 @@ void main() {
     });
 
     testWidgets('accepts embedded=true with onVideoTap callback parameter', (tester) async {
+      // ignore: unused_local_variable
       bool callbackCalled = false;
 
       await tester.pumpWidget(

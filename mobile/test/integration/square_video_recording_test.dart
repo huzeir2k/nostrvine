@@ -1,12 +1,9 @@
 // ABOUTME: Integration test for square (1:1 aspect ratio) video recording
 // ABOUTME: Tests that videos are recorded in Vine-style square format, not vertical or horizontal
 
-import 'dart:io';
-import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:openvine/providers/vine_recording_provider.dart';
-import 'package:openvine/services/vine_recording_controller.dart';
 import 'package:video_player/video_player.dart';
 
 void main() {

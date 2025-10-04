@@ -41,9 +41,13 @@ void main() {
     });
 
     testWidgets('marks video as seen when playing', (tester) async {
-      final video = VideoEvent.forTesting(
+      final now = DateTime.now();
+      final video = VideoEvent(
         id: 'test_video_123',
+        pubkey: 'test_pubkey',
         content: 'Test video',
+        createdAt: now.millisecondsSinceEpoch ~/ 1000,
+        timestamp: now,
       );
 
       final container = ProviderContainer(
@@ -82,9 +86,13 @@ void main() {
     });
 
     testWidgets('tracks loop count', (tester) async {
-      final video = VideoEvent.forTesting(
+      final now = DateTime.now();
+      final video = VideoEvent(
         id: 'looping_video',
+        pubkey: 'test_pubkey',
         content: 'Looping video',
+        createdAt: now.millisecondsSinceEpoch ~/ 1000,
+        timestamp: now,
       );
 
       final container = ProviderContainer(
@@ -136,9 +144,14 @@ void main() {
     });
 
     testWidgets('does not mark as seen if video errors', (tester) async {
-      final video = VideoEvent.forTesting(
+      final now = DateTime.now();
+      final video = VideoEvent(
         id: 'error_video',
+        pubkey: 'test-pubkey',
         content: 'Error video',
+        createdAt: now.millisecondsSinceEpoch ~/ 1000,
+        timestamp: now,
+        videoUrl: 'https://example.com/error_video.mp4',
       );
 
       when(mockController.value).thenReturn(VideoPlayerValue.erroneous('Network error'));

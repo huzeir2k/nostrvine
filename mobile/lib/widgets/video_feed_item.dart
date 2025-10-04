@@ -42,8 +42,6 @@ class VideoFeedItem extends ConsumerStatefulWidget {
 }
 
 class _VideoFeedItemState extends ConsumerState<VideoFeedItem> {
-  Offset? _tapStartPosition;
-  DateTime? _tapStartTime;
   int _playbackGeneration = 0; // Prevents race conditions with rapid state changes
 
   /// Translate error messages to user-friendly text
@@ -131,20 +129,54 @@ class _VideoFeedItemState extends ConsumerState<VideoFeedItem> {
       );
       final controller = ref.read(individualVideoControllerProvider(controllerParams));
 
-      if (shouldPlay && controller.value.isInitialized && !controller.value.isPlaying) {
-        Log.info('▶️ Widget starting video $videoIdDisplay...',
-            name: 'VideoFeedItem', category: LogCategory.ui);
-        controller.play().then((_) {
-          if (gen != _playbackGeneration) {
-            Log.debug('⏭️ Ignoring stale play() completion for $videoIdDisplay...',
-                name: 'VideoFeedItem', category: LogCategory.ui);
+      if (shouldPlay) {
+        if (controller.value.isInitialized && !controller.value.isPlaying) {
+          // Controller ready - play immediately
+          Log.info('▶️ Widget starting video $videoIdDisplay...',
+              name: 'VideoFeedItem', category: LogCategory.ui);
+          controller.play().then((_) {
+            if (gen != _playbackGeneration) {
+              Log.debug('⏭️ Ignoring stale play() completion for $videoIdDisplay...',
+                  name: 'VideoFeedItem', category: LogCategory.ui);
+            }
+          }).catchError((error) {
+            if (gen == _playbackGeneration) {
+              Log.error('❌ Widget failed to play video $videoIdDisplay...: $error',
+                  name: 'VideoFeedItem', category: LogCategory.ui);
+            }
+          });
+        } else if (!controller.value.isInitialized && !controller.value.hasError) {
+          // Controller not ready yet - wait for initialization then play
+          Log.debug('⏳ Waiting for initialization of $videoIdDisplay... before playing',
+              name: 'VideoFeedItem', category: LogCategory.ui);
+
+          void checkAndPlay() {
+            if (gen != _playbackGeneration) {
+              // State changed, ignore this attempt
+              Log.debug('⏭️ Ignoring stale initialization callback for $videoIdDisplay...',
+                  name: 'VideoFeedItem', category: LogCategory.ui);
+              return;
+            }
+
+            if (controller.value.isInitialized && !controller.value.isPlaying) {
+              Log.info('▶️ Widget starting video $videoIdDisplay... after initialization',
+                  name: 'VideoFeedItem', category: LogCategory.ui);
+              controller.play().catchError((error) {
+                if (gen == _playbackGeneration) {
+                  Log.error('❌ Widget failed to play video $videoIdDisplay... after init: $error',
+                      name: 'VideoFeedItem', category: LogCategory.ui);
+                }
+              });
+            }
           }
-        }).catchError((error) {
-          if (gen == _playbackGeneration) {
-            Log.error('❌ Widget failed to play video $videoIdDisplay...: $error',
-                name: 'VideoFeedItem', category: LogCategory.ui);
-          }
-        });
+
+          // Listen for initialization completion
+          controller.addListener(checkAndPlay);
+          // Clean up listener after first initialization or when generation changes
+          Future.delayed(const Duration(seconds: 10), () {
+            controller.removeListener(checkAndPlay);
+          });
+        }
       } else if (!shouldPlay && controller.value.isPlaying) {
         Log.info('⏸️ Widget pausing video $videoIdDisplay...',
             name: 'VideoFeedItem', category: LogCategory.ui);
@@ -188,7 +220,11 @@ class _VideoFeedItemState extends ConsumerState<VideoFeedItem> {
     // Watch if this video is currently active
     final isActive = ref.watch(isVideoActiveProvider(video.id));
 
-    Log.debug('📱 VideoFeedItem state: isActive=$isActive',
+    // Watch if this video is prewarmed (neighbor to active video)
+    final prewarmSet = ref.watch(prewarmManagerProvider);
+    final isPrewarmed = prewarmSet.contains(video.id);
+
+    Log.debug('📱 VideoFeedItem state: isActive=$isActive, isPrewarmed=$isPrewarmed',
         name: 'VideoFeedItem', category: LogCategory.ui);
 
     return VisibilityDetector(
@@ -199,9 +235,9 @@ class _VideoFeedItemState extends ConsumerState<VideoFeedItem> {
             name: 'VideoFeedItem', category: LogCategory.ui);
 
         try {
-          final currentActiveId = ref.read(activeVideoProvider);
+          final currentActiveState = ref.read(activeVideoProvider);
           if (isVisible) {
-            if (currentActiveId != video.id) {
+            if (currentActiveState.currentVideoId != video.id) {
               Log.debug('📱 Video $videoIdDisplay... visible, setting as active',
                   name: 'VideoFeedItem', category: LogCategory.ui);
               ref.read(activeVideoProvider.notifier).setActiveVideo(video.id);
@@ -253,8 +289,8 @@ class _VideoFeedItemState extends ConsumerState<VideoFeedItem> {
           child: Stack(
             fit: StackFit.expand,
             children: [
-              // Per-item video controller rendering when active
-              if (isActive)
+              // Per-item video controller rendering when active OR prewarmed
+              if (isActive || isPrewarmed)
                 Consumer(
                   builder: (context, ref, child) {
                     final controllerParams = VideoControllerParams(
@@ -266,30 +302,27 @@ class _VideoFeedItemState extends ConsumerState<VideoFeedItem> {
                       individualVideoControllerProvider(controllerParams),
                     );
 
-                    // Wrap with VideoMetricsTracker to track engagement and mark as seen
-                    return VideoMetricsTracker(
-                      video: video,
-                      controller: controller,
-                      // Listen to controller value so UI updates when initialized/playing state changes
-                      child: ValueListenableBuilder<VideoPlayerValue>(
-                        valueListenable: controller,
-                        builder: (context, value, _) {
-                          // Let the individual controller handle autoplay based on active state
-                          // Don't interfere with playback control here
+                    // Only track metrics for active videos
+                    final videoWidget = ValueListenableBuilder<VideoPlayerValue>(
+                      valueListenable: controller,
+                      builder: (context, value, _) {
+                        // Let the individual controller handle autoplay based on active state
+                        // Don't interfere with playback control here
 
-                          // Check for video error state
-                          if (value.hasError) {
-                          final errorMessage = _getErrorMessage(value.errorDescription);
-                          return Stack(
-                            fit: StackFit.expand,
-                            children: [
-                              // Show thumbnail as background
-                              VideoThumbnailWidget(
-                                video: video,
-                                fit: BoxFit.cover,
-                                showPlayIcon: false,
-                              ),
-                              // Error overlay
+                        // Check for video error state
+                        if (value.hasError) {
+                        final errorMessage = _getErrorMessage(value.errorDescription);
+                        return Stack(
+                          fit: StackFit.expand,
+                          children: [
+                            // Show thumbnail as background
+                            VideoThumbnailWidget(
+                              video: video,
+                              fit: BoxFit.cover,
+                              showPlayIcon: false,
+                            ),
+                            // Error overlay (only show on active video)
+                            if (isActive)
                               Container(
                                 color: Colors.black54,
                                 child: Center(
@@ -328,20 +361,22 @@ class _VideoFeedItemState extends ConsumerState<VideoFeedItem> {
                                   ),
                                 ),
                               ),
-                            ],
-                          );
-                        }
+                          ],
+                        );
+                      }
 
-                        if (!value.isInitialized) {
-                          // Show thumbnail/blurhash while the video initializes
-                          return Stack(
-                            fit: StackFit.expand,
-                            children: [
-                              VideoThumbnailWidget(
-                                video: video,
-                                fit: BoxFit.cover,
-                                showPlayIcon: false,
-                              ),
+                      if (!value.isInitialized) {
+                        // Show thumbnail/blurhash while the video initializes
+                        return Stack(
+                          fit: StackFit.expand,
+                          children: [
+                            VideoThumbnailWidget(
+                              video: video,
+                              fit: BoxFit.cover,
+                              showPlayIcon: false,
+                            ),
+                            // Only show loading indicator on active video
+                            if (isActive)
                               const Center(
                                 child: SizedBox(
                                   width: 28,
@@ -349,33 +384,41 @@ class _VideoFeedItemState extends ConsumerState<VideoFeedItem> {
                                   child: CircularProgressIndicator(color: Colors.white, strokeWidth: 2),
                                 ),
                               ),
-                            ],
-                          );
-                        }
-
-                        // Use BoxFit.contain for square/landscape videos to avoid cropping
-                        // Use BoxFit.cover for portrait videos to fill the screen
-                        final aspectRatio = value.size.width / value.size.height;
-                        final isPortraitVideo = aspectRatio < 0.9; // Portrait if width < height (with 10% tolerance)
-
-                        return SizedBox.expand(
-                          child: FittedBox(
-                            fit: isPortraitVideo ? BoxFit.cover : BoxFit.contain,
-                            alignment: Alignment.topCenter,
-                            child: SizedBox(
-                              width: value.size.width == 0 ? 1 : value.size.width,
-                              height: value.size.height == 0 ? 1 : value.size.height,
-                              child: VideoPlayer(controller),
-                            ),
-                          ),
+                          ],
                         );
-                        },
-                      ),
+                      }
+
+                      // Use BoxFit.contain for square/landscape videos to avoid cropping
+                      // Use BoxFit.cover for portrait videos to fill the screen
+                      final aspectRatio = value.size.width / value.size.height;
+                      final isPortraitVideo = aspectRatio < 0.9; // Portrait if width < height (with 10% tolerance)
+
+                      return SizedBox.expand(
+                        child: FittedBox(
+                          fit: isPortraitVideo ? BoxFit.cover : BoxFit.contain,
+                          alignment: Alignment.topCenter,
+                          child: SizedBox(
+                            width: value.size.width == 0 ? 1 : value.size.width,
+                            height: value.size.height == 0 ? 1 : value.size.height,
+                            child: VideoPlayer(controller),
+                          ),
+                        ),
+                      );
+                      },
                     );
+
+                    // Wrap with VideoMetricsTracker only for active videos
+                    return isActive
+                        ? VideoMetricsTracker(
+                            video: video,
+                            controller: controller,
+                            child: videoWidget,
+                          )
+                        : videoWidget;
                   },
                 )
               else
-                // Inactive: show thumbnail/blurhash with play overlay
+                // Not active or prewarmed: show thumbnail/blurhash with play overlay
                 VideoThumbnailWidget(
                   video: video,
                   fit: BoxFit.cover,
@@ -466,7 +509,7 @@ class VideoOverlayActions extends ConsumerWidget {
                   ),
                 ),
                 // Context title chip (e.g., hashtag)
-                if (contextTitle != null) ...[
+                if (contextTitle != null && contextTitle!.isNotEmpty) ...[
                   const SizedBox(height: 8),
                   Container(
                     padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),

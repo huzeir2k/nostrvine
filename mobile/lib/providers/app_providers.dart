@@ -7,7 +7,7 @@ import 'package:flutter/foundation.dart';
 import 'package:openvine/services/age_verification_service.dart';
 import 'package:openvine/services/analytics_service.dart';
 import 'package:openvine/services/api_service.dart';
-import 'package:openvine/services/auth_service.dart';
+import 'package:openvine/services/auth_service.dart' hide UserProfile;
 import 'package:openvine/services/bookmark_service.dart';
 import 'package:openvine/services/nostr_service_factory.dart';
 import 'package:openvine/services/connection_status_service.dart';
@@ -185,6 +185,7 @@ AuthService authService(Ref ref) {
   final keyStorage = ref.watch(secureKeyStorageServiceProvider);
   return AuthService(keyStorage: keyStorage);
 }
+
 
 /// Core Nostr service with platform-aware embedded relay functionality and P2P capabilities
 @Riverpod(keepAlive: true)

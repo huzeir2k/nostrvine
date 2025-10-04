@@ -2,15 +2,11 @@
 // ABOUTME: Tests complete upload flow with proper authentication and response handling
 
 import 'dart:io';
-import 'dart:convert';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:openvine/services/blossom_upload_service.dart';
-import 'package:openvine/services/auth_service.dart';
-import 'package:openvine/services/nostr_service.dart';
 
 void main() {
   group('Blossom BUD-01 Spec - Live Server Tests', () {
-    late BlossomUploadService blossomService;
     late File testVideoFile;
 
     setUp(() async {

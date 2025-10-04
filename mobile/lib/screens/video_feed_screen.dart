@@ -16,7 +16,6 @@ import 'package:openvine/utils/unified_logger.dart';
 import 'package:openvine/widgets/video_page_view.dart';
 import 'package:openvine/state/video_feed_state.dart';
 import 'package:openvine/providers/individual_video_providers.dart';
-import 'package:openvine/services/video_preload_service.dart';
 
 /// Feed context for filtering videos
 enum FeedContext {
@@ -332,7 +331,7 @@ class _VideoFeedScreenState extends ConsumerState<VideoFeedScreen>
     if (feedState == null) return null;
 
     final videos = feedState.videos;
-    if (_currentIndex >= 0 && _currentIndex < videos.length) {
+    if (_currentIndex < videos.length) {
       return videos[_currentIndex];
     }
     return null;
@@ -413,7 +412,7 @@ class _VideoFeedScreenState extends ConsumerState<VideoFeedScreen>
         // Ensure an initial active video is set once when data arrives
         WidgetsBinding.instance.addPostFrameCallback((_) {
           final currentActive = ref.read(activeVideoProvider);
-          if (currentActive == null && _currentIndex < videos.length) {
+          if (currentActive.currentVideoId == null && _currentIndex < videos.length) {
             ref.read(activeVideoProvider.notifier).setActiveVideo(videos[_currentIndex].id);
           }
         });
@@ -662,76 +661,6 @@ class _VideoFeedScreenState extends ConsumerState<VideoFeedScreen>
 
 
 
-  /// Preload upcoming videos for smooth playback using background service
-  void _preloadUpcomingVideos(int currentIndex, List<VideoEvent> videos) {
-    if (videos.isEmpty) return;
-
-    final preloadService = VideoPreloadService();
-
-    // Calculate range to preload (current + next 2-3 videos)
-    final startIndex = currentIndex;
-    const preloadCount = 3;
-
-    Log.debug('🔄 Triggering video preload from index $startIndex',
-        name: 'VideoFeedScreen', category: LogCategory.video);
-
-    // Start preloading in background (non-blocking)
-    preloadService.preloadVideos(videos, startIndex: startIndex, preloadCount: preloadCount);
-  }
-
-  Widget _buildErrorItem(String message) => ColoredBox(
-        color: Colors.black,
-        child: Center(
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              const Icon(
-                Icons.error_outline,
-                size: 64,
-                color: Colors.red,
-              ),
-              const SizedBox(height: 16),
-              Text(
-                message,
-                style: const TextStyle(
-                  color: Colors.white,
-                  fontSize: 16,
-                ),
-                textAlign: TextAlign.center,
-              ),
-              const SizedBox(height: 16),
-              Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  ElevatedButton(
-                    onPressed: () => Navigator.of(context).pop(),
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: Colors.grey[700],
-                      foregroundColor: Colors.white,
-                    ),
-                    child: const Text('Go Back'),
-                  ),
-                  const SizedBox(width: 16),
-                  ElevatedButton(
-                    onPressed: () {
-                      // Trigger refresh
-                      setState(() {});
-                    },
-                    child: const Text('Retry'),
-                  ),
-                ],
-              ),
-            ],
-          ),
-        ),
-      );
-
-  void _handleVideoError(String videoId, String error) {
-    Log.error('FeedScreenV2: Video error for $videoId: $error',
-        name: 'FeedScreenV2', category: LogCategory.ui);
-    // Error handling would be implemented here
-    // For now, just log the error
-  }
 
   DateTime? _lastPaginationCall;
 

@@ -215,7 +215,7 @@ class _ExploreScreenState extends ConsumerState<ExploreScreen>
     return ExploreVideoScreenPure(
       startingVideo: videos[_feedStartIndex],
       videoList: videos,
-      contextTitle: 'Videos',
+      contextTitle: '', // Don't show context title for general explore feed
       startingIndex: _feedStartIndex,
     );
   }

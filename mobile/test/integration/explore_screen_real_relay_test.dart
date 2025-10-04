@@ -4,16 +4,13 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:openvine/models/video_event.dart';
 import 'package:openvine/providers/app_providers.dart';
 import 'package:openvine/providers/tab_visibility_provider.dart';
-import 'package:openvine/providers/video_events_providers.dart';
 import 'package:openvine/screens/explore_screen.dart';
 import 'package:openvine/services/content_blocklist_service.dart';
 import 'package:openvine/services/nostr_key_manager.dart';
 import 'package:openvine/services/nostr_service.dart';
 import 'package:openvine/services/subscription_manager.dart';
-import 'package:openvine/services/top_hashtags_service.dart';
 import 'package:openvine/services/video_event_service.dart';
 import 'package:openvine/utils/unified_logger.dart';
 
@@ -55,8 +52,7 @@ void main() {
       );
       videoEventService.setBlocklistService(blocklistService);
 
-      // Initialize TopHashtagsService singleton
-      TopHashtagsService.instance.setVideoEventService(videoEventService);
+      // TopHashtagsService loads from static JSON, no need to inject dependencies
     });
 
     tearDown(() async {
@@ -111,7 +107,7 @@ void main() {
               subscriptionManagerProvider
                   .overrideWithValue(subscriptionManager),
               videoEventServiceProvider.overrideWithValue(videoEventService),
-              tabVisibilityProvider.overrideWith((_) => 2), // Explore tab active
+              tabVisibilityProvider.overrideWith(() => TabVisibility()..setActiveTab(2)), // Explore tab active
             ],
             child: MaterialApp(
               home: Scaffold(
@@ -191,7 +187,7 @@ void main() {
             overrides: [
               nostrServiceProvider.overrideWithValue(nostrService),
               videoEventServiceProvider.overrideWithValue(videoEventService),
-              tabVisibilityProvider.overrideWith((_) => 0), // Feed tab active
+              tabVisibilityProvider.overrideWith(() => TabVisibility()..setActiveTab(0)), // Feed tab active
             ],
             child: MaterialApp(
               home: Scaffold(
@@ -211,7 +207,7 @@ void main() {
             overrides: [
               nostrServiceProvider.overrideWithValue(nostrService),
               videoEventServiceProvider.overrideWithValue(videoEventService),
-              tabVisibilityProvider.overrideWith((_) => 2), // Explore tab now active
+              tabVisibilityProvider.overrideWith(() => TabVisibility()..setActiveTab(2)), // Explore tab now active
             ],
             child: MaterialApp(
               home: Scaffold(

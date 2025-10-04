@@ -29,9 +29,10 @@ void main() {
     });
 
     testWidgets('calls onVideoTap callback when embedded and video tapped in grid', (tester) async {
+      final now = DateTime.now();
       final testVideos = [
-        VideoEvent.forTesting(id: 'video1', content: 'Test 1'),
-        VideoEvent.forTesting(id: 'video2', content: 'Test 2'),
+        VideoEvent(id: 'video1', pubkey: 'test', content: 'Test 1', createdAt: now.millisecondsSinceEpoch ~/ 1000, timestamp: now),
+        VideoEvent(id: 'video2', pubkey: 'test', content: 'Test 2', createdAt: now.millisecondsSinceEpoch ~/ 1000, timestamp: now),
       ];
 
       when(mockHashtagService.getVideosByHashtags(['funny'])).thenReturn(testVideos);
@@ -75,8 +76,9 @@ void main() {
     });
 
     testWidgets('uses Navigator.push when NOT embedded', (tester) async {
+      final now = DateTime.now();
       final testVideos = [
-        VideoEvent.forTesting(id: 'video1', content: 'Test 1'),
+        VideoEvent(id: 'video1', pubkey: 'test', content: 'Test 1', createdAt: now.millisecondsSinceEpoch ~/ 1000, timestamp: now),
       ];
 
       when(mockHashtagService.getVideosByHashtags(['funny'])).thenReturn(testVideos);
@@ -108,9 +110,10 @@ void main() {
     });
 
     testWidgets('calls onVideoTap callback when embedded and video tapped in list view', (tester) async {
+      final now = DateTime.now();
       final testVideos = [
-        VideoEvent.forTesting(id: 'video1', content: 'Test 1'),
-        VideoEvent.forTesting(id: 'video2', content: 'Test 2'),
+        VideoEvent(id: 'video1', pubkey: 'test', content: 'Test 1', createdAt: now.millisecondsSinceEpoch ~/ 1000, timestamp: now),
+        VideoEvent(id: 'video2', pubkey: 'test', content: 'Test 2', createdAt: now.millisecondsSinceEpoch ~/ 1000, timestamp: now),
       ];
 
       when(mockHashtagService.getVideosByHashtags(['funny'])).thenReturn(testVideos);

@@ -6,7 +6,6 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:golden_toolkit/golden_toolkit.dart';
 import 'package:openvine/models/pending_upload.dart';
 import 'package:openvine/widgets/upload_progress_indicator.dart';
-import '../../helpers/golden_test_devices.dart';
 
 void main() {
   group('UploadProgressIndicator Golden Tests', () {

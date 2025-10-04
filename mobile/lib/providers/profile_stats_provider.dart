@@ -2,6 +2,7 @@
 // ABOUTME: Aggregates user video count, likes, and other metrics from Nostr events
 
 import 'package:openvine/providers/app_providers.dart';
+import 'package:openvine/services/profile_stats_cache_service.dart';
 import 'package:openvine/utils/unified_logger.dart';
 import 'package:openvine/utils/string_utils.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
@@ -85,54 +86,39 @@ class ProfileStatsState {
   bool get hasError => error != null;
 }
 
-// Cache for expensive operations
-final Map<String, ProfileStats> _profileStatsCache = {};
-final Map<String, DateTime> _profileStatsCacheTimestamps = {};
-const Duration _profileStatsCacheExpiry = Duration(minutes: 5);
+// SQLite-based persistent cache
+final _cacheService = ProfileStatsCacheService();
 
 /// Get cached stats if available and not expired
-ProfileStats? _getCachedProfileStats(String pubkey) {
-  final stats = _profileStatsCache[pubkey];
-  final timestamp = _profileStatsCacheTimestamps[pubkey];
+Future<ProfileStats?> _getCachedProfileStats(String pubkey) async {
+  final stats = await _cacheService.getCachedStats(pubkey);
 
-  if (stats != null && timestamp != null) {
-    final age = DateTime.now().difference(timestamp);
-    if (age < _profileStatsCacheExpiry) {
-      Log.debug(
-          '📱 Using cached stats for ${pubkey.substring(0, 8)} (age: ${age.inMinutes}min)',
-          name: 'ProfileStatsProvider',
-          category: LogCategory.ui);
-      return stats;
-    } else {
-      Log.debug(
-          '⏰ Cache expired for ${pubkey.substring(0, 8)} (age: ${age.inMinutes}min)',
-          name: 'ProfileStatsProvider',
-          category: LogCategory.ui);
-      _clearProfileStatsCache(pubkey);
-    }
+  if (stats != null) {
+    final age = DateTime.now().difference(stats.lastUpdated);
+    Log.debug(
+        '📱 Using cached stats for ${pubkey.substring(0, 8)} (age: ${age.inMinutes}min)',
+        name: 'ProfileStatsProvider',
+        category: LogCategory.ui);
   }
 
-  return null;
+  return stats;
 }
 
 /// Cache stats for a user
-void _cacheProfileStats(String pubkey, ProfileStats stats) {
-  _profileStatsCache[pubkey] = stats;
-  _profileStatsCacheTimestamps[pubkey] = DateTime.now();
+Future<void> _cacheProfileStats(String pubkey, ProfileStats stats) async {
+  await _cacheService.saveStats(pubkey, stats);
   Log.debug('📱 Cached stats for ${pubkey.substring(0, 8)}',
       name: 'ProfileStatsProvider', category: LogCategory.ui);
 }
 
 /// Clear cache for a specific user
-void _clearProfileStatsCache(String pubkey) {
-  _profileStatsCache.remove(pubkey);
-  _profileStatsCacheTimestamps.remove(pubkey);
+Future<void> _clearProfileStatsCache(String pubkey) async {
+  await _cacheService.clearStats(pubkey);
 }
 
 /// Clear all cached stats
-void clearAllProfileStatsCache() {
-  _profileStatsCache.clear();
-  _profileStatsCacheTimestamps.clear();
+Future<void> clearAllProfileStatsCache() async {
+  await _cacheService.clearAll();
   Log.debug('📱️ Cleared all stats cache',
       name: 'ProfileStatsProvider', category: LogCategory.ui);
 }
@@ -141,7 +127,7 @@ void clearAllProfileStatsCache() {
 @riverpod
 Future<ProfileStats> fetchProfileStats(Ref ref, String pubkey) async {
   // Check cache first
-  final cached = _getCachedProfileStats(pubkey);
+  final cached = await _getCachedProfileStats(pubkey);
   if (cached != null) {
     return cached;
   }
@@ -172,7 +158,7 @@ Future<ProfileStats> fetchProfileStats(Ref ref, String pubkey) async {
     );
 
     // Cache the results
-    _cacheProfileStats(pubkey, stats);
+    await _cacheProfileStats(pubkey, stats);
 
     Log.info('Profile stats loaded: $stats',
         name: 'ProfileStatsProvider', category: LogCategory.ui);
@@ -217,7 +203,7 @@ class ProfileStatsNotifier extends _$ProfileStatsNotifier {
 
   /// Refresh stats by clearing cache and reloading
   Future<void> refreshStats(String pubkey) async {
-    _clearProfileStatsCache(pubkey);
+    await _clearProfileStatsCache(pubkey);
     ref.invalidate(fetchProfileStatsProvider(pubkey));
     await loadStats(pubkey);
   }

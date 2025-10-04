@@ -1072,8 +1072,9 @@ class VineRecordingController {
       final outputPath =
           '${tempDir.path}/vine_final_${DateTime.now().millisecondsSinceEpoch}.mp4';
 
-      // Apply square crop: crop=min(iw,ih):min(iw,ih)
-      final command = '-i "$inputPath" -vf "crop=min(iw\\,ih):min(iw\\,ih)" -c:a copy "$outputPath"';
+      // Apply square CENTER crop: crop=w:h:x:y where w=h=min(width,height), x=(width-w)/2, y=(height-h)/2
+      // This ensures the crop is centered, not from top-left corner
+      final command = '-i "$inputPath" -vf "crop=min(iw\\,ih):min(iw\\,ih):(iw-min(iw\\,ih))/2:(ih-min(iw\\,ih))/2" -c:a copy "$outputPath"';
 
       Log.info('📹 Executing FFmpeg square crop command: $command',
           name: 'VineRecordingController', category: LogCategory.system);
@@ -1128,9 +1129,9 @@ class VineRecordingController {
       Log.info('📹 FFmpeg concat list:\n${buffer.toString()}',
           name: 'VineRecordingController', category: LogCategory.system);
 
-      // Execute FFmpeg concatenation with square (1:1) aspect ratio cropping
-      // Vine-style videos must be square format
-      final command = '-f concat -safe 0 -i "$concatFilePath" -vf "crop=min(iw\\,ih):min(iw\\,ih)" -c:a copy "$outputPath"';
+      // Execute FFmpeg concatenation with square (1:1) aspect ratio CENTER cropping
+      // Vine-style videos must be square format, centered crop for best framing
+      final command = '-f concat -safe 0 -i "$concatFilePath" -vf "crop=min(iw\\,ih):min(iw\\,ih):(iw-min(iw\\,ih))/2:(ih-min(iw\\,ih))/2" -c:a copy "$outputPath"';
 
       Log.info('📹 Executing FFmpeg command: $command',
           name: 'VineRecordingController', category: LogCategory.system);
