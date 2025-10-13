@@ -135,4 +135,14 @@ class ProofModeConfig {
           name: 'ProofModeConfig', category: LogCategory.system);
     }
   }
+
+  /// Get GCP Project ID for Android Play Integrity attestation
+  ///
+  /// Returns the configured GCP Project ID or 0 if not configured.
+  /// This is used by ProofModeAttestationService for Android Play Integrity API.
+  static Future<int> get gcpProjectId async {
+    // Default to 0 (not configured)
+    // TODO: Load from environment variable or secure config storage
+    return 0;
+  }
 }

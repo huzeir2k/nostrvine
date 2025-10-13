@@ -87,10 +87,6 @@ class ProofModeAttestationService {
   static final DeviceInfoPlugin _deviceInfo = DeviceInfoPlugin();
   static final AppDeviceIntegrity _attestationPlugin = AppDeviceIntegrity();
 
-  // GCP Project ID for Android Play Integrity
-  // TODO: Move to environment variable or secure config
-  static const int _gcpProjectId = 0; // Replace with actual GCP project ID
-
   DeviceInfo? _cachedDeviceInfo;
 
   /// Initialize the attestation service
@@ -302,10 +298,13 @@ class ProofModeAttestationService {
         name: 'ProofModeAttestationService', category: LogCategory.auth);
 
     try {
+      // Get GCP Project ID from config
+      final gcpProjectId = await ProofModeConfig.gcpProjectId;
+
       // Use app_device_integrity plugin for real Play Integrity
       final token = await _attestationPlugin.getAttestationServiceSupport(
         challengeString: challenge,
-        gcp: _gcpProjectId,
+        gcp: gcpProjectId,
       );
 
       return DeviceAttestation(
