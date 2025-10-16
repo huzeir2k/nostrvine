@@ -38,6 +38,11 @@ void main() {
       mockAuthService = MockAuthService();
       mockSubscriptionManager = MockSubscriptionManager();
 
+      // Set default auth state to prevent null errors
+      when(() => mockAuthService.authState).thenReturn(AuthState.unauthenticated);
+      when(() => mockAuthService.isAuthenticated).thenReturn(false);
+      when(() => mockAuthService.currentPublicKeyHex).thenReturn(null);
+
       container = ProviderContainer(
         overrides: [
           nostrServiceProvider.overrideWithValue(mockNostrService),
@@ -67,6 +72,7 @@ void main() {
 
     test('should initialize user social data when authenticated', () async {
       // Setup authenticated user
+      when(() => mockAuthService.authState).thenReturn(AuthState.authenticated);
       when(() => mockAuthService.isAuthenticated).thenReturn(true);
       when(() => mockAuthService.currentPublicKeyHex).thenReturn('test-pubkey');
 
@@ -336,6 +342,91 @@ void main() {
       expect(state.likeCounts[eventId], equals(2));
 
       // Note: In the UI, if video has originalLikes=1000, display shows: 2 + 1000 = 1002
+    });
+
+    test('should handle auth race condition during initialization', () async {
+      // Test scenario 1: Auth is "checking" - should return early without fetching
+      when(() => mockAuthService.authState).thenReturn(AuthState.checking);
+      when(() => mockAuthService.isAuthenticated).thenReturn(false);
+      when(() => mockAuthService.currentPublicKeyHex).thenReturn(null);
+
+      // Call initialize while auth is still checking
+      // This should NOT throw and should return early (before fetching contacts)
+      await container.read(socialProvider.notifier).initialize();
+
+      var state = container.read(socialProvider);
+      // Should mark as initialized even though no contacts fetched yet
+      expect(state.isInitialized, isTrue);
+      expect(state.followingPubkeys, isEmpty); // No contacts fetched yet
+
+      // Dispose first container to start fresh for scenario 2
+      container.dispose();
+
+      // Test scenario 2: Auth is "authenticated" - should fetch contacts
+      mockAuthService = MockAuthService();
+      when(() => mockAuthService.authState).thenReturn(AuthState.authenticated);
+      when(() => mockAuthService.isAuthenticated).thenReturn(true);
+      when(() => mockAuthService.currentPublicKeyHex)
+          .thenReturn('test-pubkey-123');
+
+      // Mock event streams
+      when(() => mockNostrService.subscribeToEvents(
+              filters: any(named: 'filters')))
+          .thenAnswer((_) => const Stream<Event>.empty());
+
+      // Create new container with authenticated state
+      container = ProviderContainer(
+        overrides: [
+          nostrServiceProvider.overrideWithValue(mockNostrService),
+          authServiceProvider.overrideWithValue(mockAuthService),
+          subscriptionManagerProvider
+              .overrideWithValue(mockSubscriptionManager),
+        ],
+      );
+
+      // Now initialize with auth authenticated
+      await container.read(socialProvider.notifier).initialize();
+
+      // Should have attempted to fetch contacts (verify subscription called)
+      verify(() => mockNostrService.subscribeToEvents(
+          filters: any(named: 'filters'))).called(greaterThan(0));
+
+      state = container.read(socialProvider);
+      expect(state.isInitialized, isTrue);
+    });
+
+    test('should prevent duplicate contact fetches (idempotency)', () async {
+      // Setup authenticated user
+      when(() => mockAuthService.authState).thenReturn(AuthState.authenticated);
+      when(() => mockAuthService.isAuthenticated).thenReturn(true);
+      when(() => mockAuthService.currentPublicKeyHex).thenReturn('test-pubkey');
+
+      // Mock event streams
+      when(() => mockNostrService.subscribeToEvents(
+              filters: any(named: 'filters')))
+          .thenAnswer((_) => const Stream<Event>.empty());
+
+      // Call initialize multiple times rapidly (simulating race condition)
+      final futures = [
+        container.read(socialProvider.notifier).initialize(),
+        container.read(socialProvider.notifier).initialize(),
+        container.read(socialProvider.notifier).initialize(),
+      ];
+
+      // Wait for all to complete
+      await Future.wait(futures);
+
+      // Verify subscribeToEvents was NOT called 3x (should be called once due to idempotency)
+      // The first call should succeed, subsequent calls should see isInitialized=true and return early
+      final verificationResult = verify(() => mockNostrService.subscribeToEvents(
+          filters: any(named: 'filters')));
+
+      // Should be called 2 times (once for followList, once for reactions in the first initialize)
+      // NOT 6 times (which would be 3 initializes * 2 subscriptions each)
+      verificationResult.called(2);
+
+      final state = container.read(socialProvider);
+      expect(state.isInitialized, isTrue);
     });
   });
 }
