@@ -3,6 +3,7 @@
 
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
 import 'package:visibility_detector/visibility_detector.dart';
 import 'package:video_player/video_player.dart';
 import 'package:openvine/models/video_event.dart';
@@ -10,7 +11,11 @@ import 'package:openvine/providers/individual_video_providers.dart' hide isVideo
 import 'package:openvine/providers/active_video_provider.dart'; // For isVideoActiveProvider (derived)
 import 'package:openvine/providers/social_providers.dart';
 import 'package:openvine/providers/user_profile_providers.dart';
+import 'package:openvine/router/page_context_provider.dart';
+import 'package:openvine/router/route_utils.dart';
 import 'package:openvine/screens/comments_screen.dart';
+import 'package:openvine/services/visibility_tracker.dart';
+import 'package:openvine/ui/overlay_policy.dart';
 import 'package:openvine/widgets/video_thumbnail_widget.dart';
 import 'package:openvine/utils/unified_logger.dart';
 import 'package:openvine/widgets/share_video_menu.dart';
@@ -235,18 +240,33 @@ class _VideoFeedItemState extends ConsumerState<VideoFeedItem> {
     Log.debug('📱 VideoFeedItem state: isActive=$isActive',
         name: 'VideoFeedItem', category: LogCategory.ui);
 
-    return VisibilityDetector(
-      key: Key('video_${video.id}'),
-      onVisibilityChanged: (info) {
-        // NOTE: VisibilityDetector is ONLY used for analytics/metrics tracking
-        // VideoPageView is the single source of truth for which video is active
-        // DO NOT call setActiveVideo() here - it creates conflicts with PageView's authority
-        final isVisible = info.visibleFraction > 0.7;
-        Log.debug('👁️ Visibility changed: $videoIdDisplay... fraction=${info.visibleFraction.toStringAsFixed(3)}, isVisible=$isVisible',
-            name: 'VideoFeedItem', category: LogCategory.ui);
-        // Future: Could emit analytics events here if needed
-      },
-      child: GestureDetector(
+    // Check if tracker is Noop - if so, skip VisibilityDetector entirely to prevent timer leaks in tests
+    final tracker = ref.watch(visibilityTrackerProvider);
+
+    // Compute overlay visibility with policy override
+    final policy = ref.watch(overlayPolicyProvider);
+    bool overlayVisible = widget.forceShowOverlay || isActive;
+
+    // Override by policy
+    switch (policy) {
+      case OverlayPolicy.alwaysOn:
+        overlayVisible = true;
+        break;
+      case OverlayPolicy.alwaysOff:
+        overlayVisible = false;
+        break;
+      case OverlayPolicy.auto:
+        // keep computed overlayVisible
+        break;
+    }
+
+    assert(() {
+      final idDisplay = video.id.length > 8 ? video.id.substring(0, 8) : video.id;
+      debugPrint('[OVERLAY] id=$idDisplay policy=$policy active=$isActive -> overlay=$overlayVisible');
+      return true;
+    }());
+
+    final child = GestureDetector(
         behavior: HitTestBehavior.translucent,
         onTap: () {
           // Lighter debounce - ignore taps within 150ms of previous tap
@@ -293,8 +313,23 @@ class _VideoFeedItemState extends ConsumerState<VideoFeedItem> {
               // Active state is derived from URL, so navigation will update it
               Log.info('🎯 Tap navigating to video $videoIdDisplay... at index ${widget.index}',
                   name: 'VideoFeedItem', category: LogCategory.ui);
-              // TODO: Navigate to this video's index using GoRouter
-              // For now, do nothing - PageView scroll will handle activation
+
+              // Read current route context to determine which route type to navigate to
+              final pageContext = ref.read(pageContextProvider);
+              pageContext.whenData((ctx) {
+                // Build new route with same type but different index
+                final newRoute = RouteContext(
+                  type: ctx.type,
+                  videoIndex: widget.index,
+                  npub: ctx.npub,
+                  hashtag: ctx.hashtag,
+                );
+
+                Log.info('🎯 Navigating to route: ${buildRoute(newRoute)}',
+                    name: 'VideoFeedItem', category: LogCategory.ui);
+
+                context.go(buildRoute(newRoute));
+              });
             }
             widget.onTap?.call();
           } catch (e) {
@@ -448,14 +483,33 @@ class _VideoFeedItemState extends ConsumerState<VideoFeedItem> {
               // Video overlay with actions
               VideoOverlayActions(
                 video: video,
-                isVisible: widget.forceShowOverlay || isActive,
+                isVisible: overlayVisible,
                 hasBottomNavigation: widget.hasBottomNavigation,
                 contextTitle: widget.contextTitle,
               ),
             ],
           ),
         ),
-      ),
+      );
+
+    // If tracker is Noop, return child directly (avoids VisibilityDetector's internal timers in tests)
+    if (tracker is NoopVisibilityTracker) return child;
+
+    // In production, wrap with VisibilityDetector for analytics
+    return VisibilityDetector(
+      key: Key('vis-${video.id}'),
+      onVisibilityChanged: (info) {
+        final isVisible = info.visibleFraction > 0.7;
+        Log.debug('👁️ Visibility changed: $videoIdDisplay... fraction=${info.visibleFraction.toStringAsFixed(3)}, isVisible=$isVisible',
+            name: 'VideoFeedItem', category: LogCategory.ui);
+
+        if (isVisible) {
+          tracker.onVisible(video.id, fractionVisible: info.visibleFraction);
+        } else {
+          tracker.onInvisible(video.id);
+        }
+      },
+      child: child,
     );
   }
 

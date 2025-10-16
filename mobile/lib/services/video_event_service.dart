@@ -157,6 +157,9 @@ class VideoEventService extends ChangeNotifier {
   final Map<SubscriptionType, bool> _isFollowingFeed = {};
   final Map<SubscriptionType, bool> _includeReposts = {};
 
+  // Track locally deleted videos to prevent resurrection from pagination
+  final Set<String> _locallyDeletedVideoIds = {};
+
   static const int _maxRetryAttempts = 3;
   static const Duration _retryDelay = Duration(seconds: 10);
 
@@ -240,7 +243,16 @@ class VideoEventService extends ChangeNotifier {
   List<VideoEvent> hashtagVideos(String tag) => _hashtagBuckets[tag] ?? const [];
 
   /// Get videos for a specific author (keyed for route-aware feeds)
-  List<VideoEvent> authorVideos(String pubkeyHex) => _authorBuckets[pubkeyHex] ?? const [];
+  List<VideoEvent> authorVideos(String pubkeyHex) {
+    final cached = _authorBuckets[pubkeyHex] ?? const [];
+    Log.info('SVC authorVideos: hex=$pubkeyHex cached=${cached.length}',
+        name: 'Service', category: LogCategory.video);
+    if (cached.isNotEmpty) {
+      Log.info('SVC authorVideos: return cached=${cached.length}',
+          name: 'Service', category: LogCategory.video);
+    }
+    return cached;
+  }
 
   /// Get search results
   List<VideoEvent> get searchResults => getVideos(SubscriptionType.search);
@@ -301,6 +313,37 @@ class VideoEventService extends ChangeNotifier {
         name: 'VideoEventService',
         category: LogCategory.video);
     return result;
+  }
+
+  /// Remove a video from an author's cached list (optimistic deletion)
+  /// This is called after successfully publishing a NIP-09 delete event
+  void removeVideoFromAuthorList(String authorPubkey, String videoId) {
+    // Remove from author bucket
+    final authorBucket = _authorBuckets[authorPubkey];
+    if (authorBucket != null) {
+      final initialCount = authorBucket.length;
+      authorBucket.removeWhere((video) => video.id == videoId);
+      final removedCount = initialCount - authorBucket.length;
+
+      if (removedCount > 0) {
+        Log.info('Removed video $videoId from author $authorPubkey bucket (${authorBucket.length} remaining)',
+            name: 'VideoEventService', category: LogCategory.video);
+      }
+    }
+
+    // Mark as locally deleted to prevent pagination resurrection
+    _locallyDeletedVideoIds.add(videoId);
+    Log.info('Marked video $videoId as locally deleted',
+        name: 'VideoEventService', category: LogCategory.video);
+
+    // Notify listeners to update UI immediately (optimistic update)
+    notifyListeners();
+  }
+
+  /// Check if a video has been locally deleted
+  /// Used to filter out deleted videos from pagination results
+  bool isVideoLocallyDeleted(String videoId) {
+    return _locallyDeletedVideoIds.contains(videoId);
   }
 
   /// Subscribe to NIP-71 video events with proper subscription type separation
@@ -652,6 +695,11 @@ class VideoEventService extends ChangeNotifier {
         }
         // Mark seen early to prevent repeated logs for the same event (even if later skipped)
         paginationState.markEventSeen(event.id);
+      }
+
+      // Checkpoint log for profile subscriptions
+      if (subscriptionType == SubscriptionType.profile) {
+        Log.info('SVC event: id=${event.id}', name: 'Service', category: LogCategory.video);
       }
 
       // Use batched logging for repetitive event logs
@@ -1119,12 +1167,14 @@ class VideoEventService extends ChangeNotifier {
   }
 
   /// Subscribe to specific user's video events
-  Future<void> subscribeToUserVideos(String pubkey, {int limit = 50}) async =>
-      subscribeToVideoFeed(
-        subscriptionType: SubscriptionType.profile,
-        authors: [pubkey],
-        limit: limit,
-      );
+  Future<void> subscribeToUserVideos(String pubkey, {int limit = 50}) async {
+    Log.info('SVC subscribeToUser: hex=$pubkey', name: 'Service', category: LogCategory.video);
+    return subscribeToVideoFeed(
+      subscriptionType: SubscriptionType.profile,
+      authors: [pubkey],
+      limit: limit,
+    );
+  }
 
   /// Subscribe to videos with specific hashtags
   Future<void> subscribeToHashtagVideos(List<String> hashtags,
@@ -2062,6 +2112,15 @@ class VideoEventService extends ChangeNotifier {
   void _addVideoToSubscription(
       VideoEvent videoEvent, SubscriptionType subscriptionType,
       {bool isHistorical = false}) {
+    // CRITICAL: Filter out locally deleted videos to prevent pagination resurrection
+    if (isVideoLocallyDeleted(videoEvent.id)) {
+      Log.debug(
+          'Filtering out locally deleted video ${videoEvent.id.substring(0, 8)} from $subscriptionType feed',
+          name: 'VideoEventService',
+          category: LogCategory.video);
+      return; // Don't resurrect deleted videos
+    }
+
     // CRITICAL: Validate that video has an accessible URL before adding to feed
     if (!_hasValidVideoUrl(videoEvent)) {
       Log.warning(
@@ -2415,6 +2474,7 @@ class VideoEventService extends ChangeNotifier {
 
     _retryTimer?.cancel();
     _authStateSubscription?.cancel();
+    _connectionService.dispose();
     unsubscribeFromVideoFeed();
     super.dispose();
   }

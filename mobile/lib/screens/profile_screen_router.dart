@@ -4,11 +4,12 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
-import 'package:openvine/models/video_event.dart';
 import 'package:openvine/providers/profile_feed_providers.dart';
 import 'package:openvine/providers/user_profile_providers.dart';
 import 'package:openvine/router/page_context_provider.dart';
 import 'package:openvine/router/route_utils.dart';
+import 'package:openvine/utils/unified_logger.dart';
+import 'package:openvine/widgets/video_page_view.dart';
 
 /// Router-driven ProfileScreen - PageView syncs with URL bidirectionally
 class ProfileScreenRouter extends ConsumerStatefulWidget {
@@ -32,6 +33,7 @@ class _ProfileScreenRouterState extends ConsumerState<ProfileScreenRouter> {
 
   @override
   Widget build(BuildContext context) {
+    Log.info('🧭 ProfileScreenRouter.build', name: 'Profile');
     // Read derived context from router
     final pageContext = ref.watch(pageContextProvider);
 
@@ -50,6 +52,8 @@ class _ProfileScreenRouterState extends ConsumerState<ProfileScreenRouter> {
         return videosAsync.when(
           data: (state) {
             final videos = state.videos;
+            Log.info('UI PROFILE: loading=${state.isLoadingMore} items=${videos.length} err=null',
+                name: 'Video', category: LogCategory.video);
 
             if (videos.isEmpty) {
               return const ProfileEmptyState();
@@ -105,10 +109,15 @@ class _ProfileScreenRouterState extends ConsumerState<ProfileScreenRouter> {
               }
             }
 
-            return PageView.builder(
+            return VideoPageView(
+              videos: videos,
               controller: _controller,
-              itemCount: itemCount,
-              onPageChanged: (newIndex) {
+              initialIndex: urlIndex,
+              hasBottomNavigation: false, // Profile screen has no bottom nav
+              enablePrewarming: true,
+              enableLifecycleManagement: true,
+              screenId: 'profile:${ctx.npub}',
+              onPageChanged: (newIndex, video) {
                 // Guard: only navigate if URL doesn't match
                 if (newIndex != urlIndex) {
                   context.go(buildRoute(
@@ -120,14 +129,6 @@ class _ProfileScreenRouterState extends ConsumerState<ProfileScreenRouter> {
                   ));
                 }
               },
-              itemBuilder: (context, index) {
-                final video = videos[index];
-                return ProfileVideoCell(
-                  video: video,
-                  index: index,
-                  total: videos.length,
-                );
-              },
             );
           },
           loading: () => const Center(child: CircularProgressIndicator()),
@@ -138,37 +139,6 @@ class _ProfileScreenRouterState extends ConsumerState<ProfileScreenRouter> {
       },
       loading: () => const Center(child: CircularProgressIndicator()),
       error: (error, stack) => Center(child: Text('Error: $error')),
-    );
-  }
-}
-
-/// Minimal video cell for displaying profile video in tests
-class ProfileVideoCell extends StatelessWidget {
-  const ProfileVideoCell({
-    required this.video,
-    required this.index,
-    required this.total,
-    super.key,
-  });
-
-  final VideoEvent video;
-  final int index;
-  final int total;
-
-  @override
-  Widget build(BuildContext context) {
-    return Center(
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          Text(
-            'Profile $index/$total',
-            style: const TextStyle(fontSize: 24),
-          ),
-          const SizedBox(height: 16),
-          Text('ID: ${video.id}'),
-        ],
-      ),
     );
   }
 }
