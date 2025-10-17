@@ -1,0 +1,206 @@
+// ABOUTME: Modal dialog explaining video badge origins (Vine archive vs ProofMode verification)
+// ABOUTME: Shows context-appropriate information based on video metadata
+
+import 'package:flutter/material.dart';
+import 'package:openvine/models/video_event.dart';
+
+/// Modal dialog explaining the origin and authenticity of video content
+class BadgeExplanationModal extends StatelessWidget {
+  const BadgeExplanationModal({super.key, required this.video});
+
+  final VideoEvent video;
+
+  @override
+  Widget build(BuildContext context) {
+    final isVineArchive = video.isOriginalVine;
+
+    return AlertDialog(
+      title: _buildTitle(isVineArchive),
+      content: SingleChildScrollView(
+        child: isVineArchive
+            ? _VineArchiveExplanation(video: video)
+            : _ProofModeExplanation(video: video),
+      ),
+      actions: [
+        TextButton(
+          onPressed: () => Navigator.of(context).pop(),
+          child: const Text('Close'),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildTitle(bool isVineArchive) {
+    return Row(
+      children: [
+        Icon(
+          isVineArchive ? Icons.archive : Icons.verified_user,
+          color: isVineArchive ? const Color(0xFF00BF8F) : Colors.blue,
+        ),
+        const SizedBox(width: 8),
+        Expanded(
+          child: Text(
+            isVineArchive ? 'Original Vine Archive' : 'Video Verification',
+            style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+          ),
+        ),
+      ],
+    );
+  }
+}
+
+/// Explanation content for archived Vine videos
+class _VineArchiveExplanation extends StatelessWidget {
+  const _VineArchiveExplanation({required this.video});
+
+  final VideoEvent video;
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      mainAxisSize: MainAxisSize.min,
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        const Text(
+          'This video is an original Vine recovered from the Internet Archive.',
+          style: TextStyle(fontSize: 14, fontWeight: FontWeight.w600),
+        ),
+        const SizedBox(height: 12),
+        const Text(
+          'Before Vine shut down in 2017, ArchiveTeam and the Internet Archive worked to preserve millions of Vines for posterity. This content is part of that historic preservation effort.',
+          style: TextStyle(fontSize: 13),
+        ),
+        const SizedBox(height: 12),
+        if (video.originalLoops != null && video.originalLoops! > 0) ...[
+          Text(
+            'Original stats: ${video.originalLoops} loops',
+            style: const TextStyle(fontSize: 12, fontStyle: FontStyle.italic),
+          ),
+          const SizedBox(height: 8),
+        ],
+        Row(
+          children: [
+            const Icon(Icons.info_outline, size: 16, color: Colors.grey),
+            const SizedBox(width: 6),
+            Expanded(
+              child: Text(
+                'Learn more at archive.org/details/vine',
+                style: TextStyle(fontSize: 12, color: Colors.grey[600]),
+              ),
+            ),
+          ],
+        ),
+      ],
+    );
+  }
+}
+
+/// Explanation content for ProofMode verified videos
+class _ProofModeExplanation extends StatelessWidget {
+  const _ProofModeExplanation({required this.video});
+
+  final VideoEvent video;
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      mainAxisSize: MainAxisSize.min,
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        const Text(
+          'This video\'s authenticity is verified using ProofMode technology.',
+          style: TextStyle(fontSize: 14, fontWeight: FontWeight.w600),
+        ),
+        const SizedBox(height: 12),
+        _VerificationLevelCard(video: video),
+        const SizedBox(height: 12),
+        const Text(
+          'ProofMode helps verify that videos are original content and not AI-generated or manipulated.',
+          style: TextStyle(fontSize: 13),
+        ),
+      ],
+    );
+  }
+}
+
+/// Card showing verification level details with icon and description
+class _VerificationLevelCard extends StatelessWidget {
+  const _VerificationLevelCard({required this.video});
+
+  final VideoEvent video;
+
+  @override
+  Widget build(BuildContext context) {
+    final config = _getVerificationConfig(video);
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Row(
+          children: [
+            Icon(config.icon, size: 20, color: config.color),
+            const SizedBox(width: 8),
+            Text(
+              config.title,
+              style: const TextStyle(fontSize: 13, fontWeight: FontWeight.bold),
+            ),
+          ],
+        ),
+        const SizedBox(height: 6),
+        Text(
+          config.description,
+          style: const TextStyle(fontSize: 12),
+        ),
+      ],
+    );
+  }
+
+  _VerificationConfig _getVerificationConfig(VideoEvent video) {
+    if (video.isVerifiedMobile) {
+      return _VerificationConfig(
+        icon: Icons.verified,
+        color: Colors.green[700]!,
+        title: 'Verified Mobile',
+        description:
+            'This video was captured with mobile device attestation and cryptographic proof of authenticity.',
+      );
+    } else if (video.isVerifiedWeb) {
+      return _VerificationConfig(
+        icon: Icons.shield_outlined,
+        color: Colors.blue[700]!,
+        title: 'Verified Web',
+        description:
+            'This video has web-based verification with cryptographic signatures.',
+      );
+    } else if (video.hasBasicProof) {
+      return _VerificationConfig(
+        icon: Icons.info_outline,
+        color: Colors.orange[700]!,
+        title: 'Basic Proof',
+        description: 'This video has basic metadata verification.',
+      );
+    } else {
+      return _VerificationConfig(
+        icon: Icons.shield_outlined,
+        color: Colors.grey[600]!,
+        title: 'Unverified',
+        description: 'This video does not have cryptographic verification.',
+      );
+    }
+  }
+}
+
+/// Configuration data for verification levels
+class _VerificationConfig {
+  const _VerificationConfig({
+    required this.icon,
+    required this.color,
+    required this.title,
+    required this.description,
+  });
+
+  final IconData icon;
+  final Color color;
+  final String title;
+  final String description;
+}

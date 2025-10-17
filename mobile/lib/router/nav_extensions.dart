@@ -84,10 +84,11 @@ extension NavX on BuildContext {
     ));
   }
 
+  void goSearch([int? index]) => go(buildRoute(
+        RouteContext(type: RouteType.search, videoIndex: index),
+      ));
+
   // Optional pushes (non-tab routes)
   Future<void> pushCamera() => push('/camera');
   Future<void> pushSettings() => push('/settings');
-
-  // Search uses go() for normal navigation instead of modal push
-  void goSearch() => go('/search');
 }

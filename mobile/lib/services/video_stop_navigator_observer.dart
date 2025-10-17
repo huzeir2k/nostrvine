@@ -3,7 +3,7 @@
 
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:openvine/providers/video_overlay_manager_provider.dart';
+import 'package:openvine/utils/video_controller_cleanup.dart';
 import 'package:openvine/utils/unified_logger.dart';
 
 class VideoStopNavigatorObserver extends NavigatorObserver {
@@ -28,7 +28,7 @@ class VideoStopNavigatorObserver extends NavigatorObserver {
 
           if (isCameraScreen) {
             // Dispose all video controllers when opening camera screen
-            container.read(videoOverlayManagerProvider).disposeAllControllers();
+            disposeAllVideoControllers(container);
             Log.info(
                 '📱 Navigation $action to camera route: ${routeName ?? 'unnamed'} - disposed all video controllers',
                 name: 'VideoStopNavigatorObserver',

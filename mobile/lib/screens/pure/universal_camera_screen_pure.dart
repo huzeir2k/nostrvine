@@ -6,8 +6,8 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
-import 'package:openvine/providers/video_overlay_manager_provider.dart';
 import 'package:openvine/providers/vine_recording_provider.dart';
+import 'package:openvine/utils/video_controller_cleanup.dart';
 import 'package:openvine/screens/pure/video_metadata_screen_pure.dart';
 import 'package:openvine/services/camera/native_macos_camera.dart';
 import 'package:openvine/theme/vine_theme.dart';
@@ -46,10 +46,8 @@ class _UniversalCameraScreenPureState extends ConsumerState<UniversalCameraScree
     // IndexedStack keeps widgets alive, so we must force-dispose controllers
     WidgetsBinding.instance.addPostFrameCallback((_) {
       try {
-        final videoManager = ref.read(videoOverlayManagerProvider);
-
         // Force dispose all video controllers (this also clears active video)
-        videoManager.disposeAllControllers();
+        disposeAllVideoControllers(ref);
         Log.info('🗑️ UniversalCameraScreenPure: Disposed all video controllers', category: LogCategory.video);
       } catch (e) {
         Log.warning('📹 Failed to dispose video controllers: $e', category: LogCategory.video);
@@ -952,8 +950,7 @@ class _UniversalCameraScreenPureState extends ConsumerState<UniversalCameraScree
 
           // CRITICAL: Dispose all controllers again before navigation
           // This ensures no stale controllers exist when switching to profile tab
-          final videoManager = ref.read(videoOverlayManagerProvider);
-          videoManager.disposeAllControllers();
+          disposeAllVideoControllers(ref);
           Log.info('🗑️ Disposed controllers before profile navigation', category: LogCategory.video);
 
           // Navigate to user's own profile using GoRouter

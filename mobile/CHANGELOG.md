@@ -7,6 +7,207 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Fixed - Hashtag Navigation and Event Deduplication (2025-10-17)
+
+#### Bug Fixes
+- **Fixed hashtag navigation from search removing search screen** - Hashtag now pushes on navigation stack
+  - Search screen previously disappeared when tapping hashtag (used GoRouter's `go()` method)
+  - Changed to `Navigator.push()` to keep search in the stack
+  - Back button now correctly returns to search results
+  - Hashtag screen shows proper AppBar with back button
+- **Fixed hashtag feeds not showing videos after search** - Removed global event deduplication
+  - Events seen in search were dropped as "globally-duplicate" when hashtag subscription tried to deliver them
+  - Removed `_rememberGlobalEvent()` global deduplication logic from NostrService
+  - Per-subscription deduplication (via `seenEventIds` Set) prevents duplicates within same subscription
+  - Same event can now appear in different contexts (search results, hashtag feed, home feed)
+  - Relay queries successfully but events were being dropped at service layer
+
+#### Technical Details
+- Modified `lib/screens/pure/search_screen_pure.dart`:
+  - Lines 521-543: Changed hashtag tap handler to use `Navigator.push()` with `MaterialPageRoute`
+  - Added import for `HashtagScreenRouter`
+  - Hashtag screen wrapped in Scaffold with AppBar for proper back navigation
+- Modified `lib/services/nostr_service.dart`:
+  - Lines 363-366: Removed global deduplication check, replaced with explanatory comment
+  - Removed lines 440-450: Deleted `_rememberGlobalEvent()` method entirely
+  - Removed lines 38-41: Deleted global deduplication state (`_recentEventQueue`, `_recentEventSet`)
+  - Removed unused `dart:collection` import
+  - Per-subscription deduplication retained (line 313: `seenEventIds` Set per subscription)
+
+#### Tests
+- Created `test/screens/search_hashtag_navigation_test.dart`:
+  - Tests that tapping hashtag from search results uses Navigator.push (keeps search in stack)
+  - Verifies search screen remains accessible via back button
+- Created `test/services/hashtag_duplicate_events_test.dart`:
+  - Documents expected behavior: same event should appear in multiple subscription contexts
+  - Verifies per-subscription deduplication prevents true duplicates
+
+### Added - Profile Feed Architecture Refactor (2025-10-17)
+
+#### Features
+- **Added unified profile feed provider with pagination** - Replaces multiple scattered profile providers
+  - New `ProfileFeedProvider` consolidates profile video loading logic
+  - Supports both grid and feed modes with proper route-based selection
+  - Implements pagination mixin for infinite scroll
+  - Handles sort order (chronological vs loop count)
+  - Manages selection state for multi-video operations
+
+#### Technical Details
+- Created `lib/providers/profile_feed_provider.dart`:
+  - Unified provider for all profile video feeds
+  - Route-aware: automatically selects correct video when navigating to /profile/:npub/:index
+  - Pagination support via `PaginationMixin`
+  - Sort order management (newest first vs most loops)
+- Updated `lib/screens/profile_screen_router.dart`:
+  - Now uses unified `ProfileFeedProvider` instead of scattered providers
+  - Simplified video selection logic
+  - Better grid/feed mode switching
+
+#### Tests
+- Created `test/providers/profile_feed_provider_selects_test.dart` - Tests video selection from routes
+- Created `test/providers/profile_feed_pagination_test.dart` - Tests infinite scroll pagination
+- Created `test/providers/profile_feed_sort_order_test.dart` - Tests chronological vs loop count sorting
+
+### Added - Router Enhancements (2025-10-17)
+
+#### Features
+- **Added search routes with grid/feed modes** - Search now has proper routing structure
+  - `/search` - Grid mode showing search results
+  - `/search/:index` - Feed mode showing video at index
+  - Search keeps explore tab active in bottom nav (tab index 1)
+- **Added /profile/me/:index redirect** - Shortcut for current user's profile
+  - Redirects `/profile/me/:index` to `/profile/{user-npub}/:index`
+  - Automatically encodes authenticated user's pubkey to npub
+  - Falls back to home if not authenticated
+
+#### Technical Details
+- Modified `lib/router/app_router.dart`:
+  - Lines 28-29: Added `_searchGridKey` and `_searchFeedKey` navigator keys
+  - Lines 48: Search returns tab index -1 to hide bottom nav (has its own AppBar)
+  - Lines 58-93: Added redirect logic for `/profile/me/*` routes
+  - Lines 191-218: Added search-grid and search-feed routes
+- Created `lib/utils/public_identifier_normalizer.dart` - Utility for npub/hex conversion
+
+#### Tests
+- Created `test/router/profile_me_redirect_test.dart` - Tests /profile/me redirect
+- Created `test/router/search_route_parsing_test.dart` - Tests search URL parsing
+- Created `test/router/search_navigation_test.dart` - Tests search navigation
+- Created `test/router/search_bottom_nav_test.dart` - Tests search hides bottom nav
+
+### Added - New Services and Utilities (2025-10-17)
+
+#### Services
+- **Created BlossomAuthService** - Handles BUD-01 authentication for Blossom servers
+  - Generates auth tokens for media uploads
+  - Signs requests with Nostr keys
+  - Created `lib/services/blossom_auth_service.dart`
+  - Tests: `test/services/blossom_auth_service_test.dart`
+
+- **Created MediaAuthInterceptor** - HTTP interceptor for authenticated media requests
+  - Automatically adds Blossom auth headers to requests
+  - Integrates with BlossomAuthService
+  - Created `lib/services/media_auth_interceptor.dart`
+  - Tests: `test/services/media_auth_interceptor_test.dart`
+
+- **Created BookmarkSyncWorker** - Background sync for bookmark sets (NIP-51)
+  - Syncs user's bookmark collections
+  - Handles kind 30003 events
+  - Created `lib/services/bookmark_sync_worker.dart`
+  - Tests: `test/services/bookmark_sync_test.dart`
+
+- **Created VideoPrewarmer** - Proactive video caching service
+  - Prewarms upcoming videos in feed for smooth playback
+  - Replaces old provider-based approach
+  - Created `lib/services/video_prewarmer.dart`
+  - Removed: `lib/providers/video_prewarmer_provider.dart`
+
+- **Created VisibilityTracker** - Tracks video visibility for analytics
+  - Monitors which videos are actually watched
+  - Integrates with analytics service
+  - Created `lib/services/visibility_tracker.dart`
+
+#### Widgets
+- **Created ComposableVideoGrid** - Reusable video grid component
+  - Consistent grid layout across explore, search, profile
+  - Supports custom tap handlers and empty states
+  - Created `lib/widgets/composable_video_grid.dart`
+  - Tests: `test/widgets/composable_video_grid_test.dart`
+
+- **Created VideoErrorOverlay** - Error state display for failed videos
+  - Shows user-friendly error messages
+  - Retry functionality
+  - Created `lib/widgets/video_error_overlay.dart`
+  - Tests: `test/widgets/video_error_overlay_test.dart`
+
+### Added - Video Editor Screen (2025-10-17)
+
+#### Features
+- **Created video editor screen** - Edit video metadata after recording
+  - Edit title, description, hashtags
+  - Route: `/edit-video` (requires VideoEvent passed via `extra`)
+  - Integrated with profile screen for editing user's videos
+
+#### Technical Details
+- Created `lib/screens/video_editor_screen.dart` - Video metadata editor
+- Modified `lib/router/app_router.dart`: Added `/edit-video` route
+- Tests:
+  - `test/screens/video_editor_route_test.dart` - Route integration
+  - `test/screens/profile_edit_video_navigation_test.dart` - Edit from profile
+  - `test/screens/profile_video_deletion_test.dart` - Delete after edit
+
+### Added - Curation Publishing (2025-10-17)
+
+#### Features
+- **Added curation set publishing** - Users can create and publish curated video collections
+  - NIP-51 kind 30005 events for video curation
+  - Draft/published status tracking
+  - Integration with bookmark system
+
+#### Technical Details
+- Created `lib/models/curation_publish_status.dart` - Publish state model
+- Modified `lib/services/curation_service.dart` - Added publishing methods
+- Tests: `test/services/curation_publish_test.dart`
+
+### Added - Comprehensive Test Coverage (2025-10-17)
+
+#### New Tests
+- **Search functionality**:
+  - `test/screens/search_results_sorting_test.dart` - Tests sorting (new vines chronologically, originals by loops)
+  - `test/providers/search_active_video_test.dart` - Active video in search feed
+
+- **Explore functionality**:
+  - `test/providers/explore_active_video_test.dart` - Active video in explore feed
+
+- **Home feed**:
+  - `test/providers/home_feed_double_watch_test.dart` - Prevents double-watching same video
+
+- **Navigation**:
+  - `test/widgets/video_feed_item_navigation_test.dart` - Video tap navigation
+
+- **Services**:
+  - `test/services/notification_service_test.dart` - Notification handling
+  - `test/services/secure_key_storage_nip46_test.dart` - NIP-46 key storage
+  - `test/services/upload_initialization_helper_test.dart` - Upload initialization
+  - `test/services/upload_manager_sandbox_test.dart` - Upload manager
+  - `test/services/video_cache_nsfw_auth_test.dart` - NSFW content auth
+
+- **Widgets**:
+  - `test/widgets/share_video_menu_bookmark_sets_test.dart` - Bookmark set sharing
+
+### Changed - Provider Cleanup (2025-10-17)
+
+#### Refactoring
+- **Consolidated video feed providers** - Unified architecture reduces duplication
+  - Removed scattered route-specific providers
+  - Centralized logic in route-aware providers
+  - Better separation of concerns
+
+#### Technical Details
+- Updated `lib/providers/hashtag_feed_providers.dart` - Route-aware provider
+- Modified `lib/providers/route_feed_providers.dart` - Unified feed management
+- Removed `lib/screens/profile_screen_scrollable.dart` - Obsolete implementation
+- Updated numerous provider files for consistency
+
 ### Added - Real End-to-End Upload and Publishing Tests (2025-10-14)
 
 #### Tests

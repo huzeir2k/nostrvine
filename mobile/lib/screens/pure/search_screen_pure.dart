@@ -8,7 +8,8 @@ import 'package:openvine/models/video_event.dart';
 import 'package:openvine/providers/app_providers.dart';
 import 'package:openvine/providers/video_events_providers.dart';
 import 'package:openvine/router/nav_extensions.dart';
-import 'package:openvine/screens/hashtag_screen_router.dart';
+import 'package:openvine/router/page_context_provider.dart';
+import 'package:openvine/router/route_utils.dart';
 import 'package:openvine/screens/pure/explore_video_screen_pure.dart';
 import 'package:openvine/theme/vine_theme.dart';
 import 'package:openvine/widgets/composable_video_grid.dart';
@@ -213,6 +214,27 @@ class _SearchScreenPureState extends ConsumerState<SearchScreenPure>
 
   @override
   Widget build(BuildContext context) {
+    // Check if we're in feed mode (videoIndex set in URL)
+    final pageContext = ref.watch(pageContextProvider);
+    final isInFeedMode = pageContext.maybeWhen(
+      data: (ctx) => ctx.type == RouteType.search && ctx.videoIndex != null,
+      orElse: () => false,
+    );
+
+    // If in feed mode, show video player instead of search UI
+    if (isInFeedMode && _videoResults.isNotEmpty) {
+      final videoIndex = pageContext.asData?.value.videoIndex ?? 0;
+      final safeIndex = videoIndex.clamp(0, _videoResults.length - 1);
+
+      return ExploreVideoScreenPure(
+        startingVideo: _videoResults[safeIndex],
+        videoList: _videoResults,
+        contextTitle: 'Search: $_currentQuery',
+        startingIndex: safeIndex,
+      );
+    }
+
+    // Otherwise show search grid UI
     final searchBar = TextField(
       controller: _searchController,
       focusNode: _searchFocusNode,
@@ -334,31 +356,8 @@ class _SearchScreenPureState extends ConsumerState<SearchScreenPure>
       onVideoTap: (videos, index) {
         Log.info('🔍 SearchScreenPure: Tapped video at index $index',
             category: LogCategory.video);
-        // Navigate to full-screen video player
-        Navigator.of(context).push(
-          MaterialPageRoute(
-            builder: (_) => Scaffold(
-              backgroundColor: Colors.black,
-              appBar: AppBar(
-                backgroundColor: VineTheme.vineGreen,
-                leading: IconButton(
-                  icon: const Icon(Icons.arrow_back, color: VineTheme.whiteText),
-                  onPressed: () => Navigator.of(context).pop(),
-                ),
-                title: Text(
-                  'Search: $_currentQuery',
-                  style: const TextStyle(color: VineTheme.whiteText),
-                ),
-              ),
-              body: ExploreVideoScreenPure(
-                startingVideo: videos[index],
-                videoList: videos,
-                contextTitle: '',
-                startingIndex: index,
-              ),
-            ),
-          ),
-        );
+        // Navigate using GoRouter to enable router-driven video playback
+        context.goSearch(index);
       },
       emptyBuilder: () => Center(
         child: Column(
@@ -520,26 +519,8 @@ class _SearchScreenPureState extends ConsumerState<SearchScreenPure>
             ),
             onTap: () {
               Log.info('🔍 SearchScreenPure: Tapped hashtag: $hashtag', category: LogCategory.video);
-              // Push hashtag screen to keep search in navigation stack
-              Navigator.of(context).push(
-                MaterialPageRoute(
-                  builder: (_) => Scaffold(
-                    backgroundColor: VineTheme.backgroundColor,
-                    appBar: AppBar(
-                      backgroundColor: VineTheme.vineGreen,
-                      leading: IconButton(
-                        icon: const Icon(Icons.arrow_back, color: VineTheme.whiteText),
-                        onPressed: () => Navigator.of(context).pop(),
-                      ),
-                      title: Text(
-                        '#$hashtag',
-                        style: const TextStyle(color: VineTheme.whiteText),
-                      ),
-                    ),
-                    body: HashtagScreenRouter(),
-                  ),
-                ),
-              );
+              // Navigate using GoRouter
+              context.goHashtag(hashtag);
             },
           ),
         );

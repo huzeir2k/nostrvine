@@ -30,6 +30,7 @@ import 'package:openvine/utils/string_utils.dart';
 import 'package:openvine/widgets/clickable_hashtag_text.dart';
 import 'package:openvine/widgets/proofmode_badge.dart';
 import 'package:openvine/widgets/proofmode_badge_row.dart';
+import 'package:openvine/widgets/badge_explanation_modal.dart';
 
 /// Video feed item using individual controller architecture
 class VideoFeedItem extends ConsumerStatefulWidget {
@@ -523,46 +524,23 @@ class VideoOverlayActions extends ConsumerWidget {
                     ),
                   ),
                 ),
-                // Context title chip (e.g., hashtag)
-                if (contextTitle != null && contextTitle!.isNotEmpty) ...[
-                  const SizedBox(height: 8),
-                  Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
-                    decoration: BoxDecoration(
-                      color: Colors.black.withValues(alpha: 0.6),
-                      borderRadius: BorderRadius.circular(16),
-                      border: Border.all(
-                        color: Colors.white.withValues(alpha: 0.3),
-                        width: 1,
-                      ),
-                    ),
-                    child: Row(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        const Icon(Icons.tag, size: 14, color: Colors.white),
-                        const SizedBox(width: 6),
-                        Text(
-                          contextTitle!,
-                          style: const TextStyle(
-                            color: Colors.white,
-                            fontSize: 12,
-                            fontWeight: FontWeight.w600,
-                          ),
-                          overflow: TextOverflow.ellipsis,
-                        ),
-                      ],
-                    ),
-                  ),
-                ],
-                // ProofMode and Vine badges
-                const SizedBox(height: 8),
-                ProofModeBadgeRow(
-                  video: video,
-                  size: BadgeSize.small,
-                ),
               ],
             );
           }),
+        ),
+        // ProofMode and Vine badges in upper right corner (tappable)
+        Positioned(
+          top: MediaQuery.of(context).viewPadding.top + 16,
+          right: 16,
+          child: GestureDetector(
+            onTap: () {
+              _showBadgeExplanationModal(context, video);
+            },
+            child: ProofModeBadgeRow(
+              video: video,
+              size: BadgeSize.small,
+            ),
+          ),
         ),
         // Video title overlay at bottom left
         Positioned(
@@ -831,6 +809,13 @@ class VideoOverlayActions extends ConsumerWidget {
       isScrollControlled: true,
       backgroundColor: Colors.transparent,
       builder: (context) => ShareVideoMenu(video: video),
+    );
+  }
+
+  void _showBadgeExplanationModal(BuildContext context, VideoEvent video) {
+    showDialog<void>(
+      context: context,
+      builder: (context) => BadgeExplanationModal(video: video),
     );
   }
 }

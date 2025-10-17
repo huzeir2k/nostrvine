@@ -5,9 +5,20 @@ import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:openvine/router/app_router.dart';
+import 'package:openvine/router/route_utils.dart';
 import 'package:openvine/screens/pure/search_screen_pure.dart';
 
 void main() {
+  group('parseRoute() - Search with terms', () {
+    test('parseRoute("/search/nostr") returns RouteContext with searchTerm', () {
+      final result = parseRoute('/search/nostr');
+
+      expect(result.type, RouteType.search);
+      expect(result.searchTerm, 'nostr');
+      expect(result.videoIndex, null);
+    });
+  });
+
   group('Search Route Navigation', () {
     testWidgets('navigating to /search renders SearchScreenPure',
         (tester) async {

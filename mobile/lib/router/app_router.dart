@@ -5,7 +5,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:openvine/models/video_event.dart';
-import 'package:openvine/providers/app_providers.dart';
 import 'package:openvine/router/app_shell.dart';
 import 'package:openvine/screens/explore_screen.dart';
 import 'package:openvine/screens/hashtag_screen_router.dart';
@@ -16,7 +15,6 @@ import 'package:openvine/screens/pure/search_screen_pure.dart';
 import 'package:openvine/screens/pure/universal_camera_screen_pure.dart';
 import 'package:openvine/screens/settings_screen.dart';
 import 'package:openvine/screens/video_editor_screen.dart';
-import 'package:openvine/utils/nostr_encoding.dart';
 
 // Navigator keys for per-tab state preservation
 final _rootKey = GlobalKey<NavigatorState>(debugLabel: 'root');
@@ -56,42 +54,6 @@ final goRouterProvider = Provider<GoRouter>((ref) {
   return GoRouter(
     navigatorKey: _rootKey,
     initialLocation: '/home/0',
-    redirect: (context, state) {
-      // Handle /profile/me/:index redirect
-      final uri = state.uri;
-      print('[ROUTER] Redirect check: ${uri.path}');
-      print('[ROUTER] Path segments: ${uri.pathSegments}');
-
-      if (uri.pathSegments.length >= 2 &&
-          uri.pathSegments[0] == 'profile' &&
-          uri.pathSegments[1] == 'me') {
-        print('[ROUTER] Detected /profile/me/* - attempting redirect');
-
-        // Get auth service dynamically from context
-        final container = ProviderScope.containerOf(context);
-        final authService = container.read(authServiceProvider);
-
-        print('[ROUTER] Auth state: ${authService.isAuthenticated}');
-        print('[ROUTER] Public key: ${authService.currentPublicKeyHex?.substring(0, 8)}...');
-
-        // Check if user is authenticated
-        if (!authService.isAuthenticated || authService.currentPublicKeyHex == null) {
-          // Redirect to home if not authenticated
-          print('[ROUTER] Not authenticated, redirecting to /home/0');
-          return '/home/0';
-        }
-
-        // Convert current user's hex to npub and redirect
-        final userNpub = NostrEncoding.encodePublicKey(authService.currentPublicKeyHex!);
-        final index = uri.pathSegments.length >= 3 ? uri.pathSegments[2] : '0';
-        final redirectTo = '/profile/$userNpub/$index';
-        print('[ROUTER] Redirecting to: $redirectTo');
-        return redirectTo;
-      }
-
-      // No redirect needed
-      return null;
-    },
     routes: [
       // Shell keeps tab navigators alive
       ShellRoute(
@@ -169,6 +131,7 @@ final goRouterProvider = Provider<GoRouter>((ref) {
           ),
 
           // PROFILE tab subtree
+          // Note: /profile/me/:index is handled by ProfileScreenRouter detecting "me" and redirecting
           GoRoute(
             path: '/profile/:npub/:index',
             name: 'profile',
@@ -187,14 +150,28 @@ final goRouterProvider = Provider<GoRouter>((ref) {
             },
           ),
 
-          // SEARCH route (inside shell for AppBar, but hides bottom nav)
+          // SEARCH routes (inside shell for AppBar, but hides bottom nav)
           GoRoute(
             path: '/search',
-            name: 'search',
+            name: 'search-grid',
             pageBuilder: (ctx, st) => NoTransitionPage(
               key: st.pageKey,
               child: Navigator(
-                key: _searchKey,
+                key: _searchGridKey,
+                onGenerateRoute: (r) => MaterialPageRoute(
+                  builder: (_) => const SearchScreenPure(embedded: true),
+                  settings: const RouteSettings(name: 'search-root'),
+                ),
+              ),
+            ),
+          ),
+          GoRoute(
+            path: '/search/:index',
+            name: 'search-feed',
+            pageBuilder: (ctx, st) => NoTransitionPage(
+              key: st.pageKey,
+              child: Navigator(
+                key: _searchFeedKey,
                 onGenerateRoute: (r) => MaterialPageRoute(
                   builder: (_) => const SearchScreenPure(embedded: true),
                   settings: const RouteSettings(name: 'search-root'),

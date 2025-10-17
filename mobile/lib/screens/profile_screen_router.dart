@@ -108,7 +108,7 @@ class _ProfileScreenRouterState extends ConsumerState<ProfileScreenRouter>
             // Not authenticated - redirect to home
             WidgetsBinding.instance.addPostFrameCallback((_) {
               if (mounted) {
-                context.go('/home/0');
+                GoRouter.of(context).go('/home/0');
               }
             });
             return const Center(child: CircularProgressIndicator());
@@ -124,10 +124,16 @@ class _ProfileScreenRouterState extends ConsumerState<ProfileScreenRouter>
             category: LogCategory.ui,
           );
 
-          // Redirect to actual user profile
+          // Redirect to actual user profile using GoRouter explicitly
           WidgetsBinding.instance.addPostFrameCallback((_) {
             if (mounted) {
-              context.go('/profile/$currentUserNpub/$videoIndex');
+              final router = GoRouter.of(context);
+              Log.info(
+                'ProfileScreenRouter: Executing redirect now...',
+                name: 'ProfileScreenRouter',
+                category: LogCategory.ui,
+              );
+              router.go('/profile/$currentUserNpub/$videoIndex');
             }
           });
 
