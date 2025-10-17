@@ -34,7 +34,7 @@ void main() {
 
     test('newer video event replaces older one with same d-tag', () async {
       // Arrange: Create two versions of the same video (same pubkey + d-tag)
-      const pubkey = 'test-pubkey-123';
+      const pubkey = '0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef';
       const vineId = 'test-vine-abc';
       const videoUrl = 'https://example.com/video.mp4';
 
@@ -71,44 +71,41 @@ void main() {
       // Assert: Should only have the newer event
       final videos = service.discoveryVideos;
       expect(videos.length, 1, reason: 'Should have exactly one video');
-      expect(videos[0].id, 'new-event-id', reason: 'Should be the newer event');
+      expect(videos[0].id, newEvent.id, reason: 'Should be the newer event');
       expect(videos[0].title, 'New Title', reason: 'Should have newer title');
+      expect(videos[0].createdAt, 2000, reason: 'Should have newer timestamp');
     });
 
     test('older video event is rejected when newer exists', () async {
       // Arrange: Create two versions with reversed timestamps
-      const pubkey = 'test-pubkey-456';
+      const pubkey = 'fedcba9876543210fedcba9876543210fedcba9876543210fedcba9876543210';
       const vineId = 'test-vine-xyz';
       const videoUrl = 'https://example.com/video2.mp4';
 
       // New version (timestamp 3000)
       final newEvent = sdk.Event(
-        id: 'new-event-id-2',
-        pubkey: pubkey,
-        createdAt: BigInt.from(3000),
-        kind: NIP71VideoKinds.addressableShortVideo,
-        content: 'New version',
-        tags: [
+        pubkey,
+        NIP71VideoKinds.addressableShortVideo,
+        [
           ['d', vineId],
           ['url', videoUrl],
           ['title', 'Newer Title'],
         ],
-        sig: 'new-sig-2',
+        'New version',
+        createdAt: 3000,
       );
 
       // Old version (timestamp 1500)
       final oldEvent = sdk.Event(
-        id: 'old-event-id-2',
-        pubkey: pubkey,
-        createdAt: BigInt.from(1500),
-        kind: NIP71VideoKinds.addressableShortVideo,
-        content: 'Old version',
-        tags: [
+        pubkey,
+        NIP71VideoKinds.addressableShortVideo,
+        [
           ['d', vineId],
           ['url', videoUrl],
           ['title', 'Older Title'],
         ],
-        sig: 'old-sig-2',
+        'Old version',
+        createdAt: 1500,
       );
 
       // Act: Add newer event first, then try to add older
@@ -118,41 +115,38 @@ void main() {
       // Assert: Should still only have the newer event
       final videos = service.discoveryVideos;
       expect(videos.length, 1, reason: 'Should have exactly one video');
-      expect(videos[0].id, 'new-event-id-2', reason: 'Should keep the newer event');
+      expect(videos[0].id, newEvent.id, reason: 'Should keep the newer event');
       expect(videos[0].title, 'Newer Title', reason: 'Should keep newer title');
+      expect(videos[0].createdAt, 3000, reason: 'Should have newer timestamp');
     });
 
     test('different d-tags create separate videos', () async {
       // Arrange: Same pubkey, different d-tags
-      const pubkey = 'test-pubkey-789';
+      const pubkey = '1111222233334444555566667777888899990000aaaabbbbccccddddeeeeffff';
       const videoUrl = 'https://example.com/video3.mp4';
 
       final event1 = sdk.Event(
-        id: 'event-1',
-        pubkey: pubkey,
-        createdAt: BigInt.from(1000),
-        kind: NIP71VideoKinds.addressableShortVideo,
-        content: 'Video 1',
-        tags: [
+        pubkey,
+        NIP71VideoKinds.addressableShortVideo,
+        [
           ['d', 'vine-1'],
           ['url', videoUrl],
           ['title', 'Video 1'],
         ],
-        sig: 'sig-1',
+        'Video 1',
+        createdAt: 1000,
       );
 
       final event2 = sdk.Event(
-        id: 'event-2',
-        pubkey: pubkey,
-        createdAt: BigInt.from(2000),
-        kind: NIP71VideoKinds.addressableShortVideo,
-        content: 'Video 2',
-        tags: [
+        pubkey,
+        NIP71VideoKinds.addressableShortVideo,
+        [
           ['d', 'vine-2'],
           ['url', videoUrl],
           ['title', 'Video 2'],
         ],
-        sig: 'sig-2',
+        'Video 2',
+        createdAt: 2000,
       );
 
       // Act: Add both events
@@ -162,41 +156,37 @@ void main() {
       // Assert: Should have both videos (different d-tags)
       final videos = service.discoveryVideos;
       expect(videos.length, 2, reason: 'Should have two separate videos');
-      expect(videos.map((v) => v.id).toSet(), {'event-1', 'event-2'});
+      expect(videos.map((v) => v.id).toSet(), {event1.id, event2.id});
     });
 
     test('different subscription types track replaceable events separately', () async {
       // Arrange: Same video, different subscription types
-      const pubkey = 'test-pubkey-999';
+      const pubkey = 'aabbccddeeff00112233445566778899aabbccddeeff00112233445566778899';
       const vineId = 'test-vine-separate';
       const videoUrl = 'https://example.com/video4.mp4';
 
       final oldEvent = sdk.Event(
-        id: 'old-id-separate',
-        pubkey: pubkey,
-        createdAt: BigInt.from(1000),
-        kind: NIP71VideoKinds.addressableShortVideo,
-        content: 'Old',
-        tags: [
+        pubkey,
+        NIP71VideoKinds.addressableShortVideo,
+        [
           ['d', vineId],
           ['url', videoUrl],
           ['title', 'Old'],
         ],
-        sig: 'sig-old',
+        'Old',
+        createdAt: 1000,
       );
 
       final newEvent = sdk.Event(
-        id: 'new-id-separate',
-        pubkey: pubkey,
-        createdAt: BigInt.from(2000),
-        kind: NIP71VideoKinds.addressableShortVideo,
-        content: 'New',
-        tags: [
+        pubkey,
+        NIP71VideoKinds.addressableShortVideo,
+        [
           ['d', vineId],
           ['url', videoUrl],
           ['title', 'New'],
         ],
-        sig: 'sig-new',
+        'New',
+        createdAt: 2000,
       );
 
       // Act: Add old to discovery, new to homeFeed
@@ -211,41 +201,39 @@ void main() {
       final homeFeedVideos = service.homeFeedVideos;
 
       expect(discoveryVideos.length, 1);
-      expect(discoveryVideos[0].id, 'new-id-separate');
+      expect(discoveryVideos[0].id, newEvent.id, reason: 'Discovery should have newer event');
+      expect(discoveryVideos[0].createdAt, 2000, reason: 'Discovery should have newer timestamp');
 
       expect(homeFeedVideos.length, 1);
-      expect(homeFeedVideos[0].id, 'new-id-separate');
+      expect(homeFeedVideos[0].id, newEvent.id, reason: 'HomeFeed should have newer event');
+      expect(homeFeedVideos[0].createdAt, 2000, reason: 'HomeFeed should have newer timestamp');
     });
 
     test('non-replaceable events (kind 22) are not deduplicated', () async {
       // Arrange: Two different kind 22 events (non-addressable)
-      const pubkey = 'test-pubkey-222';
+      const pubkey = '9876543210abcdef9876543210abcdef9876543210abcdef9876543210abcdef';
       const videoUrl = 'https://example.com/video5.mp4';
 
       final event1 = sdk.Event(
-        id: 'event-kind22-1',
-        pubkey: pubkey,
-        createdAt: BigInt.from(1000),
-        kind: NIP71VideoKinds.shortVideo, // Kind 22 is NOT replaceable
-        content: 'Video 1',
-        tags: [
+        pubkey,
+        NIP71VideoKinds.shortVideo, // Kind 22 is NOT replaceable
+        [
           ['url', videoUrl],
           ['title', 'Video 1'],
         ],
-        sig: 'sig-22-1',
+        'Video 1',
+        createdAt: 1000,
       );
 
       final event2 = sdk.Event(
-        id: 'event-kind22-2',
-        pubkey: pubkey,
-        createdAt: BigInt.from(2000),
-        kind: NIP71VideoKinds.shortVideo,
-        content: 'Video 2',
-        tags: [
+        pubkey,
+        NIP71VideoKinds.shortVideo,
+        [
           ['url', videoUrl],
           ['title', 'Video 2'],
         ],
-        sig: 'sig-22-2',
+        'Video 2',
+        createdAt: 2000,
       );
 
       // Act: Add both events
