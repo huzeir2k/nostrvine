@@ -66,6 +66,8 @@ class _VideoFeedItemState extends ConsumerState<VideoFeedItem> {
     // Listen for active state changes to control playback
     // Active state is now derived from URL + feed + foreground (pure provider)
     WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!mounted) return; // Safety check: don't use ref if widget is disposed
+
       final videoIdDisplay = widget.video.id.length > 8 ? widget.video.id.substring(0, 8) : widget.video.id;
       // Check initial state and start playback if already active
       final isActive = ref.read(isVideoActiveProvider(widget.video.id));
@@ -134,6 +136,14 @@ class _VideoFeedItemState extends ConsumerState<VideoFeedItem> {
               name: 'VideoFeedItem', category: LogCategory.ui);
 
           void checkAndPlay() {
+            // Safety check: don't use ref if widget is disposed
+            if (!mounted) {
+              Log.debug('⏭️ Ignoring initialization callback for $videoIdDisplay... (widget disposed)',
+                  name: 'VideoFeedItem', category: LogCategory.ui);
+              controller.removeListener(checkAndPlay);
+              return;
+            }
+
             // Check if video is still active (even if generation changed)
             final stillActive = ref.read(isVideoActiveProvider(widget.video.id));
 

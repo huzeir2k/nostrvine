@@ -1,0 +1,69 @@
+// ABOUTME: Tests that VideoFeedItem safely handles disposal during video initialization
+// ABOUTME: Verifies no "ref after unmount" crashes when navigating away before video loads
+
+import 'package:flutter/material.dart';
+import 'package:flutter_test/flutter_test.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:openvine/models/video_event.dart';
+import 'package:openvine/widgets/video_feed_item.dart';
+import 'package:openvine/providers/app_providers.dart';
+
+void main() {
+  testWidgets('VideoFeedItem does not crash when disposed during video initialization',
+      (tester) async {
+    final video = VideoEvent(
+      id: 'test-video-123',
+      pubkey: 'test-pubkey',
+      content: 'Test video',
+      videoUrl: 'https://example.com/video.mp4',
+      createdAt: DateTime.now(),
+      title: 'Test',
+      hashtags: [],
+    );
+
+    final container = ProviderContainer(
+      overrides: [
+        // Override necessary providers for test
+      ],
+    );
+    addTearDown(container.dispose);
+
+    await tester.pumpWidget(
+      UncontrolledProviderScope(
+        container: container,
+        child: MaterialApp(
+          home: Scaffold(
+            body: VideoFeedItem(
+              video: video,
+              index: 0,
+            ),
+          ),
+        ),
+      ),
+    );
+
+    // Pump once to start video initialization
+    await tester.pump();
+
+    // Immediately navigate away (simulating Home → Explore navigation)
+    // This should dispose the VideoFeedItem while video is initializing
+    await tester.pumpWidget(
+      UncontrolledProviderScope(
+        container: container,
+        child: const MaterialApp(
+          home: Scaffold(
+            body: Center(child: Text('Different screen')),
+          ),
+        ),
+      ),
+    );
+
+    // Pump to complete disposal and let any pending callbacks fire
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 100));
+
+    // Should complete without "ref after unmount" crash
+    expect(tester.takeException(), isNull,
+        reason: 'VideoFeedItem should not crash with ref-after-unmount when disposed during initialization');
+  });
+}
