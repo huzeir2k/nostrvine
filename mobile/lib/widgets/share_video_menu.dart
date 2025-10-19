@@ -1105,8 +1105,9 @@ class _SendToUserDialogState extends ConsumerState<_SendToUserDialog> {
           style: const TextStyle(color: VineTheme.whiteText),
         ),
         subtitle: Text(
-          '${user.pubkey.length > 16 ? user.pubkey.substring(0, 16) : user.pubkey}...',
+          user.pubkey,
           style: const TextStyle(color: VineTheme.secondaryText),
+          overflow: TextOverflow.ellipsis,
         ),
         onTap: () => _sendToUser(user),
         dense: true,

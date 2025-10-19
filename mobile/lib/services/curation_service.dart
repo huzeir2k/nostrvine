@@ -314,7 +314,7 @@ class CurationService {
             receivedCount++;
 
             Log.info(
-                "📹 Fetched editor's pick video ($receivedCount/$targetCount): ${video.title ?? video.id.substring(0, 8)}",
+                "📹 Fetched editor's pick video ($receivedCount/$targetCount): ${video.title ?? video.id}",
                 name: 'CurationService',
                 category: LogCategory.system);
 
@@ -386,7 +386,7 @@ class CurationService {
 
         if (!pubkeyMatches || !dTagMatches) {
           Log.verbose(
-              '  ✗ Coordinate mismatch: video ${video.id.substring(0, 8)} pubkey=${pubkeyMatches} dTag=${dTagMatches} (expected d-tag: $coordinateDTag, got: ${video.vineId})',
+              '  ✗ Coordinate mismatch: video ${video.id} pubkey=${pubkeyMatches} dTag=${dTagMatches} (expected d-tag: $coordinateDTag, got: ${video.vineId})',
               name: 'CurationService',
               category: LogCategory.system);
         }
@@ -448,11 +448,11 @@ class CurationService {
           (v) => _matchesCoordinate(v, coordinate),
         );
         picks.add(video);
-        Log.verbose('  ✓ Matched: ${video.title ?? video.id.substring(0, 8)}',
+        Log.verbose('  ✓ Matched: ${video.title ?? video.id}',
             name: 'CurationService', category: LogCategory.system);
       } catch (e) {
         // Video not found in cache yet (still being fetched)
-        Log.verbose('  ✗ Not in cache: ${coordinate.length > 16 ? coordinate.substring(0, 16) : coordinate}...',
+        Log.verbose('  ✗ Not in cache: $coordinate',
             name: 'CurationService', category: LogCategory.system);
       }
     }
@@ -597,7 +597,7 @@ class CurationService {
                 trending.add(localVideo);
                 // Use verbose logging for individual videos to reduce log spam
                 Log.verbose(
-                    '✅ Found trending video: ${localVideo.title ?? localVideo.id.substring(0, 8)} ($viewCount views)',
+                    '✅ Found trending video: ${localVideo.title ?? localVideo.id} ($viewCount views)',
                     name: 'CurationService',
                     category: LogCategory.system);
               } else {
@@ -641,7 +641,7 @@ class CurationService {
                     receivedCount++;
 
                     Log.info(
-                        '📹 Fetched trending video from relay ($receivedCount/$targetCount): ${video.title ?? video.id.substring(0, 8)}',
+                        '📹 Fetched trending video from relay ($receivedCount/$targetCount): ${video.title ?? video.id}',
                         name: 'CurationService',
                         category: LogCategory.system);
 

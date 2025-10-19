@@ -7,6 +7,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:openvine/utils/unified_logger.dart';
 import 'package:video_player/video_player.dart';
 import 'package:openvine/providers/app_providers.dart';
+import 'package:openvine/providers/vine_recording_provider.dart';
 import 'package:openvine/services/proofmode_session_service.dart' show ProofManifest;
 
 /// Pure video metadata screen using revolutionary single-controller Riverpod architecture
@@ -579,6 +580,9 @@ class _VideoMetadataScreenPureState extends ConsumerState<VideoMetadataScreenPur
 
       Log.info('📝 Video publishing complete, returning to camera screen',
           category: LogCategory.video);
+
+      // Mark recording as published to prevent auto-save on dispose
+      ref.read(vineRecordingProvider.notifier).markAsPublished();
 
       if (mounted) {
         setState(() {

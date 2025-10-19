@@ -14,6 +14,7 @@ import 'package:openvine/screens/profile_screen_router.dart';
 import 'package:openvine/screens/pure/search_screen_pure.dart';
 import 'package:openvine/screens/pure/universal_camera_screen_pure.dart';
 import 'package:openvine/screens/settings_screen.dart';
+import 'package:openvine/screens/video_detail_screen.dart';
 import 'package:openvine/screens/video_editor_screen.dart';
 
 // Navigator keys for per-tab state preservation
@@ -227,7 +228,7 @@ final goRouterProvider = Provider<GoRouter>((ref) {
         ],
       ),
 
-      // Non-tab routes outside the shell (camera/settings/editor)
+      // Non-tab routes outside the shell (camera/settings/editor/video)
       GoRoute(
         path: '/camera',
         builder: (_, __) => const UniversalCameraScreenPure(),
@@ -235,6 +236,23 @@ final goRouterProvider = Provider<GoRouter>((ref) {
       GoRoute(
         path: '/settings',
         builder: (_, __) => const SettingsScreen(),
+      ),
+      // Video detail route (for deep links)
+      GoRoute(
+        path: '/video/:id',
+        name: 'video',
+        builder: (ctx, st) {
+          final videoId = st.pathParameters['id'];
+          if (videoId == null || videoId.isEmpty) {
+            return Scaffold(
+              appBar: AppBar(title: const Text('Error')),
+              body: const Center(
+                child: Text('Invalid video ID'),
+              ),
+            );
+          }
+          return VideoDetailScreen(videoId: videoId);
+        },
       ),
       // Video editor route (requires video passed via extra)
       GoRoute(

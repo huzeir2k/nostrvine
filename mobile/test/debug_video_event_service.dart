@@ -154,7 +154,7 @@ void main() {
       Log.info('📝 Events received:', name: 'DebugTest');
       for (final event in videoEventService.discoveryVideos) {
         Log.info(
-            '  - Event: ${event.id.substring(0, 8)}... title="${event.title}"',
+            '  - Event: ${event.id} title="${event.title}"',
             name: 'DebugTest');
       }
     } else {

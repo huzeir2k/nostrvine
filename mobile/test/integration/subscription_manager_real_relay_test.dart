@@ -125,7 +125,7 @@ void main() {
         ],
         onEvent: (event) {
           Log.info(
-              '✅ SUBSCRIPTION_MANAGER: Received event via SubscriptionManager: kind=${event.kind}, id=${event.id.substring(0, 8)}',
+              '✅ SUBSCRIPTION_MANAGER: Received event via SubscriptionManager: kind=${event.kind}, id=${event.id}',
               name: 'SubscriptionManagerRealRelayTest',
               category: LogCategory.system);
           receivedEvents.add(event);
@@ -185,7 +185,7 @@ void main() {
       final directSub = directStream.listen(
         (event) {
           Log.info(
-              '✅ DIRECT: Received event via direct subscription: kind=${event.kind}, id=${event.id.substring(0, 8)}',
+              '✅ DIRECT: Received event via direct subscription: kind=${event.kind}, id=${event.id}',
               name: 'SubscriptionManagerRealRelayTest',
               category: LogCategory.system);
           directEvents.add(event);
@@ -278,7 +278,7 @@ void main() {
           Filter(kinds: [22], limit: 3)
         ],
         onEvent: (event) {
-          Log.debug('📱 MANAGED: ${event.id.substring(0, 8)}',
+          Log.debug('📱 MANAGED: ${event.id}',
               name: 'SubscriptionManagerRealRelayTest',
               category: LogCategory.system);
           managedEvents.add(event);
@@ -303,7 +303,7 @@ void main() {
 
       final directSub = directStream.listen(
         (event) {
-          Log.debug('🔗 DIRECT: ${event.id.substring(0, 8)}',
+          Log.debug('🔗 DIRECT: ${event.id}',
               name: 'SubscriptionManagerRealRelayTest',
               category: LogCategory.system);
           directEvents.add(event);

@@ -153,6 +153,12 @@ class MockVideoEventService extends _i1.Mock implements _i2.VideoEventService {
           as List<_i3.VideoEvent>);
 
   @override
+  void debugDumpCdnDivineVideoThumbnails() => super.noSuchMethod(
+    Invocation.method(#debugDumpCdnDivineVideoThumbnails, []),
+    returnValueForMissingStub: null,
+  );
+
+  @override
   List<_i3.VideoEvent> authorVideos(String? pubkeyHex) =>
       (super.noSuchMethod(
             Invocation.method(#authorVideos, [pubkeyHex]),
@@ -183,6 +189,11 @@ class MockVideoEventService extends _i1.Mock implements _i2.VideoEventService {
             returnValue: 0,
           )
           as int);
+
+  @override
+  _i3.VideoEvent? getVideoById(String? eventId) =>
+      (super.noSuchMethod(Invocation.method(#getVideoById, [eventId]))
+          as _i3.VideoEvent?);
 
   @override
   bool isSubscribed(_i2.SubscriptionType? type) =>

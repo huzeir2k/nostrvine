@@ -774,6 +774,18 @@ class MockINostrService extends _i1.Mock implements _i4.INostrService {
           as _i6.Future<List<_i7.Event>>);
 
   @override
+  _i6.Future<_i7.Event?> fetchEventById(String? eventId, {String? relayUrl}) =>
+      (super.noSuchMethod(
+            Invocation.method(
+              #fetchEventById,
+              [eventId],
+              {#relayUrl: relayUrl},
+            ),
+            returnValue: _i6.Future<_i7.Event?>.value(),
+          )
+          as _i6.Future<_i7.Event?>);
+
+  @override
   _i6.Stream<_i7.Event> searchVideos(
     String? query, {
     List<String>? authors,

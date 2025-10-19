@@ -219,6 +219,17 @@ class TestNostrService implements INostrService {
   }
 
   @override
+  Future<Event?> fetchEventById(String eventId, {String? relayUrl}) async {
+    // Search through stored events for matching ID
+    for (final event in _storedEvents) {
+      if (event.id == eventId) {
+        return event;
+      }
+    }
+    return null;
+  }
+
+  @override
   Future<void> closeAllSubscriptions() async {
     for (final controller in _subscriptions.values) {
       if (!controller.isClosed) {
@@ -305,5 +316,19 @@ class TestNostrService implements INostrService {
   void setRelayAuthState(String relayUrl, bool isAuthenticated) {
     _relayAuthStates[relayUrl] = isAuthenticated;
     _authStateController.add(Map.from(_relayAuthStates));
+  }
+
+  @override
+  Future<Map<String, dynamic>?> getRelayStats() async {
+    // Return mock stats for tests
+    return {
+      'database': {
+        'total_events': _storedEvents.length,
+      },
+      'subscriptions': {
+        'active_count': _subscriptions.length,
+      },
+      'external_relays': relays.length,
+    };
   }
 }

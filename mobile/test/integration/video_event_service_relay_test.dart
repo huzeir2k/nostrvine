@@ -115,7 +115,7 @@ void main() {
           Log.info('📝 Received events:');
           for (final event in videoEventService.discoveryVideos.take(5)) {
             Log.info(
-                '  - Event ${event.id.substring(0, 8)}: author=${event.pubkey.substring(0, 8)}..., content="${event.content.length > 50 ? "${event.content.substring(0, 50)}..." : event.content}", hasVideo=${event.hasVideo}');
+                '  - Event ${event.id}: author=${event.pubkey}..., content="${event.content.length > 50 ? "${event.content.substring(0, 50)}..." : event.content}", hasVideo=${event.hasVideo}');
           }
         }
 

@@ -1,5 +1,5 @@
-// ABOUTME: Video Event model for handling NIP-71 compliant video events (kinds 22, 34236)
-// ABOUTME: Parses and structures video content data from Nostr relays
+// ABOUTME: Video Event model for NIP-71 compliant video events - OpenVine uses kind 34236 (addressable short videos)
+// ABOUTME: Parses video metadata from Nostr events with support for kinds 22, 21, 34236, 34235
 
 import 'dart:developer' as developer;
 
@@ -373,6 +373,22 @@ class VideoEvent {
           '⚠️ WARNING: NIP-71 addressable event missing "d" tag, using event ID as fallback',
           name: 'VideoEvent');
       vineId = event.id; // Use event ID as unique identifier
+    }
+
+    // DEBUG: Log full event for cdn.divine.video thumbnails
+    if (thumbnailUrl != null && thumbnailUrl!.contains('cdn.divine.video')) {
+      developer.log('🔍 DEBUG cdn.divine.video thumbnail found!', name: 'VideoEvent');
+      developer.log('🔍 Event ID: ${event.id}', name: 'VideoEvent');
+      developer.log('🔍 Event Kind: ${event.kind}', name: 'VideoEvent');
+      developer.log('🔍 Event Pubkey: ${event.pubkey}', name: 'VideoEvent');
+      developer.log('🔍 Thumbnail URL: $thumbnailUrl', name: 'VideoEvent');
+      developer.log('🔍 Video URL: $videoUrl', name: 'VideoEvent');
+      developer.log('🔍 Full Event Tags JSON:', name: 'VideoEvent');
+      for (var i = 0; i < event.tags.length; i++) {
+        developer.log('🔍   Tag[$i]: ${event.tags[i]}', name: 'VideoEvent');
+      }
+      developer.log('🔍 Event Content: ${event.content}', name: 'VideoEvent');
+      developer.log('🔍 Event CreatedAt: ${event.createdAt}', name: 'VideoEvent');
     }
 
     // Generate fallback thumbnail URL if none provided

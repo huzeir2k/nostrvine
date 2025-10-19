@@ -58,7 +58,7 @@ void main() {
       final streamSubscription = subscription.listen(
         (event) {
           events.add(event.id);
-          Log.info('   Received event: ${event.id.substring(0, 8)}');
+          Log.info('   Received event: ${event.id}');
         },
         onError: (error) {
           final errorMsg = error.toString();
@@ -144,7 +144,7 @@ void main() {
 
         // Start listening
         final streamSub = subscription.listen(
-          (event) => Log.info('  Event: ${event.id.substring(0, 8)}'),
+          (event) => Log.info('  Event: ${event.id}'),
           onError: (e) {
             errors.add('Cycle $cycle error: $e');
             Log.error('  Error: $e');

@@ -7,11 +7,13 @@ import 'package:window_manager/window_manager.dart';
 import 'package:video_player_media_kit/video_player_media_kit.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:openvine/providers/app_providers.dart';
+import 'package:openvine/providers/deep_link_provider.dart';
 import 'package:openvine/providers/social_providers.dart' as social_providers;
 import 'package:openvine/screens/web_auth_screen.dart';
 import 'package:openvine/services/auth_service.dart';
 import 'package:openvine/services/background_activity_manager.dart';
 import 'package:openvine/services/crash_reporting_service.dart';
+import 'package:openvine/services/deep_link_service.dart';
 import 'package:openvine/router/app_router.dart';
 import 'package:openvine/router/route_normalization_provider.dart';
 import 'package:openvine/services/logging_config_service.dart';
@@ -270,12 +272,104 @@ class _DivineAppState extends ConsumerState<DivineApp> {
     // Trigger service initialization on first frame
     WidgetsBinding.instance.addPostFrameCallback((_) {
       _initializeServices();
+      _setupDeepLinkListener();
     });
+  }
+
+  void _setupDeepLinkListener() {
+    Log.info('🔗 Setting up deep link listener...',
+        name: 'DeepLinkHandler', category: LogCategory.ui);
+
+    // Get service reference (don't initialize yet)
+    final service = ref.read(deepLinkServiceProvider);
+
+    // Set up listener FIRST before initializing service
+    // This ensures we don't miss the initial deep link event
+    ref.listen<AsyncValue<DeepLink>>(deepLinksProvider, (previous, next) {
+      Log.info('🔗 Deep link event received - AsyncValue state: ${next.runtimeType}',
+          name: 'DeepLinkHandler', category: LogCategory.ui);
+
+      next.when(
+        data: (deepLink) {
+          Log.info('🔗 Processing deep link: $deepLink',
+              name: 'DeepLinkHandler', category: LogCategory.ui);
+
+          final router = ref.read(goRouterProvider);
+          final currentLocation = router.routeInformationProvider.value.uri.toString();
+          Log.info('🔗 Current router location: $currentLocation',
+              name: 'DeepLinkHandler', category: LogCategory.ui);
+
+          switch (deepLink.type) {
+            case DeepLinkType.video:
+              if (deepLink.videoId != null) {
+                final targetPath = '/video/${deepLink.videoId}';
+                Log.info('📱 Navigating to video: $targetPath',
+                    name: 'DeepLinkHandler', category: LogCategory.ui);
+                try {
+                  router.go(targetPath);
+                  Log.info('✅ Navigation completed to: $targetPath',
+                      name: 'DeepLinkHandler', category: LogCategory.ui);
+                } catch (e) {
+                  Log.error('❌ Navigation failed: $e',
+                      name: 'DeepLinkHandler', category: LogCategory.ui);
+                }
+              } else {
+                Log.warning('⚠️ Video deep link missing videoId',
+                    name: 'DeepLinkHandler', category: LogCategory.ui);
+              }
+              break;
+            case DeepLinkType.profile:
+              if (deepLink.npub != null) {
+                final targetPath = '/profile/${deepLink.npub}/0';
+                Log.info('📱 Navigating to profile: $targetPath',
+                    name: 'DeepLinkHandler', category: LogCategory.ui);
+                try {
+                  router.go(targetPath);
+                  Log.info('✅ Navigation completed to: $targetPath',
+                      name: 'DeepLinkHandler', category: LogCategory.ui);
+                } catch (e) {
+                  Log.error('❌ Navigation failed: $e',
+                      name: 'DeepLinkHandler', category: LogCategory.ui);
+                }
+              } else {
+                Log.warning('⚠️ Profile deep link missing npub',
+                    name: 'DeepLinkHandler', category: LogCategory.ui);
+              }
+              break;
+            case DeepLinkType.unknown:
+              Log.warning('📱 Unknown deep link type',
+                  name: 'DeepLinkHandler', category: LogCategory.ui);
+              break;
+          }
+        },
+        loading: () {
+          Log.info('🔗 Deep link loading...',
+              name: 'DeepLinkHandler', category: LogCategory.ui);
+        },
+        error: (error, stack) {
+          Log.error('🔗 Deep link error: $error',
+              name: 'DeepLinkHandler', category: LogCategory.ui);
+        },
+      );
+    });
+
+    Log.info('✅ Deep link listener setup complete, now initializing service',
+        name: 'DeepLinkHandler', category: LogCategory.ui);
+
+    // NOW initialize the service - listener is ready to receive events
+    service.initialize();
+    Log.info('✅ Deep link service initialized',
+        name: 'DeepLinkHandler', category: LogCategory.ui);
   }
 
   Future<void> _initializeServices() async {
     try {
       Log.info('[INIT] Starting service initialization...',
+          name: 'Main', category: LogCategory.system);
+
+      // Initialize key manager first (needed for NIP-17 bug reports and auth)
+      await ref.read(nostrKeyManagerProvider).initialize();
+      Log.info('[INIT] ✅ NostrKeyManager initialized',
           name: 'Main', category: LogCategory.system);
 
       // Initialize auth service
@@ -457,6 +551,18 @@ class _AppInitializerState extends ConsumerState<AppInitializer> {
         Log.warning('Failed to initialize background activity manager: $e',
             name: 'AppInitializer');
       }
+
+      if (!mounted) return;
+      setState(() => _initializationStatus = 'Initializing key manager...');
+
+      await StartupPerformanceService.instance.measureWork(
+        'nostr_key_manager',
+        () async {
+          CrashReportingService.instance.logInitializationStep('Starting NostrKeyManager');
+          await ref.read(nostrKeyManagerProvider).initialize();
+          CrashReportingService.instance.logInitializationStep('✓ NostrKeyManager initialized');
+        }
+      );
 
       if (!mounted) return;
       setState(() => _initializationStatus = 'Checking authentication...');

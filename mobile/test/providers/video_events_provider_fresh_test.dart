@@ -57,7 +57,7 @@ void main() {
       await seenNotifier.markVideoAsSeen(videos[0].id);
       await seenNotifier.markVideoAsSeen(videos[2].id);
 
-      print('Marked 2 videos as seen: ${videos[0].id.substring(0, 8)}, ${videos[2].id.substring(0, 8)}');
+      print('Marked 2 videos as seen: ${videos[0].id}, ${videos[2].id}');
       container1.dispose();
 
       // PART 2: Create new container (simulates app restart) - should load with fresh-first ordering
@@ -99,7 +99,7 @@ void main() {
       final seenNotifier2 = container2.read(seenVideosProvider.notifier);
 
       print('After restart, received ${restartVideos.length} videos');
-      print('First 3 video IDs: ${restartVideos.take(3).map((v) => v.id.substring(0, 8)).toList()}');
+      print('First 3 video IDs: ${restartVideos.take(3).map((v) => v.id).toList()}');
 
       // Find positions of seen vs unseen videos
       final seenIndices = <int>[];

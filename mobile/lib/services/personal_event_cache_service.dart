@@ -35,7 +35,7 @@ class PersonalEventCacheService {
       _isInitialized = true;
 
       Log.info(
-          'PersonalEventCacheService initialized for ${userPubkey.substring(0, 8)} with ${_eventsBox!.length} cached events',
+          'PersonalEventCacheService initialized for $userPubkey with ${_eventsBox!.length} cached events',
           name: 'PersonalEventCache',
           category: LogCategory.storage);
 
@@ -108,7 +108,7 @@ class PersonalEventCacheService {
       _metadataBox!.put(kindKey, kindEvents);
 
       Log.debug(
-          '💾 Cached personal event: ${event.id.substring(0, 8)} (kind ${event.kind})',
+          '💾 Cached personal event: ${event.id} (kind ${event.kind})',
           name: 'PersonalEventCache',
           category: LogCategory.storage);
     } catch (e) {
@@ -218,7 +218,7 @@ class PersonalEventCacheService {
     final stats = <String, dynamic>{
       'total_events': _eventsBox!.length,
       'by_kind': <String, int>{},
-      'user_pubkey': _currentUserPubkey?.substring(0, 8),
+      'user_pubkey': _currentUserPubkey,
     };
 
     // Count events by kind

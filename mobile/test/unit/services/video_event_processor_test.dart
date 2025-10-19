@@ -22,13 +22,13 @@ void main() {
     });
 
     group('Event Processing', () {
-      test('should process kind 32222 video events', () async {
+      test('should process kind 34236 video events', () async {
         // ARRANGE
         final validEvent = Event(
           '1234567890abcdef1234567890abcdef1234567890abcdef1234567890abcdef', // pubkey (hex)
-          32222,
+          34236, // NIP-71 addressable short video
           [
-            ['d', 'test_vine_id'], // Required for kind 32222
+            ['d', 'test_vine_id'], // Required for addressable events
             ['url', 'https://example.com/video.mp4'],
             ['title', 'Test Video'],
             ['duration', '30'],
@@ -121,9 +121,9 @@ void main() {
         // ARRANGE
         final eventWithoutUrl = Event(
           '1234567890abcdef1234567890abcdef1234567890abcdef1234567890abcdef', // pubkey (hex)
-          32222,
+          34236, // NIP-71 addressable short video
           [
-            ['d', 'invalid_vine_id'], // Required for kind 32222
+            ['d', 'invalid_vine_id'], // Required for addressable events
             // Missing 'url' tag - should be handled gracefully
             ['title', 'Video without URL'],
           ],
@@ -158,9 +158,9 @@ void main() {
         final eventStreamController = StreamController<Event>.broadcast();
         final testEvent = Event(
           '1234567890abcdef1234567890abcdef1234567890abcdef1234567890abcdef',
-          32222,
+          34236, // NIP-71 addressable short video
           [
-            ['d', 'stream_test_vine'], // Required for kind 32222
+            ['d', 'stream_test_vine'], // Required for addressable events
             ['url', 'https://example.com/video.mp4'],
           ],
           'Test video',
@@ -224,9 +224,9 @@ void main() {
 
         eventStreamController.add(Event(
           '1234567890abcdef1234567890abcdef1234567890abcdef1234567890abcdef',
-          32222,
+          34236, // NIP-71 addressable short video
           [
-            ['d', 'disconnect_test_vine'], // Required for kind 32222
+            ['d', 'disconnect_test_vine'], // Required for addressable events
             ['url', 'https://example.com/video.mp4'],
           ],
           'Should not be processed',
@@ -248,9 +248,9 @@ void main() {
         // ARRANGE
         final imetaEvent = Event(
           '1234567890abcdef1234567890abcdef1234567890abcdef1234567890abcdef',
-          32222,
+          34236, // NIP-71 addressable short video
           [
-            ['d', 'imeta_test_vine'], // Required for kind 32222
+            ['d', 'imeta_test_vine'], // Required for addressable events
             [
               'imeta',
               'url https://example.com/imeta_video.mp4',
@@ -291,9 +291,9 @@ void main() {
         // ARRANGE
         final minimalEvent = Event(
           '1234567890abcdef1234567890abcdef1234567890abcdef1234567890abcdef',
-          32222,
+          34236, // NIP-71 addressable short video
           [
-            ['d', 'minimal_test_vine'], // Required for kind 32222
+            ['d', 'minimal_test_vine'], // Required for addressable events
             ['url', 'https://example.com/minimal.mp4'],
           ],
           'Minimal video event',
@@ -327,9 +327,9 @@ void main() {
             3,
             (i) => Event(
                   '1234567890abcdef1234567890abcdef1234567890abcdef1234567890abcdef',
-                  32222,
+                  34236, // NIP-71 addressable short video
                   [
-                    ['d', 'sequence_test_vine_$i'], // Required for kind 32222
+                    ['d', 'sequence_test_vine_$i'], // Required for addressable events
                     ['url', 'https://example.com/video$i.mp4'],
                     ['title', 'Video $i'],
                   ],

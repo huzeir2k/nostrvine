@@ -36,6 +36,7 @@ OpenVine is a decentralized, short-form video sharing mobile application built o
 - **Cross-Platform**: Flutter app for iOS, Android, and Web
 - **Real-Time Social**: Follow, like, comment, repost, and share videos
 - **Open Source**: Fully open source and transparent
+- **Dark Mode Only**: Sleek dark aesthetic optimized for video viewing
 
 ### Video Features
 - **Multi-Platform Camera**: Supports iOS, Android, macOS, and Web recording
@@ -50,6 +51,7 @@ OpenVine is a decentralized, short-form video sharing mobile application built o
 - **Content Curation**: Create and manage curated video lists (NIP-51)
 - **Content Reporting**: Apple-compliant content moderation and reporting
 - **Direct Messaging**: Share videos privately with other users
+- **Bug Reporting**: Encrypted diagnostic reports sent via NIP-17 private messages
 
 ### Technical Features
 - **Nostr Integration**: Full NIP compliance (NIP-01, NIP-02, NIP-18, NIP-25, NIP-71)
@@ -209,6 +211,55 @@ OpenVine uses two separate Cloudflare Workers with distinct domains for differen
 | Domain | Purpose | Examples |
 |--------|---------|----------|
 | `api.openvine.co` | File uploads, media serving, video management, user identity, analytics | Upload videos, serve thumbnails, NIP-05 verification, track video views, get trending content |
+
+## Bug Reporting
+
+OpenVine includes an encrypted bug reporting system that allows users to send diagnostic information directly to developers via NIP-17 private messages.
+
+### How It Works
+
+1. **User Initiates Report**: Navigate to Settings → Support → Report a Bug
+2. **Describe the Issue**: Enter a description of the problem you're experiencing
+3. **Automatic Diagnostics**: The app automatically collects:
+   - Recent application logs (last 1000 entries)
+   - Device information (OS version, device model, app version)
+   - Error frequency counts (helps identify recurring issues)
+   - Current screen name
+   - User public key (for follow-up if needed)
+4. **Privacy Protection**: All collected data is automatically sanitized to remove:
+   - Private keys (nsec1... formats and hex private keys)
+   - Passwords and authentication tokens
+   - Authorization headers
+   - Any other sensitive credentials
+5. **Encrypted Transmission**: Report is sent via NIP-17 (gift-wrapped encrypted messages) to the developer's npub
+6. **Confirmation**: User receives immediate feedback on successful submission
+
+### Architecture
+
+**Components:**
+- **LogCaptureService**: Circular buffer that maintains the last 1000 log entries in memory
+- **BugReportService**: Collects diagnostics, sanitizes sensitive data, and coordinates report sending
+- **NIP17MessageService**: Implements three-layer NIP-17 encryption (kind 14 rumor → kind 13 seal → kind 1059 gift wrap)
+- **BugReportDialog**: User interface for bug report submission
+
+**Security:**
+- Uses NIP-17 gift wrapping for maximum privacy
+- Random ephemeral keys ensure sender anonymity
+- Timestamp obfuscation (±2 days randomization)
+- End-to-end encryption to recipient's public key
+- Automatic sensitive data removal via regex patterns
+
+**Testing:**
+- Comprehensive widget tests (BugReportDialog: 8/8 passing)
+- Unit tests for diagnostic collection (8/10 passing)
+- Unit tests for NIP-17 encryption (8/8 passing)
+- Unit tests for log capture (10/10 passing)
+
+### Developer Information
+
+Bug reports are sent to: `npub1wmr34t36fy03m8hvgl96zl3znndyzyaqhwmwdtshwmtkg03fetaqhjg240`
+
+Reports include structured diagnostic data that helps with debugging and improving the app while respecting user privacy.
 
 ## Contributing
 

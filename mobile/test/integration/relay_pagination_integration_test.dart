@@ -108,7 +108,7 @@ void main() {
       for (int i = 0; i < videosToShow; i++) {
         final video = initialVideos[i];
         Log.info(
-            '  Video ${i + 1}: ${video.title ?? "Untitled"} - ${video.id.substring(0, 8)}... created at ${video.timestamp}',
+            '  Video ${i + 1}: ${video.title ?? "Untitled"} - ${video.id}... created at ${video.timestamp}',
             name: 'Test');
         expect(video.videoUrl, isNotNull,
             reason: 'Real videos should have URLs');

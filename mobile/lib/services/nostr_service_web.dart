@@ -394,6 +394,12 @@ abstract class NostrServiceWeb implements INostrService {
     return events.isNotEmpty ? events.first : null;
   }
 
+  @override
+  Future<sdk.Event?> fetchEventById(String eventId, {String? relayUrl}) async {
+    // Use existing getEvent method
+    return getEvent(eventId);
+  }
+
   // Additional INostrService methods for web implementation
   @override
   Future<bool> addRelay(String relayUrl) async {

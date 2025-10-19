@@ -169,6 +169,12 @@ class MockVideoEventService extends _i1.Mock implements _i4.VideoEventService {
           as List<_i5.VideoEvent>);
 
   @override
+  void debugDumpCdnDivineVideoThumbnails() => super.noSuchMethod(
+    Invocation.method(#debugDumpCdnDivineVideoThumbnails, []),
+    returnValueForMissingStub: null,
+  );
+
+  @override
   List<_i5.VideoEvent> authorVideos(String? pubkeyHex) =>
       (super.noSuchMethod(
             Invocation.method(#authorVideos, [pubkeyHex]),
@@ -199,6 +205,11 @@ class MockVideoEventService extends _i1.Mock implements _i4.VideoEventService {
             returnValue: 0,
           )
           as int);
+
+  @override
+  _i5.VideoEvent? getVideoById(String? eventId) =>
+      (super.noSuchMethod(Invocation.method(#getVideoById, [eventId]))
+          as _i5.VideoEvent?);
 
   @override
   bool isSubscribed(_i4.SubscriptionType? type) =>
@@ -943,6 +954,18 @@ class MockINostrService extends _i1.Mock implements _i3.INostrService {
             returnValue: _i8.Future<List<_i9.Event>>.value(<_i9.Event>[]),
           )
           as _i8.Future<List<_i9.Event>>);
+
+  @override
+  _i8.Future<_i9.Event?> fetchEventById(String? eventId, {String? relayUrl}) =>
+      (super.noSuchMethod(
+            Invocation.method(
+              #fetchEventById,
+              [eventId],
+              {#relayUrl: relayUrl},
+            ),
+            returnValue: _i8.Future<_i9.Event?>.value(),
+          )
+          as _i8.Future<_i9.Event?>);
 
   @override
   _i8.Stream<_i9.Event> searchVideos(

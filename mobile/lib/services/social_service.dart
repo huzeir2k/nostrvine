@@ -293,7 +293,7 @@ class SocialService {
       return;
     }
 
-    Log.debug('❤️ Toggling like for event: ${eventId.substring(0, 8)}...',
+    Log.debug('❤️ Toggling like for event: $eventId',
         name: 'SocialService', category: LogCategory.system);
 
     try {
@@ -312,7 +312,7 @@ class SocialService {
           final currentCount = _likeCounts[eventId] ?? 0;
           _likeCounts[eventId] = currentCount + 1;
 
-          Log.info('Like published for event: ${eventId.substring(0, 8)}...',
+          Log.info('Like published for event: $eventId',
               name: 'SocialService', category: LogCategory.system);
         }
       } else {
@@ -332,7 +332,7 @@ class SocialService {
           }
 
           Log.info(
-              'Unlike (deletion) published for event: ${eventId.substring(0, 8)}...',
+              'Unlike (deletion) published for event: $eventId',
               name: 'SocialService',
               category: LogCategory.system);
         } else {
@@ -431,7 +431,7 @@ class SocialService {
   /// Fetches like count and determines if current user has liked an event
   /// Returns {'count': int, 'user_liked': bool}
   Future<Map<String, dynamic>> getLikeStatus(String eventId) async {
-    Log.debug('Fetching like status for event: ${eventId.substring(0, 8)}...',
+    Log.debug('Fetching like status for event: $eventId',
         name: 'SocialService', category: LogCategory.system);
 
     try {
@@ -479,7 +479,7 @@ class SocialService {
 
       // Subscribe to Kind 7 reactions for this event using SubscriptionManager
       await _subscriptionManager.createSubscription(
-        name: 'like_count_${eventId.substring(0, 8)}',
+        name: 'like_count_$eventId',
         filters: [
           Filter(
             kinds: [7],
@@ -525,13 +525,13 @@ class SocialService {
       if (currentUserPubkey == null) return;
 
       Log.debug(
-          'Loading user liked events for: ${currentUserPubkey.substring(0, 8)}...',
+          'Loading user liked events for: $currentUserPubkey',
           name: 'SocialService',
           category: LogCategory.system);
 
       // Subscribe to current user's reactions (Kind 7) using SubscriptionManager
       _userLikesSubscriptionId = await _subscriptionManager.createSubscription(
-        name: 'user_likes_${currentUserPubkey.substring(0, 8)}',
+        name: 'user_likes_$currentUserPubkey',
         filters: [
           Filter(
             authors: [currentUserPubkey],
@@ -549,7 +549,7 @@ class SocialService {
                 // Store the reaction event ID for future deletion
                 _likeEventIdToReactionId[likedEventId] = event.id;
                 Log.debug(
-                    '📱 Cached user like: ${likedEventId.substring(0, 8)}... (reaction: ${event.id.substring(0, 8)}...)',
+                    '📱 Cached user like: $likedEventId (reaction: ${event.id})',
                     name: 'SocialService',
                     category: LogCategory.system);
                 break;
@@ -576,14 +576,14 @@ class SocialService {
       if (currentUserPubkey == null) return;
 
       Log.debug(
-          'Loading user reposted events for: ${currentUserPubkey.substring(0, 8)}...',
+          'Loading user reposted events for: $currentUserPubkey',
           name: 'SocialService',
           category: LogCategory.system);
 
       // Subscribe to current user's reposts (Kind 6) using SubscriptionManager
       _userRepostsSubscriptionId =
           await _subscriptionManager.createSubscription(
-        name: 'user_reposts_${currentUserPubkey.substring(0, 8)}',
+        name: 'user_reposts_$currentUserPubkey',
         filters: [
           Filter(
             authors: [currentUserPubkey],
@@ -605,7 +605,7 @@ class SocialService {
 
   /// Fetches all events liked by a specific user
   Future<List<Event>> fetchLikedEvents(String pubkey) async {
-    Log.debug('Fetching liked events for user: ${pubkey.substring(0, 8)}...',
+    Log.debug('Fetching liked events for user: $pubkey',
         name: 'SocialService', category: LogCategory.system);
 
     try {
@@ -708,7 +708,7 @@ class SocialService {
       if (currentUserPubkey == null) return;
 
       Log.debug(
-          '📱 Loading follow list for: ${currentUserPubkey.substring(0, 8)}...',
+          '📱 Loading follow list for: $currentUserPubkey',
           name: 'SocialService',
           category: LogCategory.system);
 
@@ -732,14 +732,14 @@ class SocialService {
 
       if (contactListEvent != null) {
         Log.debug(
-          '✅ Contact list received immediately for ${currentUserPubkey.substring(0, 8)}',
+          '✅ Contact list received immediately for $currentUserPubkey',
           name: 'SocialService',
           category: LogCategory.system,
         );
         _processContactListEvent(contactListEvent);
       } else {
         Log.debug(
-          '⏰ No contact list found for ${currentUserPubkey.substring(0, 8)}',
+          '⏰ No contact list found for $currentUserPubkey',
           name: 'SocialService',
           category: LogCategory.system,
         );
@@ -784,13 +784,13 @@ class SocialService {
 
     if (_followingPubkeys.contains(pubkeyToFollow)) {
       Log.debug(
-          'ℹ️ Already following user: ${pubkeyToFollow.substring(0, 8)}...',
+          'ℹ️ Already following user: $pubkeyToFollow',
           name: 'SocialService',
           category: LogCategory.system);
       return;
     }
 
-    Log.debug('📱 Following user: ${pubkeyToFollow.substring(0, 8)}...',
+    Log.debug('📱 Following user: $pubkeyToFollow',
         name: 'SocialService', category: LogCategory.system);
 
     // Optimistically update local state for immediate UI feedback
@@ -834,7 +834,7 @@ class SocialService {
       _currentUserContactListEvent = event;
 
       Log.info(
-          'Successfully followed user: ${pubkeyToFollow.substring(0, 8)}...',
+          'Successfully followed user: $pubkeyToFollow',
           name: 'SocialService',
           category: LogCategory.system);
     } catch (e) {
@@ -853,12 +853,12 @@ class SocialService {
     }
 
     if (!_followingPubkeys.contains(pubkeyToUnfollow)) {
-      Log.debug('ℹ️ Not following user: ${pubkeyToUnfollow.substring(0, 8)}...',
+      Log.debug('ℹ️ Not following user: $pubkeyToUnfollow',
           name: 'SocialService', category: LogCategory.system);
       return;
     }
 
-    Log.debug('📱 Unfollowing user: ${pubkeyToUnfollow.substring(0, 8)}...',
+    Log.debug('📱 Unfollowing user: $pubkeyToUnfollow',
         name: 'SocialService', category: LogCategory.system);
 
     // Optimistically update local state for immediate UI feedback
@@ -902,7 +902,7 @@ class SocialService {
       _currentUserContactListEvent = event;
 
       Log.info(
-          'Successfully unfollowed user: ${pubkeyToUnfollow.substring(0, 8)}...',
+          'Successfully unfollowed user: $pubkeyToUnfollow',
           name: 'SocialService',
           category: LogCategory.system);
     } catch (e) {
@@ -914,7 +914,7 @@ class SocialService {
 
   /// Get follower and following counts for a specific pubkey
   Future<Map<String, int>> getFollowerStats(String pubkey) async {
-    Log.debug('Fetching follower stats for: ${pubkey.substring(0, 8)}...',
+    Log.debug('Fetching follower stats for: $pubkey',
         name: 'SocialService', category: LogCategory.system);
 
     try {
@@ -971,7 +971,7 @@ class SocialService {
             .where((tag) => tag.isNotEmpty && tag[0] == 'p')
             .length;
         Log.debug(
-          '✅ Following count received immediately: $followingCount for ${pubkey.substring(0, 8)}',
+          '✅ Following count received immediately: $followingCount for $pubkey',
           name: 'SocialService',
           category: LogCategory.system,
         );
@@ -1008,7 +1008,7 @@ class SocialService {
         onComplete: (result) {
           followersCount = followerPubkeys.length;
           Log.debug(
-            '✅ Followers query completed: $followersCount followers for ${pubkey.substring(0, 8)}',
+            '✅ Followers query completed: $followersCount followers for $pubkey',
             name: 'SocialService',
             category: LogCategory.system,
           );
@@ -1285,7 +1285,7 @@ class SocialService {
 
   /// Get video count for a specific user
   Future<int> getUserVideoCount(String pubkey) async {
-    Log.debug('📱 Fetching video count for: ${pubkey.substring(0, 8)}...',
+    Log.debug('📱 Fetching video count for: $pubkey',
         name: 'SocialService', category: LogCategory.system);
 
     try {
@@ -1333,7 +1333,7 @@ class SocialService {
 
   /// Get total likes across all videos for a specific user
   Future<int> getUserTotalLikes(String pubkey) async {
-    Log.debug('❤️ Fetching total likes for: ${pubkey.substring(0, 8)}...',
+    Log.debug('❤️ Fetching total likes for: $pubkey',
         name: 'SocialService', category: LogCategory.system);
 
     try {
@@ -1446,7 +1446,7 @@ class SocialService {
       throw Exception('Comment content cannot be empty');
     }
 
-    Log.debug('📱 Posting comment to event: ${rootEventId.substring(0, 8)}...',
+    Log.debug('📱 Posting comment to event: $rootEventId',
         name: 'SocialService', category: LogCategory.system);
 
     try {
@@ -1489,7 +1489,7 @@ class SocialService {
         throw Exception('Failed to broadcast comment: $errorMessages');
       }
 
-      Log.info('Comment posted successfully: ${event.id.substring(0, 8)}...',
+      Log.info('Comment posted successfully: ${event.id}',
           name: 'SocialService', category: LogCategory.system);
     } catch (e) {
       Log.error('Error posting comment: $e',
@@ -1501,7 +1501,7 @@ class SocialService {
   /// Fetches all comments for a given root event ID
   Stream<Event> fetchCommentsForEvent(String rootEventId) {
     Log.debug(
-        '📱 Fetching comments for event: ${rootEventId.substring(0, 8)}...',
+        '📱 Fetching comments for event: $rootEventId',
         name: 'SocialService',
         category: LogCategory.system);
 
@@ -1518,7 +1518,7 @@ class SocialService {
     // Create managed subscription for comments
     _subscriptionManager
         .createSubscription(
-      name: 'comments_${rootEventId.substring(0, 8)}',
+      name: 'comments_$rootEventId',
       filters: [
         Filter(
           kinds: filter.kinds,
@@ -1560,7 +1560,7 @@ class SocialService {
   /// Fetches comment count for an event
   Future<int> getCommentCount(String rootEventId) async {
     Log.debug(
-        'Fetching comment count for event: ${rootEventId.substring(0, 8)}...',
+        'Fetching comment count for event: $rootEventId',
         name: 'SocialService',
         category: LogCategory.system);
 
@@ -1570,7 +1570,7 @@ class SocialService {
 
       // Create a dedicated comment count subscription with higher priority and shorter timeout
       await _subscriptionManager.createSubscription(
-        name: 'comment_count_${rootEventId.substring(0, 8)}',
+        name: 'comment_count_$rootEventId',
         filters: [
           Filter(
             kinds: [1], // Text notes
@@ -1610,11 +1610,10 @@ class SocialService {
 
   /// Cancel comment subscriptions for a specific video (call when video scrolls out of view)
   Future<void> cancelCommentSubscriptions(String rootEventId) async {
-    final shortId = rootEventId.substring(0, 8);
-    await _subscriptionManager.cancelSubscriptionsByName('comments_$shortId');
+    await _subscriptionManager.cancelSubscriptionsByName('comments_$rootEventId');
     await _subscriptionManager
-        .cancelSubscriptionsByName('comment_count_$shortId');
-    Log.debug('🗑️ Cancelled comment subscriptions for: $shortId',
+        .cancelSubscriptionsByName('comment_count_$rootEventId');
+    Log.debug('🗑️ Cancelled comment subscriptions for: $rootEventId',
         name: 'SocialService', category: LogCategory.system);
   }
 
@@ -1628,7 +1627,7 @@ class SocialService {
       throw Exception('User not authenticated');
     }
 
-    Log.debug('Reposting event: ${eventToRepost.id.substring(0, 8)}...',
+    Log.debug('Reposting event: ${eventToRepost.id}',
         name: 'SocialService', category: LogCategory.system);
 
     try {
@@ -1678,7 +1677,7 @@ class SocialService {
       _repostedEventIds.add(addressableId);
       _repostEventIdToRepostId[addressableId] = event.id;
 
-      Log.info('Event reposted successfully: ${event.id.substring(0, 8)}...',
+      Log.info('Event reposted successfully: ${event.id}',
           name: 'SocialService', category: LogCategory.system);
     } catch (e) {
       Log.error('Error reposting event: $e',
@@ -1731,7 +1730,7 @@ class SocialService {
       }
 
       Log.info(
-          'NIP-62 deletion request published: ${event.id.substring(0, 8)}...',
+          'NIP-62 deletion request published: ${event.id}',
           name: 'SocialService',
           category: LogCategory.system);
     } catch (e) {
@@ -1823,7 +1822,7 @@ class SocialService {
           _repostedEventIds.add(addressableId);
           _repostEventIdToRepostId[addressableId] = repostEvent.id;
           Log.debug(
-              '📱 Cached user repost of addressable event: $addressableId (repost: ${repostEvent.id.substring(0, 8)}...)',
+              '📱 Cached user repost of addressable event: $addressableId (repost: ${repostEvent.id})',
               name: 'SocialService',
               category: LogCategory.system);
           return;

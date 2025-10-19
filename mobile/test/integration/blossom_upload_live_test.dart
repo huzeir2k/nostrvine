@@ -51,7 +51,7 @@ void main() {
       // Generate test keys if none exist (using the actual API)
       if (keyManager.privateKey == null) {
         final newKeyPair = await keyManager.generateKeys();
-        print('Generated test keys: ${newKeyPair.public.substring(0, 8)}...');
+        print('Generated test keys: ${newKeyPair.public}...');
       }
 
       nostrService = NostrServiceFactory.create(keyManager);
@@ -87,7 +87,7 @@ void main() {
 
       print('🔄 Testing upload to staging server: $stagingServer');
       print('📁 Test file size: ${await testVideoFile.length()} bytes');
-      print('👤 Using pubkey: ${authService.currentPublicKeyHex?.substring(0, 8)}...');
+      print('👤 Using pubkey: ${authService.currentPublicKeyHex}...');
 
       final result = await blossomService.uploadVideo(
         videoFile: testVideoFile,
@@ -138,7 +138,7 @@ void main() {
         print('❌ Upload failed: ${result.errorMessage}');
         // Print more details for debugging
         print('🔍 Auth status: ${authService.isAuthenticated}');
-        print('🔍 Current pubkey: ${authService.currentPublicKeyHex?.substring(0, 8)}...');
+        print('🔍 Current pubkey: ${authService.currentPublicKeyHex}...');
         print('🔍 Server: ${await blossomService.getBlossomServer()}');
         print('🔍 Enabled: ${await blossomService.isBlossomEnabled()}');
       }

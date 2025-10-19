@@ -58,7 +58,7 @@ void main() {
         ],
         onEvent: (event) {
           Log.info(
-              '✅ TDD: Callback received event: ${event.id.substring(0, 8)}',
+              '✅ TDD: Callback received event: ${event.id}',
               name: 'SubscriptionManagerTDDTest',
               category: LogCategory.system);
           receivedEvents.add(event);
@@ -141,7 +141,7 @@ void main() {
       ]);
       final subscription = directStream.listen(
         (event) {
-          Log.info('✅ TDD: Direct stream received: ${event.id.substring(0, 8)}',
+          Log.info('✅ TDD: Direct stream received: ${event.id}',
               name: 'SubscriptionManagerTDDTest', category: LogCategory.system);
           receivedEvents.add(event);
           if (receivedEvents.length >= 2) {

@@ -26,7 +26,8 @@ AnalyticsApiService analyticsApiService(Ref ref) {
 }
 
 /// Main curation provider that manages curated content sets
-@riverpod
+/// keepAlive ensures provider persists across tab navigation
+@Riverpod(keepAlive: true)
 class Curation extends _$Curation {
   @override
   CurationState build() {

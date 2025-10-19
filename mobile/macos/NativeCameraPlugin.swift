@@ -11,10 +11,11 @@ public class NativeCameraPlugin: NSObject, FlutterPlugin {
     private var captureSession: AVCaptureSession?
     private var videoDevice: AVCaptureDevice?
     private var videoInput: AVCaptureDeviceInput?
+    private var audioInput: AVCaptureDeviceInput?
     private var videoOutput: AVCaptureVideoDataOutput?
     private var movieOutput: AVCaptureMovieFileOutput?
     private var previewLayer: AVCaptureVideoPreviewLayer?
-    
+
     private var isRecording = false
     private var outputURL: URL?
     private var stopRecordingResult: FlutterResult?
@@ -125,6 +126,8 @@ public class NativeCameraPlugin: NSObject, FlutterPlugin {
             }
             existingSession.inputs.forEach { existingSession.removeInput($0) }
             existingSession.outputs.forEach { existingSession.removeOutput($0) }
+            videoInput = nil
+            audioInput = nil
         }
         
         captureSession = AVCaptureSession()
@@ -176,11 +179,25 @@ public class NativeCameraPlugin: NSObject, FlutterPlugin {
             videoInput = try AVCaptureDeviceInput(device: videoDevice)
             if let videoInput = videoInput, captureSession.canAddInput(videoInput) {
                 captureSession.addInput(videoInput)
+                print("✅ [NativeCamera] Video input added successfully")
             } else {
                 result(FlutterError(code: "INPUT_FAILED", message: "Failed to add video input", details: nil))
                 return
             }
-            
+
+            // Add audio input for recording with sound
+            if let audioDevice = AVCaptureDevice.default(for: .audio) {
+                audioInput = try AVCaptureDeviceInput(device: audioDevice)
+                if let audioInput = audioInput, captureSession.canAddInput(audioInput) {
+                    captureSession.addInput(audioInput)
+                    print("✅ [NativeCamera] Audio input added successfully: \(audioDevice.localizedName)")
+                } else {
+                    print("⚠️ [NativeCamera] Could not add audio input - recording will be video-only")
+                }
+            } else {
+                print("⚠️ [NativeCamera] No microphone available - recording will be video-only")
+            }
+
             // Add video output for frames
             videoOutput = AVCaptureVideoDataOutput()
             if let videoOutput = videoOutput, captureSession.canAddOutput(videoOutput) {
@@ -446,17 +463,18 @@ public class NativeCameraPlugin: NSObject, FlutterPlugin {
         if isRecording {
             movieOutput?.stopRecording()
         }
-        
+
         captureSession?.stopRunning()
         captureSession = nil
         videoDevice = nil
         videoInput = nil
+        audioInput = nil
         videoOutput = nil
         movieOutput = nil
         previewLayer = nil
         outputURL = nil
         isRecording = false
-        
+
         result(nil)
     }
     

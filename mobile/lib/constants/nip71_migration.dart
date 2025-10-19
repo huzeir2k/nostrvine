@@ -1,5 +1,5 @@
-// ABOUTME: Constants and migration utilities for transitioning from Kind 32222 to NIP-71 compliant video kinds
-// ABOUTME: Handles backward compatibility during the migration from legacy video events to NIP-71 standard
+// ABOUTME: Constants for NIP-71 compliant video kinds - OpenVine uses kind 34236 (addressable short videos)
+// ABOUTME: Defines supported video event kinds per NIP-71 standard for short-form video content
 
 /// NIP-71 compliant video event kinds
 class NIP71VideoKinds {

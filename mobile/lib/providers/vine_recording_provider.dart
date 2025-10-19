@@ -82,6 +82,9 @@ class VineRecordingNotifier extends StateNotifier<VineRecordingUIState> {
   final VineRecordingController _controller;
   final Ref _ref;
 
+  // Track whether video was successfully published to prevent auto-save
+  bool _wasPublished = false;
+
   /// Get the camera preview widget from the controller
   Widget get previewWidget => _controller.previewWidget;
 
@@ -128,7 +131,32 @@ class VineRecordingNotifier extends StateNotifier<VineRecordingUIState> {
 
   void reset() {
     _controller.reset();
+    _wasPublished = false; // Reset publish flag for new recording
     updateState();
+  }
+
+  /// Mark recording as published to prevent auto-save on dispose
+  void markAsPublished() {
+    _wasPublished = true;
+    Log.info('Recording marked as published - auto-save will be skipped',
+        name: 'VineRecordingProvider', category: LogCategory.system);
+  }
+
+  /// Clean up temp files and reset for new recording
+  Future<void> cleanupAndReset() async {
+    try {
+      // Clean up temp files first
+      _controller.cleanupFiles();
+      // Then reset state
+      _controller.reset();
+      _wasPublished = false;
+      updateState();
+      Log.info('Cleaned up temp files and reset for new recording',
+          name: 'VineRecordingProvider', category: LogCategory.system);
+    } catch (e) {
+      Log.error('Error during cleanup and reset: $e',
+          name: 'VineRecordingProvider', category: LogCategory.system);
+    }
   }
 
   @override
@@ -154,6 +182,13 @@ class VineRecordingNotifier extends StateNotifier<VineRecordingUIState> {
   /// Auto-save recording as draft if completed but not published
   Future<void> _autoSaveDraftBeforeDispose() async {
     try {
+      // Skip auto-save if video was successfully published
+      if (_wasPublished) {
+        Log.info('Skipping auto-save - video was published',
+            name: 'VineRecordingProvider', category: LogCategory.system);
+        return;
+      }
+
       // Only auto-save if recording is completed
       if (_controller.state != VineRecordingState.completed) {
         return;

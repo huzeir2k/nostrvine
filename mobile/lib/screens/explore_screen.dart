@@ -361,10 +361,6 @@ class _ExploreScreenState extends ConsumerState<ExploreScreen>
       // Track empty feed
       if (videos.isEmpty) {
         _feedTracker.trackEmptyFeed('popular_now');
-        _errorTracker.trackEmptyResult(
-          operation: 'feed_load',
-          location: 'explore_popular_now',
-        );
       }
 
       // Sort by loop count (descending order - most popular first)
@@ -479,10 +475,6 @@ class _ExploreScreenState extends ConsumerState<ExploreScreen>
       // Track empty feed
       if (videos.isEmpty) {
         _feedTracker.trackEmptyFeed('trending');
-        _errorTracker.trackEmptyResult(
-          operation: 'feed_load',
-          location: 'explore_trending',
-        );
       }
 
       // Sort by loop count (descending order - most popular first)

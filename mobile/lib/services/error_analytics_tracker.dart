@@ -166,28 +166,6 @@ class ErrorAnalyticsTracker {
     );
   }
 
-  /// Track empty result scenarios (critical for detecting "no events" issues)
-  void trackEmptyResult({
-    required String operation, // 'feed_load', 'search', 'profile_videos'
-    required String location,
-    int? loadTimeMs,
-    Map<String, dynamic>? expectedFilters,
-  }) {
-    UnifiedLogger.warning(
-      '📭 Empty result: $operation in $location',
-      name: 'ErrorAnalytics',
-    );
-
-    _analytics.logEvent(
-      name: 'empty_result',
-      parameters: {
-        'operation': operation,
-        'location': location,
-        if (loadTimeMs != null) 'load_time_ms': loadTimeMs,
-        if (expectedFilters != null) ...expectedFilters,
-      },
-    );
-  }
 
   /// Track video playback errors
   void trackVideoPlaybackError({
@@ -200,7 +178,7 @@ class ErrorAnalyticsTracker {
     _analytics.logEvent(
       name: 'video_playback_error',
       parameters: {
-        'video_id': videoId.substring(0, 8),
+        'video_id': videoId,
         'error_type': errorType,
         'error_message': errorMessage.substring(0, errorMessage.length > 150 ? 150 : errorMessage.length),
         if (videoUrl != null) 'video_url_domain': Uri.tryParse(videoUrl)?.host ?? 'unknown',
@@ -261,6 +239,11 @@ class ErrorAnalyticsTracker {
   /// Get error count for a specific type/location
   int getErrorCount(String location, String errorType) {
     return _errorCounts['$location:$errorType'] ?? 0;
+  }
+
+  /// Get all error counts for bug reports
+  Map<String, int> getAllErrorCounts() {
+    return Map.from(_errorCounts);
   }
 
   /// Reset error counts (useful for testing or debugging)

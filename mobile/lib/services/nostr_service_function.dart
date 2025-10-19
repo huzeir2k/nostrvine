@@ -664,4 +664,23 @@ class NostrServiceFunction implements INostrService {
   String get primaryRelay => _configuredRelays.isNotEmpty
       ? _configuredRelays.first
       : 'wss://relay3.openvine.co';
+
+  @override
+  Future<Map<String, dynamic>?> getRelayStats() async {
+    if (!_isInitialized || _embeddedRelay == null) return null;
+
+    try {
+      final stats = await _embeddedRelay!.getStats();
+      final subscriptionStats = _embeddedRelay!.getSubscriptionStats();
+
+      return {
+        'database': stats,
+        'subscriptions': subscriptionStats,
+        'external_relays': _configuredRelays.length,
+        'p2p_enabled': _p2pEnabled,
+      };
+    } catch (e) {
+      return {'error': e.toString()};
+    }
+  }
 }

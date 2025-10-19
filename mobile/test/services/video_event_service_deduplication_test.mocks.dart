@@ -409,6 +409,18 @@ class MockNostrService extends _i1.Mock implements _i4.NostrService {
           as _i5.Future<List<_i7.Event>>);
 
   @override
+  _i5.Future<_i7.Event?> fetchEventById(String? eventId, {String? relayUrl}) =>
+      (super.noSuchMethod(
+            Invocation.method(
+              #fetchEventById,
+              [eventId],
+              {#relayUrl: relayUrl},
+            ),
+            returnValue: _i5.Future<_i7.Event?>.value(),
+          )
+          as _i5.Future<_i7.Event?>);
+
+  @override
   _i5.Future<void> discoverUserRelays(String? pubkey) =>
       (super.noSuchMethod(
             Invocation.method(#discoverUserRelays, [pubkey]),

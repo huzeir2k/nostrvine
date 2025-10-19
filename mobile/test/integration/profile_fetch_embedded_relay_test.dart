@@ -57,7 +57,7 @@ void main() {
         onEvent: (event) {
           videoEvents.add(event);
           Log.info(
-              '  Video from ${event.pubkey.substring(0, 8)}...',
+              '  Video from ${event.pubkey}',
               name: 'Test');
           
           if (videoEvents.length >= 3 && !videoCompleter.isCompleted) {
@@ -107,7 +107,7 @@ void main() {
         onEvent: (event) {
           profileEvents.add(event);
           Log.info(
-              '  ✓ Got profile for ${event.pubkey.substring(0, 8)}...',
+              '  ✓ Got profile for ${event.pubkey}',
               name: 'Test');
           
           // Parse profile content
@@ -197,7 +197,7 @@ void main() {
           // Parse and log profile details
           try {
             final content = event.content;
-            Log.info('  Content preview: ${content.substring(0, 100)}...',
+            Log.info('  Content preview: ${content.length > 100 ? "${content.substring(0, 100)}..." : content}',
                 name: 'Test');
           } catch (e) {
             Log.warning('  Could not parse content: $e', name: 'Test');

@@ -251,8 +251,8 @@ void main() {
 
         await tester.pumpAndSettle();
 
-        // Should show abbreviated pubkey
-        expect(find.text(testPubkey.substring(0, 8)), findsOneWidget);
+        // Should show full pubkey
+        expect(find.text(testPubkey), findsOneWidget);
       });
     });
 

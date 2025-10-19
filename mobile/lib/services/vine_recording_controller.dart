@@ -1489,6 +1489,11 @@ class VineRecordingController {
     }
   }
 
+  /// Clean up recording files and prepare for new recording
+  void cleanupFiles() {
+    _cleanupRecordings();
+  }
+
   /// Reset the recording session (but keep files for upload)
   void reset() {
     _stopProgressTimer();

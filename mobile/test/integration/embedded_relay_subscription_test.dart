@@ -57,7 +57,7 @@ void main() {
       );
 
       Log.info(
-          '   Filter: kinds=${filter.kinds}, authors=${filter.authors?.length} (first=${filter.authors?.first.substring(0, 8)})');
+          '   Filter: kinds=${filter.kinds}, authors=${filter.authors?.length} (first=${filter.authors?.first})');
 
       // Test 3: Subscribe and collect events
       Log.info('\n3. Subscribing and waiting for events...');
@@ -95,7 +95,7 @@ void main() {
         for (var i = 0; i < receivedEvents.length && i < 3; i++) {
           final event = receivedEvents[i];
           Log.info(
-              '   Event $i: kind=${event.kind}, author=${event.pubkey.substring(0, 8)}');
+              '   Event $i: kind=${event.kind}, author=${event.pubkey}');
         }
       }
 

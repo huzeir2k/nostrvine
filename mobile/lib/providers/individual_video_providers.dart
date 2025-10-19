@@ -2,7 +2,6 @@
 // ABOUTME: Each video gets its own controller with automatic lifecycle management via autoDispose
 
 import 'dart:async';
-import 'dart:io' if (dart.library.html) 'dart:html' as io;
 import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:flutter_riverpod/legacy.dart';
 import 'package:video_player/video_player.dart';
@@ -174,9 +173,11 @@ VideoPlayerController individualVideoController(
   }
 
   // Initialize the controller (async in background)
+  // Timeout set to 30 seconds to accommodate slow connections
+  // Previous 15-second timeout was too aggressive for cellular/slow networks
   final initFuture = controller.initialize().timeout(
-    const Duration(seconds: 15),
-    onTimeout: () => throw TimeoutException('Video initialization timed out'),
+    const Duration(seconds: 30),
+    onTimeout: () => throw TimeoutException('Video initialization timed out after 30 seconds'),
   );
 
   initFuture.then((_) {

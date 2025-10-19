@@ -180,9 +180,9 @@ class VideoEventPublisher {
       final tags = <List<String>>[];
 
       // Generate unique identifier for the addressable event
-      // Use videoId if available, otherwise generate from timestamp and random component
+      // Use videoId if available, otherwise generate from timestamp and upload ID
       final dTag = upload.videoId ??
-          '${DateTime.now().millisecondsSinceEpoch}_${upload.id.substring(0, 8)}';
+          '${DateTime.now().millisecondsSinceEpoch}_${upload.id}';
       tags.add(['d', dTag]);
 
       // Build imeta tag components

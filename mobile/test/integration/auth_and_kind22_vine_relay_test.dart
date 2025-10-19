@@ -123,7 +123,7 @@ void main() {
           if (!receivedEvents.any((e) => e.id == event.id)) {
             receivedEvents.add(event);
             Log.info(
-                'Received Kind 22 event: ${event.id.substring(0, 8)} from ${event.pubkey.substring(0, 8)}',
+                'Received Kind 22 event: ${event.id} from ${event.pubkey}',
                 name: 'AuthTest',
                 category: LogCategory.system);
           }
@@ -207,7 +207,7 @@ void main() {
           expect(event.pubkey, isNotEmpty);
           // Note: kind is validated during VideoEvent.fromNostrEvent creation, so all events are kind 22
           Log.debug(
-              'Event details: id=${event.id.substring(0, 8)}, author=${event.pubkey.substring(0, 8)}',
+              'Event details: id=${event.id}, author=${event.pubkey}',
               name: 'AuthTest',
               category: LogCategory.system);
         }
@@ -235,7 +235,7 @@ void main() {
           if (!receivedEvents.any((e) => e.id == event.id)) {
             receivedEvents.add(event);
             Log.info(
-                'Received event via retry mechanism: ${event.id.substring(0, 8)}',
+                'Received event via retry mechanism: ${event.id}',
                 name: 'AuthTest',
                 category: LogCategory.system);
           }

@@ -117,21 +117,47 @@ class NostrService implements INostrService {
 
       // Add external relays (embedded relay will manage connections if available)
       if (!embeddedRelayFailed && _embeddedRelay != null) {
+        Log.info('🔗 Connecting to ${relaysToAdd.length} external relay(s)...',
+            name: 'NostrService', category: LogCategory.relay);
+
         for (final relayUrl in relaysToAdd) {
           try {
-            await _embeddedRelay!.addExternalRelay(relayUrl);
-            _configuredRelays.add(relayUrl);
-            Log.info('Added external relay: $relayUrl',
+            final connectStart = DateTime.now();
+            Log.info('🔌 Connecting to external relay: $relayUrl',
                 name: 'NostrService', category: LogCategory.relay);
+
+            await _embeddedRelay!.addExternalRelay(relayUrl);
+
+            final connectDuration = DateTime.now().difference(connectStart);
+            _configuredRelays.add(relayUrl);
 
             // Check if the relay is actually connected
             final connectedRelays = _embeddedRelay!.connectedRelays;
-            Log.debug('Connected relays after adding: $connectedRelays',
+            final isConnected = connectedRelays.contains(relayUrl);
+
+            if (isConnected) {
+              Log.info('✅ External relay connected: $relayUrl (${connectDuration.inMilliseconds}ms)',
+                  name: 'NostrService', category: LogCategory.relay);
+            } else {
+              Log.error('❌ External relay FAILED to connect: $relayUrl (${connectDuration.inMilliseconds}ms) - not in connectedRelays list!',
+                  name: 'NostrService', category: LogCategory.relay);
+            }
+
+            Log.info('📊 Connected relays: ${connectedRelays.length}/${_configuredRelays.length} total',
                 name: 'NostrService', category: LogCategory.relay);
           } catch (e) {
-            Log.error('Failed to add relay $relayUrl: $e',
+            Log.error('❌ Failed to add relay $relayUrl: $e',
                 name: 'NostrService', category: LogCategory.relay);
           }
+        }
+
+        // Final connection summary
+        final finalConnected = _embeddedRelay!.connectedRelays;
+        Log.info('🎯 External relay connection complete: ${finalConnected.length}/${_configuredRelays.length} relays connected',
+            name: 'NostrService', category: LogCategory.relay);
+        if (finalConnected.isEmpty && _configuredRelays.isNotEmpty) {
+          Log.error('⚠️ WARNING: No external relays connected! App will have limited functionality.',
+              name: 'NostrService', category: LogCategory.relay);
         }
       }
 
@@ -735,21 +761,56 @@ class NostrService implements INostrService {
   /// Retry initialization of embedded relay and reconnect configured relays
   @override
   Future<void> retryInitialization() async {
+    Log.info('🔄 Starting relay connection retry...', name: 'NostrService', category: LogCategory.relay);
+
     if (_embeddedRelay != null) {
-      UnifiedLogger.info('Embedded relay already exists', name: 'NostrService');
+      Log.info('Embedded relay already exists - attempting to reconnect external relays',
+          name: 'NostrService', category: LogCategory.relay);
+
+      // Get current connection status before retry
+      final beforeConnected = _embeddedRelay!.connectedRelays;
+      Log.info('📊 Before retry: ${beforeConnected.length}/${_configuredRelays.length} relays connected',
+          name: 'NostrService', category: LogCategory.relay);
 
       // Try to reconnect configured relays
       for (final relayUrl in _configuredRelays) {
         try {
+          final connectStart = DateTime.now();
+          Log.info('🔌 Reconnecting to relay: $relayUrl',
+              name: 'NostrService', category: LogCategory.relay);
+
           await _embeddedRelay!.addExternalRelay(relayUrl);
-          _relayAuthStates[relayUrl] = true;
-          UnifiedLogger.info('Reconnected to relay: $relayUrl',
-              name: 'NostrService');
+
+          final connectDuration = DateTime.now().difference(connectStart);
+          final connectedRelays = _embeddedRelay!.connectedRelays;
+          final isConnected = connectedRelays.contains(relayUrl);
+
+          if (isConnected) {
+            _relayAuthStates[relayUrl] = true;
+            Log.info('✅ Reconnected to relay: $relayUrl (${connectDuration.inMilliseconds}ms)',
+                name: 'NostrService', category: LogCategory.relay);
+          } else {
+            Log.error('❌ Failed to reconnect relay: $relayUrl (${connectDuration.inMilliseconds}ms) - not in connectedRelays',
+                name: 'NostrService', category: LogCategory.relay);
+          }
         } catch (e) {
-          UnifiedLogger.error('Failed to reconnect relay $relayUrl: $e',
-              name: 'NostrService');
+          Log.error('❌ Failed to reconnect relay $relayUrl: $e',
+              name: 'NostrService', category: LogCategory.relay);
         }
       }
+
+      // Final status after retry
+      final afterConnected = _embeddedRelay!.connectedRelays;
+      Log.info('🎯 Retry complete: ${afterConnected.length}/${_configuredRelays.length} relays connected',
+          name: 'NostrService', category: LogCategory.relay);
+      if (afterConnected.length > beforeConnected.length) {
+        Log.info('✨ Successfully connected ${afterConnected.length - beforeConnected.length} additional relay(s)',
+            name: 'NostrService', category: LogCategory.relay);
+      } else if (afterConnected.isEmpty) {
+        Log.error('⚠️ WARNING: Still no relays connected after retry!',
+            name: 'NostrService', category: LogCategory.relay);
+      }
+
       _authStateController.add(Map.from(_relayAuthStates));
       return;
     }
@@ -1145,6 +1206,15 @@ class NostrService implements INostrService {
 
     // Convert back to nostr_sdk events
     return embeddedEvents.map(_convertFromEmbeddedEvent).toList();
+  }
+
+  @override
+  Future<Event?> fetchEventById(String eventId, {String? relayUrl}) async {
+    final events = await getEvents(
+      filters: [nostr.Filter(ids: [eventId])],
+      limit: 1,
+    );
+    return events.isNotEmpty ? events.first : null;
   }
 
   // Private helper methods

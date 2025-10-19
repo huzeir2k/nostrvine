@@ -62,21 +62,24 @@ String _$analyticsApiServiceHash() =>
     r'bffbe1efb4b6d2a6172d4397e70d82b0312410e7';
 
 /// Main curation provider that manages curated content sets
+/// keepAlive ensures provider persists across tab navigation
 
 @ProviderFor(Curation)
 const curationProvider = CurationProvider._();
 
 /// Main curation provider that manages curated content sets
+/// keepAlive ensures provider persists across tab navigation
 final class CurationProvider
     extends $NotifierProvider<Curation, CurationState> {
   /// Main curation provider that manages curated content sets
+  /// keepAlive ensures provider persists across tab navigation
   const CurationProvider._()
     : super(
         from: null,
         argument: null,
         retry: null,
         name: r'curationProvider',
-        isAutoDispose: true,
+        isAutoDispose: false,
         dependencies: null,
         $allTransitiveDependencies: null,
       );
@@ -97,9 +100,10 @@ final class CurationProvider
   }
 }
 
-String _$curationHash() => r'7ab1f6e702ca2bbd1806f5271e8ed5c31b2c3087';
+String _$curationHash() => r'ac57ca4fa72232ccf104c8b4739ec94c91aaa3d8';
 
 /// Main curation provider that manages curated content sets
+/// keepAlive ensures provider persists across tab navigation
 
 abstract class _$Curation extends $Notifier<CurationState> {
   CurationState build();

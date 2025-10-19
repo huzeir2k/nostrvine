@@ -292,7 +292,7 @@ class _SafeNetworkImage extends StatelessWidget {
         if (error.toString().contains('404') ||
             error.toString().contains('statusCode')) {
           Log.warning(
-              '🖼️ HTTP error loading thumbnail for video ${videoId.substring(0, 8)}, URL: $url',
+              '🖼️ HTTP error loading thumbnail for video $videoId (FULL ID), URL: $url',
               name: 'VideoThumbnailWidget',
               category: LogCategory.video);
         }

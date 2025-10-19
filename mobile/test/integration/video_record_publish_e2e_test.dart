@@ -41,7 +41,7 @@ void main() {
       testPrivateKey = keys.generatePrivateKey();
       testPublicKey = keys.getPublicKey(testPrivateKey);
 
-      print('🔑 Generated test keypair: ${testPublicKey.substring(0, 8)}...');
+      print('🔑 Generated test keypair: ${testPublicKey}...');
 
       // Create a test video file with valid MP4 structure
       testVideoFile = File('test_video_${DateTime.now().millisecondsSinceEpoch}.mp4');
@@ -75,7 +75,7 @@ void main() {
       final nostrService = container.read(nostrServiceProvider);
 
       print('📤 Starting E2E test: upload → publish → verify');
-      print('   Test user: ${testPublicKey.substring(0, 8)}...');
+      print('   Test user: ${testPublicKey}...');
       print('   Video file: ${testVideoFile.path}');
 
       // ACT 1: Start upload (this triggers both Blossom upload AND Nostr publishing)
@@ -158,7 +158,7 @@ void main() {
       final eventStream = nostrService.subscribeToEvents(filters: [filter]);
 
       final subscription = eventStream.listen((event) {
-        print('📥 Received event from relay: ${event.id.substring(0, 8)}...');
+        print('📥 Received event from relay: ${event.id}...');
         events.add(event);
       });
 

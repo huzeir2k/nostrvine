@@ -1,8 +1,11 @@
 // ABOUTME: Unified logging utility that outputs to both Flutter console and browser DevTools
 // ABOUTME: Provides structured logging with levels while maintaining single command simplicity
 
+import 'dart:async';
 import 'dart:developer' as developer;
 import 'package:flutter/foundation.dart';
+import 'package:openvine/models/log_entry.dart';
+import 'package:openvine/services/log_capture_service.dart';
 
 /// Log levels for filtering and categorization
 enum LogLevel {
@@ -207,6 +210,26 @@ class UnifiedLogger {
         error: error,
         stackTrace: stackTrace,
       );
+    }
+
+    // Capture log entry for bug reports (fire-and-forget to avoid blocking)
+    try {
+      final logEntry = LogEntry(
+        timestamp: now,
+        level: level,
+        message: message,
+        category: category,
+        name: name,
+        error: error?.toString(),
+        stackTrace: stackTrace?.toString(),
+      );
+      // Don't await - logging should be non-blocking
+      unawaited(LogCaptureService.instance.captureLog(logEntry));
+    } catch (e) {
+      // Don't let log capture failures break logging
+      if (kDebugMode) {
+        debugPrint('Failed to capture log: $e');
+      }
     }
   }
 

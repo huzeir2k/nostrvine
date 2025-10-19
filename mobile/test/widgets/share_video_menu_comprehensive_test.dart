@@ -650,7 +650,7 @@ Future<List<VideoEvent>> _fetchRealVideoEvents(VideoEventService videoEventServi
 
     for (int i = 0; i < videos.length && i < 3; i++) {
       final video = videos[i];
-      Log.info('  [$i] ${video.title ?? "No title"} by ${video.pubkey.substring(0, 8)}...',
+      Log.info('  [$i] ${video.title ?? "No title"} by ${video.pubkey}',
           name: 'ShareVideoMenuTest', category: LogCategory.system);
     }
 

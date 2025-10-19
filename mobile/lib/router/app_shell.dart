@@ -7,6 +7,8 @@ import 'package:go_router/go_router.dart';
 import 'package:google_fonts/google_fonts.dart';
 
 import 'package:openvine/utils/unified_logger.dart';
+import 'package:openvine/widgets/vine_drawer.dart';
+import 'package:openvine/providers/app_providers.dart';
 import 'page_context_provider.dart';
 import 'route_utils.dart';
 import 'nav_extensions.dart';
@@ -140,7 +142,23 @@ class AppShell extends ConsumerWidget {
                   }
                 },
               )
-            : null,
+            : Builder(
+                // Hamburger menu in upper left when no back button
+                builder: (context) => IconButton(
+                  key: const Key('menu-icon-button'),
+                  tooltip: 'Menu',
+                  icon: const Icon(Icons.menu),
+                  onPressed: () {
+                    Log.info('👆 User tapped menu button', name: 'Navigation', category: LogCategory.ui);
+
+                    // Pause all videos when drawer opens
+                    final visibilityManager = ref.read(videoVisibilityManagerProvider);
+                    visibilityManager.pauseAllVideos();
+
+                    Scaffold.of(context).openDrawer();
+                  },
+                ),
+              ),
         title: Text(
           title,
           // Pacifico font, with sane fallbacks if font isn't available yet.
@@ -173,6 +191,7 @@ class AppShell extends ConsumerWidget {
           ),
         ],
       ),
+      drawer: const VineDrawer(),
       body: child,
       // Bottom nav visible for all shell routes (search, tabs, etc.)
       // For search (currentIndex=-1), no tab is highlighted

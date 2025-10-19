@@ -98,7 +98,7 @@ void main() {
         ],
         onEvent: (event) {
           Log.info(
-              '✅ TDD: SubscriptionManager received event: kind=${event.kind}, id=${event.id.substring(0, 8)}',
+              '✅ TDD: SubscriptionManager received event: kind=${event.kind}, id=${event.id}',
               name: 'SubscriptionManagerTDDIntegrationTest',
               category: LogCategory.system);
           receivedEvents.add(event);
@@ -170,7 +170,7 @@ void main() {
       final directSub = directStream.listen(
         (event) {
           Log.info(
-              '✅ TDD: Direct subscription received event: kind=${event.kind}, id=${event.id.substring(0, 8)}',
+              '✅ TDD: Direct subscription received event: kind=${event.kind}, id=${event.id}',
               name: 'SubscriptionManagerTDDIntegrationTest',
               category: LogCategory.system);
           directEvents.add(event);

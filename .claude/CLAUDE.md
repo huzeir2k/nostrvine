@@ -105,6 +105,15 @@ Before making any assumptions or changes, YOU MUST verify:
 - When you are trying to fix a bug or compilation error or any other issue, YOU MUST NEVER throw away the old implementation and rewrite without explicit permission from the user. If you are going to do this, YOU MUST STOP and get explicit permission from the user
 - YOU MUST NEVER name things as 'improved' or 'new' or 'enhanced', etc. Code naming should be evergreen. What is new today will be "old" someday
 - YOU MUST NOT change whitespace that does not affect execution or output. Otherwise, use a formatting tool
+- **CRITICAL - NOSTR ID RULE**: YOU MUST NEVER TRUNCATE NOSTR IDS. This applies EVERYWHERE:
+  - ❌ FORBIDDEN: `eventId.substring(0, 8)`, `pubkey.substring(0, 8)`, `id.take(8)`, etc.
+  - ❌ FORBIDDEN in logging: `Log.info('Video: ${video.id.substring(0, 8)}')`
+  - ❌ FORBIDDEN in production code: displaying shortened IDs in UI
+  - ❌ FORBIDDEN in debug output: console logs, error messages, analytics
+  - ❌ FORBIDDEN in tests: test descriptions, assertions, mock data
+  - ✅ REQUIRED: ALWAYS use full Nostr IDs (64-character hex event IDs, npub/nsec formats)
+  - ✅ If display space is limited, use UI truncation (ellipsis in middle) NOT string manipulation
+  - **Rationale**: Truncated IDs are useless for debugging, searching logs, and correlating events across systems
 
 ### File Management and Cleanup
 - **CRITICAL**: When creating debug, test, or temporary scripts (files like `debug_*.py`, `test_*.py`, `analyze_*.py`, `check_*.py`), YOU MUST delete or move them to an `old_files/` directory immediately after they have served their purpose
@@ -307,6 +316,19 @@ OpenVine is a decentralized vine-like video sharing application powered by Nostr
 - **Backend**: Cloudflare Workers + R2 Storage
 - **Protocol**: Nostr (decentralized social network)
 - **Media Processing**: Real-time frame capture → GIF creation
+
+## UI/UX Requirements
+
+**CRITICAL**: OpenVine is a **DARK MODE ONLY** application.
+
+- **Background**: Always use `Colors.black` or `VineTheme.backgroundColor`
+- **Text**: Always use `Colors.white`, `VineTheme.whiteText`, or `Colors.grey` for secondary text
+- **Accent Colors**: Use `VineTheme.vineGreen` for primary accents
+- **Card Backgrounds**: Use `VineTheme.cardBackground` for elevated surfaces
+- **NO LIGHT MODE**: Do not implement light mode themes, auto-switching, or light color schemes
+- **Consistency**: All screens must maintain the dark aesthetic
+
+**Rationale**: The dark mode aesthetic is core to the app's visual identity and user experience.
 
 ## Nostr Architecture
 

@@ -8,8 +8,10 @@ import 'package:openvine/screens/blossom_settings_screen.dart';
 import 'package:openvine/screens/notification_settings_screen.dart';
 import 'package:openvine/screens/profile_setup_screen.dart';
 import 'package:openvine/screens/relay_settings_screen.dart';
+import 'package:openvine/screens/relay_diagnostic_screen.dart';
 import 'package:openvine/screens/p2p_sync_screen.dart';
 import 'package:openvine/theme/vine_theme.dart';
+import 'package:openvine/widgets/bug_report_dialog.dart';
 import 'package:openvine/widgets/camera_fab.dart';
 import 'package:openvine/widgets/vine_bottom_nav.dart';
 
@@ -26,6 +28,11 @@ class SettingsScreen extends ConsumerWidget {
         title: const Text('Settings'),
         backgroundColor: VineTheme.vineGreen,
         foregroundColor: VineTheme.whiteText,
+        leading: IconButton(
+          icon: const Icon(Icons.arrow_back),
+          onPressed: () => Navigator.of(context).pop(),
+          tooltip: 'Back',
+        ),
       ),
       backgroundColor: Colors.black,
       body: ListView(
@@ -59,6 +66,18 @@ class SettingsScreen extends ConsumerWidget {
               context,
               MaterialPageRoute(
                 builder: (context) => const RelaySettingsScreen(),
+              ),
+            ),
+          ),
+          _buildSettingsTile(
+            context,
+            icon: Icons.troubleshoot,
+            title: 'Relay Diagnostics',
+            subtitle: 'Debug relay connectivity and network issues',
+            onTap: () => Navigator.push(
+              context,
+              MaterialPageRoute(
+                builder: (context) => const RelayDiagnosticScreen(),
               ),
             ),
           ),
@@ -100,6 +119,60 @@ class SettingsScreen extends ConsumerWidget {
                 builder: (context) => const NotificationSettingsScreen(),
               ),
             ),
+          ),
+
+          // Support
+          _buildSectionHeader('Support'),
+          _buildSettingsTile(
+            context,
+            icon: Icons.bug_report,
+            title: 'Report a Bug',
+            subtitle: 'Send diagnostic info to help improve the app',
+            onTap: () {
+              final bugReportService = ref.read(bugReportServiceProvider);
+              final userPubkey = authService.currentPublicKeyHex;
+
+              showDialog(
+                context: context,
+                builder: (context) => BugReportDialog(
+                  bugReportService: bugReportService,
+                  currentScreen: 'SettingsScreen',
+                  userPubkey: userPubkey,
+                ),
+              );
+            },
+          ),
+          _buildSettingsTile(
+            context,
+            icon: Icons.save,
+            title: 'Save Logs',
+            subtitle: 'Export logs to file for manual sending',
+            onTap: () async {
+              final bugReportService = ref.read(bugReportServiceProvider);
+              final userPubkey = authService.currentPublicKeyHex;
+
+              // Show loading indicator
+              ScaffoldMessenger.of(context).showSnackBar(
+                const SnackBar(
+                  content: Text('Exporting logs...'),
+                  duration: Duration(seconds: 2),
+                ),
+              );
+
+              final success = await bugReportService.exportLogsToFile(
+                currentScreen: 'SettingsScreen',
+                userPubkey: userPubkey,
+              );
+
+              if (!success && context.mounted) {
+                ScaffoldMessenger.of(context).showSnackBar(
+                  const SnackBar(
+                    content: Text('Failed to export logs'),
+                    backgroundColor: Colors.red,
+                  ),
+                );
+              }
+            },
           ),
         ],
       ),

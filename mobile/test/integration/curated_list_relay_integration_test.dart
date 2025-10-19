@@ -216,7 +216,7 @@ void main() {
             if (event.kind == 30005) {
               subscriptionWorked = true;
               Log.info(
-                  '✅ Received Kind 30005 event from relay: ${event.id.substring(0, 8)}...',
+                  '✅ Received Kind 30005 event from relay: ${event.id}...',
                   name: 'CuratedListRelayIntegrationTest',
                   category: LogCategory.system);
             }

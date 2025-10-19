@@ -1,0 +1,14 @@
+{
+  "applinks": {
+    "apps": [],
+    "details": [
+      {
+        "appID": "REPLACE_WITH_YOUR_TEAM_ID.co.openvine.app",
+        "paths": [
+          "/video/*",
+          "/profile/*"
+        ]
+      }
+    ]
+  }
+}

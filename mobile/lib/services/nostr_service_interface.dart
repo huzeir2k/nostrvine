@@ -92,6 +92,9 @@ abstract class INostrService {
     int? limit,
   });
 
+  /// Fetch a single event by ID
+  Future<Event?> fetchEventById(String eventId, {String? relayUrl});
+
   // NIP-50 Search functionality
   Stream<Event> searchVideos(
     String query, {
@@ -103,6 +106,9 @@ abstract class INostrService {
 
   // Primary relay for all client operations
   String get primaryRelay;
+
+  // Diagnostics and monitoring
+  Future<Map<String, dynamic>?> getRelayStats();
 
   Future<void> dispose();
 }

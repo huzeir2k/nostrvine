@@ -139,7 +139,7 @@ class VideoExploreTile extends ConsumerWidget {
     final profile = profileService.getCachedProfile(video.pubkey);
     final displayName = profile?.displayName ??
         profile?.name ??
-        '@${video.pubkey.substring(0, 8)}...';
+        'Loading...';
 
     return Builder(
       builder: (context) => GestureDetector(

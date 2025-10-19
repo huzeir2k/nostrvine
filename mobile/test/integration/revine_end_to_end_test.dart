@@ -29,7 +29,7 @@ void main() {
       );
 
       Log.info(
-          '   ✓ Original video created by ${authorPubkey.substring(0, 8)}...');
+          '   ✓ Original video created by ${authorPubkey}...');
       Log.info('   ✓ Video URL: ${originalVideo.videoUrl}');
       Log.info('   ✓ isRepost: ${originalVideo.isRepost}\n');
 

@@ -58,7 +58,7 @@ void main() {
         onEvent: (event) {
           events1.add(event);
           Log.info(
-              '  Got video event: ${event.id.substring(0, 8)}... created at ${DateTime.fromMillisecondsSinceEpoch(event.createdAt * 1000)}',
+              '  Got video event: ${event.id}... created at ${DateTime.fromMillisecondsSinceEpoch(event.createdAt * 1000)}',
               name: 'Test');
 
           // Complete after getting some events
@@ -111,7 +111,7 @@ void main() {
           onEvent: (event) {
             events2.add(event);
             Log.info(
-                '  Got older video: ${event.id.substring(0, 8)}... created at ${DateTime.fromMillisecondsSinceEpoch(event.createdAt * 1000)}',
+                '  Got older video: ${event.id}... created at ${DateTime.fromMillisecondsSinceEpoch(event.createdAt * 1000)}',
                 name: 'Test');
 
             if (events2.length >= 3 && !completer2.isCompleted) {

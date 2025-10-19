@@ -286,7 +286,7 @@ class UploadManager {
           name: 'UploadManager', category: LogCategory.video);
     }
     Log.info(
-        '👤 Nostr pubkey: ${nostrPubkey.length > 8 ? '${nostrPubkey.substring(0, 8)}...' : nostrPubkey}',
+        '👤 Nostr pubkey: $nostrPubkey',
         name: 'UploadManager',
         category: LogCategory.video);
     Log.info('📝 Title: $title',
@@ -469,7 +469,7 @@ class UploadManager {
     Log.info('📁 Video: ${videoFile.path}',
         name: 'UploadManager', category: LogCategory.video);
     Log.info(
-        '👤 Pubkey: ${upload.nostrPubkey.length > 8 ? '${upload.nostrPubkey.substring(0, 8)}...' : upload.nostrPubkey}',
+        '👤 Pubkey: ${upload.nostrPubkey}',
         name: 'UploadManager',
         category: LogCategory.video);
     Log.info('📝 Title: ${upload.title}',

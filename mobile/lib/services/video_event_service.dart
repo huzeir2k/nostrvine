@@ -246,6 +246,29 @@ class VideoEventService extends ChangeNotifier {
   /// Get videos for a specific hashtag (keyed for route-aware feeds)
   List<VideoEvent> hashtagVideos(String tag) => _hashtagBuckets[tag] ?? const [];
 
+  /// DEBUG: Dump all events with cdn.divine.video thumbnails
+  void debugDumpCdnDivineVideoThumbnails() {
+    Log.warning('🔍 DEBUG: Searching all loaded events for cdn.divine.video thumbnails...',
+        name: 'VideoEventService', category: LogCategory.video);
+
+    int count = 0;
+    for (final entry in _eventLists.entries) {
+      for (final video in entry.value) {
+        if (video.thumbnailUrl?.contains('cdn.divine.video') == true) {
+          count++;
+          Log.warning('🔍 FOUND #$count:', name: 'VideoEventService', category: LogCategory.video);
+          Log.warning('  Event ID: ${video.id}', name: 'VideoEventService', category: LogCategory.video);
+          Log.warning('  Video URL: ${video.videoUrl}', name: 'VideoEventService', category: LogCategory.video);
+          Log.warning('  Thumbnail: ${video.thumbnailUrl}', name: 'VideoEventService', category: LogCategory.video);
+          Log.warning('  Subscription Type: ${entry.key}', name: 'VideoEventService', category: LogCategory.video);
+        }
+      }
+    }
+
+    Log.warning('🔍 DEBUG: Found $count events with cdn.divine.video thumbnails',
+        name: 'VideoEventService', category: LogCategory.video);
+  }
+
   /// Get videos for a specific author (keyed for route-aware feeds)
   /// Always returns videos sorted in reverse chronological order (newest first)
   List<VideoEvent> authorVideos(String pubkeyHex) {
@@ -288,6 +311,20 @@ class VideoEventService extends ChangeNotifier {
 
   /// Get event count for a subscription type
   int getEventCount(SubscriptionType type) => (_eventLists[type] ?? []).length;
+
+  /// Get a video by its event ID (searches across all subscription types)
+  VideoEvent? getVideoById(String eventId) {
+    for (final eventList in _eventLists.values) {
+      try {
+        final video = eventList.firstWhere((v) => v.id == eventId);
+        return video;
+      } catch (_) {
+        // Not found in this list, continue searching
+        continue;
+      }
+    }
+    return null;
+  }
 
   /// Check if subscribed to a specific type
   bool isSubscribed(SubscriptionType type) =>
@@ -609,22 +646,60 @@ class VideoEventService extends ChangeNotifier {
         }
 
         // Create direct subscription using NostrService with proper filters
-        final eventStream = _nostrService.subscribeToEvents(filters: filters);
+        final subscriptionStartTime = DateTime.now();
+        int eventCount = 0;
+        DateTime? firstEventTime;
+        bool eoseReceived = false;
+
+        Log.info('📡 Creating subscription for $subscriptionType at ${subscriptionStartTime.toIso8601String()}',
+            name: 'VideoEventService', category: LogCategory.video);
+
+        final eventStream = _nostrService.subscribeToEvents(
+          filters: filters,
+          onEose: () {
+            eoseReceived = true;
+            final eoseDuration = DateTime.now().difference(subscriptionStartTime);
+            Log.info('✅ EOSE received for $subscriptionType after ${eoseDuration.inMilliseconds}ms with $eventCount events',
+                name: 'VideoEventService', category: LogCategory.video);
+
+            // Warn if no events received
+            if (eventCount == 0) {
+              Log.warning('⚠️ EOSE received but NO EVENTS for $subscriptionType - feed will be empty!',
+                  name: 'VideoEventService', category: LogCategory.video);
+            }
+          },
+        );
 
         final streamSubscription = eventStream.listen(
           (event) {
+            eventCount++;
+
+            // Track first event arrival time
+            if (firstEventTime == null) {
+              firstEventTime = DateTime.now();
+              final firstEventLatency = firstEventTime!.difference(subscriptionStartTime);
+              Log.info('🎯 First event for $subscriptionType arrived after ${firstEventLatency.inMilliseconds}ms',
+                  name: 'VideoEventService', category: LogCategory.video);
+            }
+
             if (subscriptionType == SubscriptionType.homeFeed) {
               Log.info(
-                  '🏠📥 HOME FEED EVENT RECEIVED: kind=${event.kind}, author=${event.pubkey.substring(0, 8)}',
+                  '🏠📥 HOME FEED EVENT #$eventCount RECEIVED: kind=${event.kind}, author=${event.pubkey.substring(0, 8)}',
                   name: 'VideoEventService',
                   category: LogCategory.video);
             }
             _handleNewVideoEvent(event, subscriptionType);
           },
           onError: (error) {
+            Log.error('❌ Subscription error for $subscriptionType after $eventCount events: $error',
+                name: 'VideoEventService', category: LogCategory.video);
             _handleSubscriptionError(error, subscriptionType);
           },
           onDone: () {
+            final totalDuration = DateTime.now().difference(subscriptionStartTime);
+            Log.info('🏁 Subscription complete for $subscriptionType: $eventCount events in ${totalDuration.inMilliseconds}ms (EOSE: $eoseReceived)',
+                name: 'VideoEventService', category: LogCategory.video);
+
             // PERSISTENT SUBSCRIPTION: onDone means relay closed connection
             // For main feeds, this should trigger reconnection attempt
             _handleSubscriptionComplete(subscriptionType);

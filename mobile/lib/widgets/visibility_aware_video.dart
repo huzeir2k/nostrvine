@@ -96,7 +96,7 @@ class _VisibilityAwareVideoState extends ConsumerState<VisibilityAwareVideo> {
             );
 
             Log.verbose(
-              '👁️ Visibility: ${(visibilityInfo.visibleFraction * 100).toStringAsFixed(1)}% for ${widget.videoId.substring(0, 8)}',
+              '👁️ Visibility: ${(visibilityInfo.visibleFraction * 100).toStringAsFixed(1)}% for ${widget.videoId}',
               name: 'VisibilityAwareVideo',
               category: LogCategory.ui,
             );

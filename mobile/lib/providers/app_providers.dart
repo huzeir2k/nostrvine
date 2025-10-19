@@ -46,6 +46,8 @@ import 'package:openvine/services/video_sharing_service.dart';
 import 'package:openvine/services/video_visibility_manager.dart';
 import 'package:openvine/services/web_auth_service.dart';
 import 'package:openvine/services/background_activity_manager.dart';
+import 'package:openvine/services/bug_report_service.dart';
+import 'package:openvine/services/nip17_message_service.dart';
 import 'package:openvine/utils/unified_logger.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
@@ -525,4 +527,18 @@ Future<BrokenVideoTracker> brokenVideoTracker(Ref ref) async {
   final tracker = BrokenVideoTracker();
   await tracker.initialize();
   return tracker;
+}
+
+/// Bug report service for collecting diagnostics and sending encrypted reports
+@riverpod
+BugReportService bugReportService(Ref ref) {
+  final keyManager = ref.watch(nostrKeyManagerProvider);
+  final nostrService = ref.watch(nostrServiceProvider);
+
+  final nip17Service = NIP17MessageService(
+    keyManager: keyManager,
+    nostrService: nostrService,
+  );
+
+  return BugReportService(nip17MessageService: nip17Service);
 }

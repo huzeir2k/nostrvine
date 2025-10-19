@@ -127,7 +127,7 @@ void main() {
 
       if (videoEventService.hasEvents(SubscriptionType.discovery)) {
         Log.info(
-            '  - First event ID: ${videoEventService.discoveryVideos.first.id.substring(0, 8)}...');
+            '  - First event ID: ${videoEventService.discoveryVideos.first.id}');
         Log.info(
             '  - First event title: ${videoEventService.discoveryVideos.first.title}');
       }

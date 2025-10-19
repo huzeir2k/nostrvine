@@ -425,7 +425,7 @@ class ContentModerationService with NostrListServiceMixin {
   /// Returns the entries from the most recent mute list event.
   Future<List<MuteListEntry>> _loadMuteListByPubkey(String pubkey) async {
     try {
-      Log.debug('Loading mute list for pubkey: ${pubkey.substring(0, 8)}...',
+      Log.debug('Loading mute list for pubkey: $pubkey',
           name: 'ContentModerationService', category: LogCategory.system);
 
       // Query for kind 10000 (mute list) events from this pubkey
@@ -437,7 +437,7 @@ class ContentModerationService with NostrListServiceMixin {
       final events = await _nostrService.getEvents(filters: [filter]);
 
       if (events.isEmpty) {
-        Log.debug('No mute list found for pubkey: ${pubkey.substring(0, 8)}...',
+        Log.debug('No mute list found for pubkey: $pubkey',
             name: 'ContentModerationService', category: LogCategory.system);
         return [];
       }
@@ -447,7 +447,7 @@ class ContentModerationService with NostrListServiceMixin {
       final latestEvent = events.first;
 
       Log.debug(
-          'Found mute list event: ${latestEvent.id.substring(0, 8)}... (created: ${DateTime.fromMillisecondsSinceEpoch(latestEvent.createdAt * 1000)})',
+          'Found mute list event: ${latestEvent.id} (created: ${DateTime.fromMillisecondsSinceEpoch(latestEvent.createdAt * 1000)})',
           name: 'ContentModerationService',
           category: LogCategory.system);
 
@@ -516,7 +516,7 @@ class ContentModerationService with NostrListServiceMixin {
     }
 
     Log.debug(
-        'Parsed ${entries.length} mute entries from event ${event.id.substring(0, 8)}...',
+        'Parsed ${entries.length} mute entries from event ${event.id}',
         name: 'ContentModerationService',
         category: LogCategory.system);
 

@@ -47,7 +47,7 @@ class FeedPerformanceTracker {
     );
 
     _analytics.logEvent(
-      name: 'feed_first_videos',
+      name: 'feed_first_batch_received',
       parameters: {
         'feed_type': feedType,
         'time_to_first_ms': timeToFirstVideos,
@@ -157,7 +157,7 @@ class FeedPerformanceTracker {
         'feed_type': feedType,
         'engagement_type': engagementType,
         'position_in_feed': positionInFeed,
-        'video_id': videoId.substring(0, 8),
+        'video_id': videoId,
         if (watchDurationMs != null) 'watch_duration_ms': watchDurationMs,
       },
     );
@@ -223,7 +223,7 @@ class FeedPerformanceTracker {
     _analytics.logEvent(
       name: 'video_discovered',
       parameters: {
-        'video_id': videoId.substring(0, 8),
+        'video_id': videoId,
         'discovery_source': discoverySource,
         if (positionInList != null) 'position': positionInList,
       },

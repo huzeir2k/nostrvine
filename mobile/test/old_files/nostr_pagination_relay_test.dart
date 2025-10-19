@@ -28,7 +28,7 @@ void main() async {
         final event = data[2];
         receivedEvents.add(event);
         final timestamp = event['created_at'];
-        final eventId = (event['id'] as String).substring(0, 8);
+        final eventId = event['id'] as String;
         final date = DateTime.fromMillisecondsSinceEpoch(timestamp * 1000);
         Log.info('   📺 Event $eventId created: $date');
       } else if (data[0] == 'EOSE') {
@@ -67,7 +67,7 @@ void main() async {
     final oldestTimestamp = oldestEvent['created_at'] as int;
     final oldestDate =
         DateTime.fromMillisecondsSinceEpoch(oldestTimestamp * 1000);
-    final oldestId = (oldestEvent['id'] as String).substring(0, 8);
+    final oldestId = oldestEvent['id'] as String;
 
     Log.info('📊 Initial batch stats:');
     Log.info('   Total events: ${receivedEvents.length}');
@@ -116,7 +116,7 @@ void main() async {
       for (final event in newEventsList) {
         final timestamp = event['created_at'] as int;
         final date = DateTime.fromMillisecondsSinceEpoch(timestamp * 1000);
-        final eventId = (event['id'] as String).substring(0, 8);
+        final eventId = event['id'] as String;
         Log.info('   📺 New event $eventId: $date');
       }
     } else {

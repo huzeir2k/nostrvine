@@ -39,7 +39,7 @@ void main() {
 
       // Generate test key pair
       keyPair = Keychain.generate();
-      print('Generated test keys: ${keyPair.public.substring(0, 8)}...');
+      print('Generated test keys: ${keyPair.public}...');
 
       dio = Dio();
     });
@@ -52,7 +52,7 @@ void main() {
 
     Future<void> _testUploadToServer(String serverUrl) async {
       print('📁 Test file size: ${await testVideoFile.length()} bytes');
-      print('👤 Using pubkey: ${keyPair.public.substring(0, 8)}...');
+      print('👤 Using pubkey: ${keyPair.public}...');
 
       // Read file and calculate hash
       final fileBytes = await testVideoFile.readAsBytes();

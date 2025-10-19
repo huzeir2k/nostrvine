@@ -218,7 +218,7 @@ class AnalyticsService implements BackgroundAwareService {
       // Log only on first attempt to reduce noise
       if (attempt == 1) {
         Log.info(
-            '📊 Tracking $eventType for video ${video.id.substring(0, 8)}...',
+            '📊 Tracking $eventType for video ${video.id}',
             name: 'AnalyticsService',
             category: LogCategory.system);
       }
@@ -237,7 +237,7 @@ class AnalyticsService implements BackgroundAwareService {
 
       if (response.statusCode == 200) {
         Log.debug(
-            '✅ Successfully tracked $eventType for video ${video.id.substring(0, 8)}... (attempt $attempt)',
+            '✅ Successfully tracked $eventType for video ${video.id} (attempt $attempt)',
             name: 'AnalyticsService',
             category: LogCategory.system);
       } else if (response.statusCode == 429) {

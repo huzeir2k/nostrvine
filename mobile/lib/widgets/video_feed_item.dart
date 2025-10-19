@@ -68,10 +68,9 @@ class _VideoFeedItemState extends ConsumerState<VideoFeedItem> {
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (!mounted) return; // Safety check: don't use ref if widget is disposed
 
-      final videoIdDisplay = widget.video.id.length > 8 ? widget.video.id.substring(0, 8) : widget.video.id;
       // Check initial state and start playback if already active
       final isActive = ref.read(isVideoActiveProvider(widget.video.id));
-      Log.info('🎬 VideoFeedItem.initState postFrameCallback: videoId=$videoIdDisplay, isActive=$isActive',
+      Log.info('🎬 VideoFeedItem.initState postFrameCallback: videoId=${widget.video.id}, isActive=$isActive',
           name: 'VideoFeedItem', category: LogCategory.video);
       if (isActive) {
         _handlePlaybackChange(true);
@@ -81,7 +80,7 @@ class _VideoFeedItemState extends ConsumerState<VideoFeedItem> {
       ref.listenManual(
         isVideoActiveProvider(widget.video.id),
         (prev, next) {
-          Log.info('🔄 VideoFeedItem active state changed: videoId=$videoIdDisplay, prev=$prev → next=$next',
+          Log.info('🔄 VideoFeedItem active state changed: videoId=${widget.video.id}, prev=$prev → next=$next',
               name: 'VideoFeedItem', category: LogCategory.video);
           _handlePlaybackChange(next);
         },
@@ -94,7 +93,6 @@ class _VideoFeedItemState extends ConsumerState<VideoFeedItem> {
   /// Handle playback state changes with generation counter to prevent race conditions
   void _handlePlaybackChange(bool shouldPlay) {
     final gen = ++_playbackGeneration;
-    final videoIdDisplay = widget.video.id.length > 8 ? widget.video.id.substring(0, 8) : widget.video.id;
 
     // Get stack trace to understand why playback is changing
     final stackTrace = StackTrace.current;
@@ -109,7 +107,7 @@ class _VideoFeedItemState extends ConsumerState<VideoFeedItem> {
       final controller = ref.read(individualVideoControllerProvider(controllerParams));
 
       if (shouldPlay) {
-        Log.info('▶️ PLAY REQUEST for video $videoIdDisplay | gen=$gen | initialized=${controller.value.isInitialized} | isPlaying=${controller.value.isPlaying}\nCalled from:\n$stackLines',
+        Log.info('▶️ PLAY REQUEST for video ${widget.video.id} | gen=$gen | initialized=${controller.value.isInitialized} | isPlaying=${controller.value.isPlaying}\nCalled from:\n$stackLines',
             name: 'VideoFeedItem', category: LogCategory.video);
 
         Log.info('🔍 Play condition check: isInitialized=${controller.value.isInitialized}, isPlaying=${controller.value.isPlaying}, hasError=${controller.value.hasError}',
@@ -117,28 +115,28 @@ class _VideoFeedItemState extends ConsumerState<VideoFeedItem> {
 
         if (controller.value.isInitialized && !controller.value.isPlaying) {
           // Controller ready - play immediately
-          Log.info('▶️ Widget starting video $videoIdDisplay... (controller already initialized)',
+          Log.info('▶️ Widget starting video ${widget.video.id} (controller already initialized)',
               name: 'VideoFeedItem', category: LogCategory.ui);
           controller.play().then((_) {
             if (gen != _playbackGeneration) {
-              Log.debug('⏭️ Ignoring stale play() completion for $videoIdDisplay...',
+              Log.debug('⏭️ Ignoring stale play() completion for ${widget.video.id}',
                   name: 'VideoFeedItem', category: LogCategory.ui);
             }
           }).catchError((error) {
             if (gen == _playbackGeneration) {
-              Log.error('❌ Widget failed to play video $videoIdDisplay...: $error',
+              Log.error('❌ Widget failed to play video ${widget.video.id}: $error',
                   name: 'VideoFeedItem', category: LogCategory.ui);
             }
           });
         } else if (!controller.value.isInitialized && !controller.value.hasError) {
           // Controller not ready yet - wait for initialization then play
-          Log.debug('⏳ Waiting for initialization of $videoIdDisplay... before playing',
+          Log.debug('⏳ Waiting for initialization of ${widget.video.id} before playing',
               name: 'VideoFeedItem', category: LogCategory.ui);
 
           void checkAndPlay() {
             // Safety check: don't use ref if widget is disposed
             if (!mounted) {
-              Log.debug('⏭️ Ignoring initialization callback for $videoIdDisplay... (widget disposed)',
+              Log.debug('⏭️ Ignoring initialization callback for ${widget.video.id} (widget disposed)',
                   name: 'VideoFeedItem', category: LogCategory.ui);
               controller.removeListener(checkAndPlay);
               return;
@@ -149,7 +147,7 @@ class _VideoFeedItemState extends ConsumerState<VideoFeedItem> {
 
             if (!stillActive) {
               // Video no longer active, don't play
-              Log.debug('⏭️ Ignoring initialization callback for $videoIdDisplay... (no longer active)',
+              Log.debug('⏭️ Ignoring initialization callback for ${widget.video.id} (no longer active)',
                   name: 'VideoFeedItem', category: LogCategory.ui);
               controller.removeListener(checkAndPlay);
               return;
@@ -157,17 +155,17 @@ class _VideoFeedItemState extends ConsumerState<VideoFeedItem> {
 
             if (gen != _playbackGeneration) {
               // Generation changed but video still active - this can happen if state toggled quickly
-              Log.debug('⏭️ Ignoring stale initialization callback for $videoIdDisplay... (generation mismatch)',
+              Log.debug('⏭️ Ignoring stale initialization callback for ${widget.video.id} (generation mismatch)',
                   name: 'VideoFeedItem', category: LogCategory.ui);
               return;
             }
 
             if (controller.value.isInitialized && !controller.value.isPlaying) {
-              Log.info('▶️ Widget starting video $videoIdDisplay... after initialization',
+              Log.info('▶️ Widget starting video ${widget.video.id} after initialization',
                   name: 'VideoFeedItem', category: LogCategory.ui);
               controller.play().catchError((error) {
                 if (gen == _playbackGeneration) {
-                  Log.error('❌ Widget failed to play video $videoIdDisplay... after init: $error',
+                  Log.error('❌ Widget failed to play video ${widget.video.id} after init: $error',
                       name: 'VideoFeedItem', category: LogCategory.ui);
                 }
               });
@@ -182,20 +180,20 @@ class _VideoFeedItemState extends ConsumerState<VideoFeedItem> {
             controller.removeListener(checkAndPlay);
           });
         } else {
-          Log.info('❓ PLAY REQUEST for video $videoIdDisplay - No action taken | initialized=${controller.value.isInitialized} | isPlaying=${controller.value.isPlaying} | hasError=${controller.value.hasError}',
+          Log.info('❓ PLAY REQUEST for video ${widget.video.id} - No action taken | initialized=${controller.value.isInitialized} | isPlaying=${controller.value.isPlaying} | hasError=${controller.value.hasError}',
               name: 'VideoFeedItem', category: LogCategory.video);
         }
       } else if (!shouldPlay && controller.value.isPlaying) {
-        Log.info('⏸️ PAUSE REQUEST for video $videoIdDisplay | gen=$gen | initialized=${controller.value.isInitialized} | isPlaying=${controller.value.isPlaying}\nCalled from:\n$stackLines',
+        Log.info('⏸️ PAUSE REQUEST for video ${widget.video.id} | gen=$gen | initialized=${controller.value.isInitialized} | isPlaying=${controller.value.isPlaying}\nCalled from:\n$stackLines',
             name: 'VideoFeedItem', category: LogCategory.video);
         controller.pause().then((_) {
           if (gen != _playbackGeneration) {
-            Log.debug('⏭️ Ignoring stale pause() completion for $videoIdDisplay...',
+            Log.debug('⏭️ Ignoring stale pause() completion for ${widget.video.id}',
                 name: 'VideoFeedItem', category: LogCategory.ui);
           }
         }).catchError((error) {
           if (gen == _playbackGeneration) {
-            Log.error('❌ Widget failed to pause video $videoIdDisplay...: $error',
+            Log.error('❌ Widget failed to pause video ${widget.video.id}: $error',
                 name: 'VideoFeedItem', category: LogCategory.ui);
           }
         });
@@ -209,8 +207,7 @@ class _VideoFeedItemState extends ConsumerState<VideoFeedItem> {
   @override
   Widget build(BuildContext context) {
     final video = widget.video;
-    final videoIdDisplay = video.id.length > 8 ? video.id.substring(0, 8) : video.id;
-    Log.debug('🏗️ VideoFeedItem.build() for video $videoIdDisplay..., index: ${widget.index}',
+    Log.debug('🏗️ VideoFeedItem.build() for video ${video.id}..., index: ${widget.index}',
         name: 'VideoFeedItem', category: LogCategory.ui);
 
     // Skip rendering if no video URL
@@ -252,8 +249,7 @@ class _VideoFeedItemState extends ConsumerState<VideoFeedItem> {
     }
 
     assert(() {
-      final idDisplay = video.id.length > 8 ? video.id.substring(0, 8) : video.id;
-      debugPrint('[OVERLAY] id=$idDisplay policy=$policy active=$isActive -> overlay=$overlayVisible');
+      debugPrint('[OVERLAY] id=${video.id} policy=$policy active=$isActive -> overlay=$overlayVisible');
       return true;
     }());
 
@@ -264,13 +260,13 @@ class _VideoFeedItemState extends ConsumerState<VideoFeedItem> {
           // 300ms was too aggressive and was swallowing legitimate pause taps
           final now = DateTime.now();
           if (_lastTapTime != null && now.difference(_lastTapTime!) < const Duration(milliseconds: 150)) {
-            Log.debug('⏭️ Ignoring rapid tap (debounced) for $videoIdDisplay...',
+            Log.debug('⏭️ Ignoring rapid tap (debounced) for ${video.id}...',
                 name: 'VideoFeedItem', category: LogCategory.ui);
             return;
           }
           _lastTapTime = now;
 
-          Log.debug('📱 Tap detected on VideoFeedItem for $videoIdDisplay...',
+          Log.debug('📱 Tap detected on VideoFeedItem for ${video.id}...',
               name: 'VideoFeedItem', category: LogCategory.ui);
           try {
             final controllerParams = VideoControllerParams(
@@ -287,22 +283,22 @@ class _VideoFeedItemState extends ConsumerState<VideoFeedItem> {
               // Toggle play/pause only if currently active and initialized
               if (controller.value.isInitialized) {
                 if (controller.value.isPlaying) {
-                  Log.info('⏸️ Tap pausing video $videoIdDisplay...',
+                  Log.info('⏸️ Tap pausing video ${video.id}...',
                       name: 'VideoFeedItem', category: LogCategory.ui);
                   controller.pause();
                 } else {
-                  Log.info('▶️ Tap playing video $videoIdDisplay...',
+                  Log.info('▶️ Tap playing video ${video.id}...',
                       name: 'VideoFeedItem', category: LogCategory.ui);
                   controller.play();
                 }
               } else {
-                Log.debug('⏳ Tap ignored - video $videoIdDisplay... not yet initialized',
+                Log.debug('⏳ Tap ignored - video ${video.id}... not yet initialized',
                     name: 'VideoFeedItem', category: LogCategory.ui);
               }
             } else {
               // Tapping inactive video: Navigate to this video's index
               // Active state is derived from URL, so navigation will update it
-              Log.info('🎯 Tap navigating to video $videoIdDisplay... at index ${widget.index}',
+              Log.info('🎯 Tap navigating to video ${video.id}... at index ${widget.index}',
                   name: 'VideoFeedItem', category: LogCategory.ui);
 
               // Read current route context to determine which route type to navigate to
@@ -324,7 +320,7 @@ class _VideoFeedItemState extends ConsumerState<VideoFeedItem> {
             }
             widget.onTap?.call();
           } catch (e) {
-            Log.error('❌ Error in VideoFeedItem tap handler for $videoIdDisplay...: $e',
+            Log.error('❌ Error in VideoFeedItem tap handler for ${video.id}...: $e',
                 name: 'VideoFeedItem', category: LogCategory.ui);
           }
         },
@@ -446,7 +442,7 @@ class _VideoFeedItemState extends ConsumerState<VideoFeedItem> {
       key: Key('vis-${video.id}'),
       onVisibilityChanged: (info) {
         final isVisible = info.visibleFraction > 0.7;
-        Log.debug('👁️ Visibility changed: $videoIdDisplay... fraction=${info.visibleFraction.toStringAsFixed(3)}, isVisible=$isVisible',
+        Log.debug('👁️ Visibility changed: ${video.id}... fraction=${info.visibleFraction.toStringAsFixed(3)}, isVisible=$isVisible',
             name: 'VideoFeedItem', category: LogCategory.ui);
 
         if (isVisible) {
@@ -498,7 +494,7 @@ class VideoOverlayActions extends ConsumerWidget {
             final display = profileAsync.maybeWhen(
                   data: (p) => p?.bestDisplayName ?? p?.displayName ?? p?.name,
                   orElse: () => null,
-                ) ?? 'npub:${video.pubkey.length > 8 ? video.pubkey.substring(0, 8) : video.pubkey}';
+                ) ?? 'Loading...';
 
             return Column(
               crossAxisAlignment: CrossAxisAlignment.start,
@@ -508,7 +504,7 @@ class VideoOverlayActions extends ConsumerWidget {
                   ignoring: false, // This chip SHOULD receive taps
                   child: GestureDetector(
                     onTap: () {
-                      Log.info('👤 User tapped profile: videoId=${video.id.substring(0, 8)}, authorPubkey=${video.pubkey.substring(0, 8)}',
+                      Log.info('👤 User tapped profile: videoId=${video.id}, authorPubkey=${video.pubkey}',
                           name: 'VideoFeedItem', category: LogCategory.ui);
                       // Navigate to profile tab using GoRouter
                       context.goProfile(video.pubkey, 0);

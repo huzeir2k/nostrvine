@@ -78,7 +78,7 @@ class VideoSharingService {
   }) async {
     try {
       Log.debug(
-          '📱 Sharing video with user: ${recipientPubkey.substring(0, 8)}...',
+          '📱 Sharing video with user: $recipientPubkey',
           name: 'VideoSharingService',
           category: LogCategory.video);
 

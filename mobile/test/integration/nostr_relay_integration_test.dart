@@ -78,7 +78,7 @@ void main() {
           streamSub = subscription.listen((event) {
             receivedEvents.add(event);
             Log.debug(
-                '📨 Received event: ${event.id.substring(0, 8)}... content: "${event.content}"');
+                '📨 Received event: ${event.id}... content: "${event.content}"');
 
             // Check if we received our test event
             if (event.content == testContent) {

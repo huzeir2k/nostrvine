@@ -42,7 +42,7 @@ void main() {
       testPrivateKey = keys.generatePrivateKey();
       testPublicKey = keys.getPublicKey(testPrivateKey);
 
-      print('🔑 Test keypair: ${testPublicKey.substring(0, 8)}...');
+      print('🔑 Test keypair: ${testPublicKey}...');
 
       // Create test video file
       testVideoFile = File('test_e2e_video_${DateTime.now().millisecondsSinceEpoch}.mp4');

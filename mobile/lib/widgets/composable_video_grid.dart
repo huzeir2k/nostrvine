@@ -179,10 +179,7 @@ class ComposableVideoGrid extends ConsumerWidget {
                     const SizedBox(height: 2),
                     // Title or content
                     Text(
-                      video.title ??
-                          (video.content.length > 25
-                              ? '${video.content.substring(0, 25)}...'
-                              : video.content),
+                      video.title ?? video.content,
                       style: TextStyle(
                         color: VineTheme.primaryText,
                         fontSize: 11,
@@ -241,7 +238,7 @@ class ComposableVideoGrid extends ConsumerWidget {
     final profile = profileService.getCachedProfile(video.pubkey);
     final displayName = profile?.displayName ??
         profile?.name ??
-        '@${video.pubkey.substring(0, 8)}...';
+        'Loading...';
 
     return Text(
       displayName,

@@ -125,13 +125,13 @@ void main() {
           if (!receivedVideos.any((v) => v.id == event.id)) {
             receivedVideos.add(event);
             Log.info(
-                '✅ New video: ${event.title ?? event.id.substring(0, 8)} (hasVideo: ${event.hasVideo})',
+                '✅ New video: ${event.title ?? event.id} (hasVideo: ${event.hasVideo})',
                 name: 'RealVideoSubscriptionTest',
                 category: LogCategory.system);
             Log.info('   - URL: ${event.videoUrl}',
                 name: 'RealVideoSubscriptionTest',
                 category: LogCategory.system);
-            Log.info('   - Author: ${event.pubkey.substring(0, 8)}',
+            Log.info('   - Author: ${event.pubkey}',
                 name: 'RealVideoSubscriptionTest',
                 category: LogCategory.system);
             Log.info('   - Hashtags: ${event.hashtags}',

@@ -18,9 +18,9 @@ void setupTestEnvironment() {
 }
 
 void _setupSecureStorageMock() {
-  // Mock flutter_securetestStorage
+  // Mock flutter_secure_storage
   const MethodChannel secureStorageChannel =
-      MethodChannel('plugins.it_nomads.com/flutter_securetestStorage');
+      MethodChannel('plugins.it_nomads.com/flutter_secure_storage');
 
   // Simple in-memory storage for testing
   final Map<String, String> testStorage = {};
@@ -61,7 +61,7 @@ void _setupSecureStorageMock() {
 
   // Mock the secure storage capability check channel
   const MethodChannel capabilityChannel =
-      MethodChannel('openvine.securetestStorage');
+      MethodChannel('openvine.secure_storage');
 
   TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
       .setMockMethodCallHandler(capabilityChannel,

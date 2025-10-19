@@ -126,7 +126,7 @@ class _VideoMetricsTrackerState extends ConsumerState<VideoMetricsTracker> {
         _lastPosition!.inMilliseconds > duration.inMilliseconds - 1000) {
       _loopCount++;
       Log.debug(
-        '🔄 Video looped (count: $_loopCount) for ${widget.video.id.substring(0, 8)}',
+        '🔄 Video looped (count: $_loopCount) for ${widget.video.id}',
         name: 'VideoMetricsTracker',
         category: LogCategory.video,
       );
@@ -177,7 +177,7 @@ class _VideoMetricsTrackerState extends ConsumerState<VideoMetricsTracker> {
     );
 
     Log.debug(
-      '▶️ Started tracking video ${widget.video.id.substring(0, 8)}',
+      '▶️ Started tracking video ${widget.video.id}',
       name: 'VideoMetricsTracker',
       category: LogCategory.video,
     );

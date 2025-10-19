@@ -144,6 +144,9 @@ class _UniversalCameraScreenPureState extends ConsumerState<UniversalCameraScree
   /// Perform async initialization after the first frame
   Future<void> _performAsyncInitialization() async {
     try {
+      // Clean up any old temp files and reset state from previous recordings
+      ref.read(vineRecordingProvider.notifier).cleanupAndReset();
+
       // Check platform and request permissions if needed
       if (Platform.isMacOS) {
         // macOS uses native platform channel
@@ -293,9 +296,8 @@ class _UniversalCameraScreenPureState extends ConsumerState<UniversalCameraScree
               if (recordingState.isRecording) {
                 return const SizedBox.shrink();
               }
-              return IconButton(
+              return TextButton(
                 key: const Key('drafts-button'),
-                icon: const Icon(Icons.video_library, color: Colors.white),
                 onPressed: () {
                   Navigator.of(context).push(
                     MaterialPageRoute(
@@ -303,7 +305,13 @@ class _UniversalCameraScreenPureState extends ConsumerState<UniversalCameraScree
                     ),
                   );
                 },
-                tooltip: 'Drafts',
+                child: const Text(
+                  'Drafts',
+                  style: TextStyle(
+                    color: Colors.white,
+                    fontSize: 16,
+                  ),
+                ),
               );
             },
           ),
@@ -353,9 +361,16 @@ class _UniversalCameraScreenPureState extends ConsumerState<UniversalCameraScree
           // Listen for auto-stop (when recording stops without user action)
           ref.listen<VineRecordingUIState>(vineRecordingProvider, (previous, next) {
             if (previous != null && previous.isRecording && !next.isRecording && !_isProcessing) {
-              // Recording stopped automatically (timer reached max duration)
-              Log.info('📹 Recording auto-stopped, processing result', category: LogCategory.video);
-              _handleRecordingAutoStop();
+              // Recording stopped automatically - check if it was max duration or an error
+              if (next.hasSegments) {
+                // Has segments = legitimate max duration stop
+                Log.info('📹 Recording auto-stopped at max duration', category: LogCategory.video);
+                _handleRecordingAutoStop();
+              } else {
+                // No segments = recording failure
+                Log.warning('📹 Recording stopped due to error (no segments)', category: LogCategory.video);
+                _handleRecordingFailure();
+              }
             }
           });
 
@@ -916,6 +931,18 @@ class _UniversalCameraScreenPureState extends ConsumerState<UniversalCameraScree
     } catch (e) {
       Log.error('📹 Failed to handle auto-stop: $e', category: LogCategory.video);
     }
+  }
+
+  void _handleRecordingFailure() {
+    if (!mounted) return;
+
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(
+        content: Text('Camera recording failed. Please try again.'),
+        backgroundColor: Colors.red,
+        duration: Duration(seconds: 4),
+      ),
+    );
   }
 
   void _toggleTimer() {

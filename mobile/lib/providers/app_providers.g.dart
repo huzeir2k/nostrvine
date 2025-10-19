@@ -1903,3 +1903,54 @@ final class BrokenVideoTrackerProvider
 
 String _$brokenVideoTrackerHash() =>
     r'36268bd477659a229f13da325ac23403a20e7fa7';
+
+/// Bug report service for collecting diagnostics and sending encrypted reports
+
+@ProviderFor(bugReportService)
+const bugReportServiceProvider = BugReportServiceProvider._();
+
+/// Bug report service for collecting diagnostics and sending encrypted reports
+
+final class BugReportServiceProvider
+    extends
+        $FunctionalProvider<
+          BugReportService,
+          BugReportService,
+          BugReportService
+        >
+    with $Provider<BugReportService> {
+  /// Bug report service for collecting diagnostics and sending encrypted reports
+  const BugReportServiceProvider._()
+    : super(
+        from: null,
+        argument: null,
+        retry: null,
+        name: r'bugReportServiceProvider',
+        isAutoDispose: true,
+        dependencies: null,
+        $allTransitiveDependencies: null,
+      );
+
+  @override
+  String debugGetCreateSourceHash() => _$bugReportServiceHash();
+
+  @$internal
+  @override
+  $ProviderElement<BugReportService> $createElement($ProviderPointer pointer) =>
+      $ProviderElement(pointer);
+
+  @override
+  BugReportService create(Ref ref) {
+    return bugReportService(ref);
+  }
+
+  /// {@macro riverpod.override_with_value}
+  Override overrideWithValue(BugReportService value) {
+    return $ProviderOverride(
+      origin: this,
+      providerOverride: $SyncValueProvider<BugReportService>(value),
+    );
+  }
+}
+
+String _$bugReportServiceHash() => r'250a5fce245b0ddfe83986b90719d24bff84b58a';

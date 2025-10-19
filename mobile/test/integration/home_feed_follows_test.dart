@@ -99,7 +99,7 @@ void main() {
 
         Log.info('👥 Following ${authorPubkeys.length} authors from discovery feed');
         for (final pubkey in authorPubkeys) {
-          Log.info('   - ${pubkey.substring(0, 8)}...');
+          Log.info('   - ${pubkey}...');
         }
 
         // Subscribe to home feed with these authors
@@ -136,7 +136,7 @@ void main() {
         final homeFeedVideos = videoEventService.homeFeedVideos;
         for (final video in homeFeedVideos) {
           expect(authorPubkeys.contains(video.pubkey), true,
-              reason: 'Home feed video ${video.id.substring(0, 8)} '
+              reason: 'Home feed video ${video.id} '
                   'should be from a followed author');
         }
 
@@ -170,7 +170,7 @@ void main() {
         // Pick the first video and follow its author
         final targetVideo = discoveryVideos.first;
         final targetAuthor = targetVideo.pubkey;
-        Log.info('🎯 Target video: ${targetVideo.id.substring(0, 8)} from ${targetAuthor.substring(0, 8)}');
+        Log.info('🎯 Target video: ${targetVideo.id} from $targetAuthor');
 
         // Subscribe to home feed for just this author
         await videoEventService.subscribeToHomeFeed(
@@ -192,7 +192,7 @@ void main() {
         // CRITICAL: The target video should be in home feed
         final targetInHomeFeed = homeFeedVideos.any((v) => v.id == targetVideo.id);
         expect(targetInHomeFeed, true,
-            reason: 'Video ${targetVideo.id.substring(0, 8)} should appear in home feed '
+            reason: 'Video ${targetVideo.id} should appear in home feed '
                 'because its author is followed, even though it was already in discovery feed. '
                 'One event, multiple feeds.');
 

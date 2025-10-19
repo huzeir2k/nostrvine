@@ -18,6 +18,10 @@ class VideoCacheManager extends CacheManager {
 
   static VideoCacheManager? _instance;
 
+  // Cache manifest for synchronous lookups - tracks videoId → cached file path
+  // This enables getCachedVideoSync() to avoid async overhead
+  final Map<String, String> _cacheManifest = {};
+
   factory VideoCacheManager() {
     return _instance ??= VideoCacheManager._();
   }
@@ -53,12 +57,14 @@ class VideoCacheManager extends CacheManager {
       // Check if already cached first - avoid redundant downloads
       final cachedFile = await getCachedVideo(videoId);
       if (cachedFile != null) {
-        Log.debug('⏭️ Video ${videoId.substring(0, 8)}... already cached, skipping download',
+        // Update manifest in case it was missing
+        _cacheManifest[videoId] = cachedFile.path;
+        Log.debug('⏭️ Video $videoId already cached, skipping download',
             name: 'VideoCacheManager', category: LogCategory.video);
         return cachedFile;
       }
 
-      Log.info('🎬 Caching video ${videoId.substring(0, 8)}... from $videoUrl${authHeaders != null && authHeaders.isNotEmpty ? " (with auth)" : ""}',
+      Log.info('🎬 Caching video $videoId from $videoUrl${authHeaders != null && authHeaders.isNotEmpty ? " (with auth)" : ""}',
           name: 'VideoCacheManager', category: LogCategory.video);
 
       final fileInfo = await downloadFile(
@@ -67,13 +73,16 @@ class VideoCacheManager extends CacheManager {
         authHeaders: authHeaders ?? {},
       );
 
-      Log.info('✅ Video ${videoId.substring(0, 8)}... cached successfully',
+      // Add to cache manifest for synchronous lookups
+      _cacheManifest[videoId] = fileInfo.file.path;
+
+      Log.info('✅ Video $videoId cached successfully at ${fileInfo.file.path}',
           name: 'VideoCacheManager', category: LogCategory.video);
 
       return fileInfo.file;
     } catch (error) {
       final errorMessage = error.toString();
-      Log.error('❌ Failed to cache video ${videoId.substring(0, 8)}...: $error',
+      Log.error('❌ Failed to cache video $videoId: $error',
           name: 'VideoCacheManager', category: LogCategory.video);
 
       // Mark video as broken if it's a 404, network error, or timeout
@@ -103,12 +112,17 @@ class VideoCacheManager extends CacheManager {
       final fileInfo = await getFileFromCache(videoId);
       final isCached = fileInfo != null && fileInfo.file.existsSync();
 
-      Log.debug('🔍 Video ${videoId.substring(0, 8)}... cached: $isCached',
+      // Update manifest if cached
+      if (isCached) {
+        _cacheManifest[videoId] = fileInfo.file.path;
+      }
+
+      Log.debug('🔍 Video $videoId cached: $isCached',
           name: 'VideoCacheManager', category: LogCategory.video);
 
       return isCached;
     } catch (error) {
-      Log.warning('⚠️ Error checking cache for video ${videoId.substring(0, 8)}...: $error',
+      Log.warning('⚠️ Error checking cache for video $videoId: $error',
           name: 'VideoCacheManager', category: LogCategory.video);
       return false;
     }
@@ -118,26 +132,43 @@ class VideoCacheManager extends CacheManager {
   Future<File?> getCachedVideo(String videoId) async {
     try {
       final fileInfo = await getFileFromCache(videoId);
-      if (fileInfo?.file.existsSync() == true) {
-        Log.info('🎯 Using cached video ${videoId.substring(0, 8)}... : ${fileInfo!.file.path}',
+      if (fileInfo != null && fileInfo.file.existsSync()) {
+        // Update manifest for synchronous lookups
+        _cacheManifest[videoId] = fileInfo.file.path;
+        Log.info('🎯 Using cached video $videoId : ${fileInfo.file.path}',
             name: 'VideoCacheManager', category: LogCategory.video);
         return fileInfo.file;
       }
     } catch (error) {
-      Log.warning('⚠️ Error retrieving cached video ${videoId.substring(0, 8)}...: $error',
+      Log.warning('⚠️ Error retrieving cached video $videoId: $error',
           name: 'VideoCacheManager', category: LogCategory.video);
     }
     return null;
   }
 
-  /// SYNCHRONOUS cache check - checks if file exists without async overhead
-  /// Returns null always for now - async cache check will be used in background
-  /// This method exists as a placeholder for future optimization
+  /// SYNCHRONOUS cache check - uses in-memory manifest for instant cache lookups
+  /// This enables video controllers to use cached files immediately without async overhead
   File? getCachedVideoSync(String videoId) {
-    // TODO: Implement true synchronous cache check using file path construction
-    // For now, always return null - the async background check will invalidate
-    // the provider if cache is found, which will recreate with cached file
-    return null;
+    // Check manifest for cached video path
+    final cachedPath = _cacheManifest[videoId];
+
+    if (cachedPath == null) {
+      return null;
+    }
+
+    // Verify file still exists (in case cache was cleared externally)
+    final file = File(cachedPath);
+    if (!file.existsSync()) {
+      // Remove stale entry from manifest
+      _cacheManifest.remove(videoId);
+      Log.debug('🗑️ Removed stale cache entry for video $videoId',
+          name: 'VideoCacheManager', category: LogCategory.video);
+      return null;
+    }
+
+    Log.debug('⚡ Fast cache hit for video $videoId (sync check)',
+        name: 'VideoCacheManager', category: LogCategory.video);
+    return file;
   }
 
   /// Preemptively cache videos for offline use
@@ -215,15 +246,18 @@ class VideoCacheManager extends CacheManager {
   /// Remove a corrupted video from cache so it can be re-downloaded
   Future<void> removeCorruptedVideo(String videoId) async {
     try {
-      Log.info('🗑️ Removing corrupted video ${videoId.substring(0, 8)}... from cache',
+      Log.info('🗑️ Removing corrupted video $videoId from cache',
           name: 'VideoCacheManager', category: LogCategory.video);
 
       await removeFile(videoId);
 
-      Log.info('✅ Corrupted video ${videoId.substring(0, 8)}... removed from cache',
+      // Remove from manifest
+      _cacheManifest.remove(videoId);
+
+      Log.info('✅ Corrupted video $videoId removed from cache',
           name: 'VideoCacheManager', category: LogCategory.video);
     } catch (error) {
-      Log.error('❌ Error removing corrupted video ${videoId.substring(0, 8)}... from cache: $error',
+      Log.error('❌ Error removing corrupted video $videoId from cache: $error',
           name: 'VideoCacheManager', category: LogCategory.video);
     }
   }
@@ -235,6 +269,9 @@ class VideoCacheManager extends CacheManager {
           name: 'VideoCacheManager', category: LogCategory.video);
 
       await emptyCache();
+
+      // Clear manifest
+      _cacheManifest.clear();
 
       Log.info('✅ All cached videos cleared',
           name: 'VideoCacheManager', category: LogCategory.video);

@@ -202,6 +202,9 @@ class HomeFeed extends _$HomeFeed {
       category: LogCategory.video,
     );
 
+    // DEBUG: Dump all events with cdn.divine.video thumbnails
+    videoEventService.debugDumpCdnDivineVideoThumbnails();
+
     // Reorder to show unseen videos first
     final seenVideosState = ref.watch(seenVideosProvider);
 
