@@ -7,6 +7,24 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Fixed - Video Display Crash (2025-10-25)
+
+#### Bug Fixes
+- **Fixed "Invalid argument(s): 0" crash preventing videos from displaying**
+  - Root cause: `clamp(0, videos.length - 1)` when `videos.length` is 0 produces `clamp(0, -1)` which throws error
+  - Previously calculated clamp before checking if videos list was empty
+  - Now checks for empty videos first, only calculates clamp when videos exist
+  - Prevents crash when home feed is loading or has no videos
+
+#### Files Modified
+- `lib/screens/home_screen_router.dart` - Reordered empty check before clamp calculation
+
+#### Technical Details
+- Moved `urlIndex = (ctx.videoIndex ?? 0).clamp(0, videos.length - 1)` to AFTER empty videos check
+- When videos is empty, sets `urlIndex = 0` and displays "No videos available" UI
+- When videos exist, safely clamps index because `videos.length - 1 >= 0`
+- Fix resolves issue where NostrService was successfully fetching events but UI crashed before displaying them
+
 ### Fixed - Trending Hashtags Fallback (2025-10-25)
 
 #### Bug Fixes

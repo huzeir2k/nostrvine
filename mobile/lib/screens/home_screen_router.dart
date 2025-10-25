@@ -88,10 +88,9 @@ class _HomeScreenRouterState extends ConsumerState<HomeScreenRouter>
           onData: (state) {
             final videos = state.videos;
 
-            // Determine target index from route context (index-based routing)
-            urlIndex = (ctx.videoIndex ?? 0).clamp(0, videos.length - 1);
-
             if (videos.isEmpty) {
+              // Handle empty videos case - no clamp needed
+              urlIndex = 0;
               return const Center(
                 child: Column(
                   mainAxisAlignment: MainAxisAlignment.center,
@@ -112,6 +111,9 @@ class _HomeScreenRouterState extends ConsumerState<HomeScreenRouter>
                 ),
               );
             }
+
+            // Determine target index from route context (index-based routing)
+            urlIndex = (ctx.videoIndex ?? 0).clamp(0, videos.length - 1);
 
             final itemCount = videos.length;
 
