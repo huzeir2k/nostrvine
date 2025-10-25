@@ -418,7 +418,6 @@ void main() {
           }),
         ],
       );
-      addTearDown(testContainer.dispose);
 
       // Act
       final result = await testContainer.read(homeFeedProvider.future);
@@ -433,6 +432,8 @@ void main() {
         followingPubkeys,
         limit: 100,
       )).called(1);
+
+      testContainer.dispose();
     });
   });
 
@@ -477,11 +478,12 @@ void main() {
           }),
         ],
       );
-      addTearDown(container.dispose);
 
       // Test loading state detection
       final isLoading = container.read(homeFeedLoadingProvider);
       expect(isLoading, isA<bool>());
+
+      container.dispose();
     });
 
     test('homeFeedCount should return video count', () async {
@@ -499,12 +501,13 @@ void main() {
           }),
         ],
       );
-      addTearDown(container.dispose);
 
       // Test video count
       final count = container.read(homeFeedCountProvider);
       expect(count, isA<int>());
       expect(count, greaterThanOrEqualTo(0));
+
+      container.dispose();
     });
 
     test('hasHomeFeedVideos should indicate if videos exist', () async {
@@ -522,11 +525,12 @@ void main() {
           }),
         ],
       );
-      addTearDown(container.dispose);
 
       // Test video existence check
       final hasVideos = container.read(hasHomeFeedVideosProvider);
       expect(hasVideos, isA<bool>());
+
+      container.dispose();
     });
   });
 }

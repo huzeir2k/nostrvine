@@ -14,7 +14,6 @@ void main() {
 
     test('initializes with empty state', () async {
       final container = ProviderContainer();
-      addTearDown(container.dispose);
 
       final initialState = container.read(seenVideosProvider);
 
@@ -26,11 +25,12 @@ void main() {
 
       final state = container.read(seenVideosProvider);
       expect(state.isInitialized, isTrue);
+
+      container.dispose();
     });
 
     test('marks video as seen and updates state', () async {
       final container = ProviderContainer();
-      addTearDown(container.dispose);
 
       final notifier = container.read(seenVideosProvider.notifier);
 
@@ -42,11 +42,12 @@ void main() {
 
       final state = container.read(seenVideosProvider);
       expect(state.seenVideoIds, contains(videoId));
+
+      container.dispose();
     });
 
     test('hasSeenVideo returns correct state', () async {
       final container = ProviderContainer();
-      addTearDown(container.dispose);
 
       final notifier = container.read(seenVideosProvider.notifier);
 
@@ -60,11 +61,12 @@ void main() {
       await notifier.markVideoAsSeen(videoId);
 
       expect(notifier.hasSeenVideo(videoId), isTrue);
+
+      container.dispose();
     });
 
     test('records video view with metrics', () async {
       final container = ProviderContainer();
-      addTearDown(container.dispose);
 
       final notifier = container.read(seenVideosProvider.notifier);
 
@@ -83,11 +85,12 @@ void main() {
 
       final state = container.read(seenVideosProvider);
       expect(state.seenVideoIds, contains(videoId));
+
+      container.dispose();
     });
 
     test('does not duplicate seen videos', () async {
       final container = ProviderContainer();
-      addTearDown(container.dispose);
 
       final notifier = container.read(seenVideosProvider.notifier);
 
@@ -102,11 +105,12 @@ void main() {
 
       final state = container.read(seenVideosProvider);
       expect(state.seenVideoIds.where((id) => id == videoId).length, 1);
+
+      container.dispose();
     });
 
     test('state updates trigger provider listeners', () async {
       final container = ProviderContainer();
-      addTearDown(container.dispose);
 
       final notifier = container.read(seenVideosProvider.notifier);
 
@@ -123,6 +127,8 @@ void main() {
       await notifier.markVideoAsSeen(videoId);
 
       expect(listenerCallCount, greaterThan(0));
+
+      container.dispose();
     });
 
     test('persists state across notifier instances', () async {
@@ -140,13 +146,14 @@ void main() {
 
       // Second container
       final container2 = ProviderContainer();
-      addTearDown(container2.dispose);
 
       // Wait for initialization
       await Future.delayed(const Duration(milliseconds: 100));
 
       final notifier2 = container2.read(seenVideosProvider.notifier);
       expect(notifier2.hasSeenVideo(videoId), isTrue);
+
+      container2.dispose();
     });
   });
 }
