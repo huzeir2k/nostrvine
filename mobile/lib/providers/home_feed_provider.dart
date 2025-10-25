@@ -111,12 +111,24 @@ class HomeFeed extends _$HomeFeed {
 
     Log.info('🏠 HomeFeed: BUILD #$buildId watching socialProvider...', name: 'HomeFeedProvider', category: LogCategory.video);
 
-    // Watch ONLY the following pubkeys, not the entire social state
-    // This prevents rebuilds when social provider state changes (e.g., initialization)
-    // Only rebuild when the actual following list changes (follow/unfollow)
-    final followingPubkeys = ref.watch(
-      social.socialProvider.select((state) => state.followingPubkeys),
-    );
+    // Read social provider to get following list
+    // Use ref.read() instead of ref.watch() to avoid rebuilding on every social state change
+    // We'll use ref.listen() below to invalidate only when following list changes
+    final socialData = ref.read(social.socialProvider);
+    final followingPubkeys = socialData.followingPubkeys;
+
+    // Listen to social provider and invalidate ONLY when following list changes
+    ref.listen(social.socialProvider, (prev, next) {
+      // Only invalidate if the following list actually changed
+      if (prev?.followingPubkeys != next.followingPubkeys) {
+        Log.info(
+          '🏠 HomeFeed: Following list changed (${prev?.followingPubkeys.length ?? 0} → ${next.followingPubkeys.length}), invalidating...',
+          name: 'HomeFeedProvider',
+          category: LogCategory.video,
+        );
+        ref.invalidateSelf();
+      }
+    });
 
     Log.info(
       '🏠 HomeFeed: BUILD #$buildId - User is following ${followingPubkeys.length} people',
