@@ -545,28 +545,59 @@ class _ShareVideoMenuState extends ConsumerState<ShareVideoMenu> {
               final hasReported =
                   reportService.hasBeenReported(widget.video.id);
 
-              return Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  const Text(
-                    'Content Actions',
-                    style: TextStyle(
-                      color: VineTheme.whiteText,
-                      fontSize: 16,
-                      fontWeight: FontWeight.w600,
+              // Wrap in orange warning container
+              return Container(
+                padding: const EdgeInsets.all(12),
+                decoration: BoxDecoration(
+                  color: Colors.orange.withAlpha(26), // 0.1 opacity
+                  border: Border.all(
+                    color: Colors.orange.withAlpha(77), // 0.3 opacity
+                    width: 1,
+                  ),
+                  borderRadius: BorderRadius.circular(8),
+                ),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    const Text(
+                      'Safety Actions',
+                      style: TextStyle(
+                        color: VineTheme.whiteText,
+                        fontSize: 16,
+                        fontWeight: FontWeight.w600,
+                      ),
                     ),
-                  ),
-                  const SizedBox(height: 12),
-                  _buildActionTile(
-                    icon: hasReported ? Icons.flag : Icons.flag_outlined,
-                    title: hasReported ? 'Already Reported' : 'Report Content',
-                    subtitle: hasReported
-                        ? 'You have reported this content'
-                        : 'Report for policy violations',
-                    iconColor: hasReported ? Colors.red : Colors.orange,
-                    onTap: hasReported ? null : _showReportDialog,
-                  ),
-                ],
+                    const SizedBox(height: 12),
+                    _buildActionTile(
+                      icon: hasReported ? Icons.flag : Icons.flag_outlined,
+                      title: hasReported ? 'Already Reported' : 'Report Content',
+                      subtitle: hasReported
+                          ? 'You have reported this content'
+                          : 'Report for policy violations',
+                      iconColor: hasReported ? Colors.red : Colors.orange,
+                      onTap: hasReported ? null : _showReportDialog,
+                    ),
+                    // Add Block User action (only for other users' content)
+                    if (!_isUserOwnContent()) ...[
+                      const SizedBox(height: 8),
+                      Consumer(
+                        builder: (context, ref, _) {
+                          final blocklistService = ref.watch(contentBlocklistServiceProvider);
+                          final isBlocked = blocklistService.isBlocked(widget.video.pubkey);
+                          return _buildActionTile(
+                            icon: isBlocked ? Icons.block : Icons.block_outlined,
+                            title: isBlocked ? 'Unblock User' : 'Block @${widget.video.pubkey.substring(0, 8)}',
+                            subtitle: isBlocked
+                                ? 'Show content from this user'
+                                : 'Hide content from this user',
+                            iconColor: Colors.orange,
+                            onTap: () => _handleBlockUser(ref, isBlocked),
+                          );
+                        },
+                      ),
+                    ],
+                  ],
+                ),
               );
             },
             loading: () => const SizedBox.shrink(),
@@ -766,6 +797,55 @@ class _ShareVideoMenuState extends ConsumerState<ShareVideoMenu> {
     );
   }
 
+  void _handleBlockUser(WidgetRef ref, bool currentlyBlocked) {
+    final blocklistService = ref.read(contentBlocklistServiceProvider);
+
+    if (currentlyBlocked) {
+      // Unblock without confirmation
+      blocklistService.unblockUser(widget.video.pubkey);
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('User unblocked')),
+        );
+      }
+    } else {
+      // Block with confirmation
+      showDialog(
+        context: context,
+        builder: (context) => AlertDialog(
+          backgroundColor: VineTheme.cardBackground,
+          title: const Text(
+            'Block User?',
+            style: TextStyle(color: VineTheme.whiteText),
+          ),
+          content: const Text(
+            'You won\'t see their content in feeds. They won\'t be notified.',
+            style: TextStyle(color: Colors.grey),
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.of(context).pop(),
+              child: const Text('Cancel', style: TextStyle(color: Colors.grey)),
+            ),
+            TextButton(
+              onPressed: () {
+                blocklistService.blockUser(widget.video.pubkey);
+                Navigator.of(context).pop();
+                if (mounted) {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(content: Text('User blocked')),
+                  );
+                }
+              },
+              style: TextButton.styleFrom(foregroundColor: Colors.red),
+              child: const Text('Block'),
+            ),
+          ],
+        ),
+      );
+    }
+  }
+
   void _showReportDialog() {
     showDialog(
       context: context,
@@ -776,8 +856,10 @@ class _ShareVideoMenuState extends ConsumerState<ShareVideoMenu> {
   /// Check if this is the user's own content
   bool _isUserOwnContent() {
     try {
-      final nostrService = ref.read(nostrServiceProvider);
-      final userPubkey = nostrService.publicKey;
+      final authService = ref.read(authServiceProvider);
+      if (!authService.isAuthenticated) return false;
+
+      final userPubkey = authService.currentPublicKeyHex;
       if (userPubkey == null) return false;
 
       return widget.video.pubkey == userPubkey;
