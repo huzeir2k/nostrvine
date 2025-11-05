@@ -9,6 +9,7 @@ import 'package:openvine/screens/safety_settings_screen.dart';
 import 'package:openvine/services/content_blocklist_service.dart';
 import 'package:openvine/services/content_reporting_service.dart';
 import 'package:openvine/providers/app_providers.dart';
+import 'package:openvine/theme/vine_theme.dart';
 
 class MockContentBlocklistService extends Mock implements ContentBlocklistService {}
 class MockContentReportingService extends Mock implements ContentReportingService {}
@@ -34,8 +35,9 @@ void main() {
 
       return UncontrolledProviderScope(
         container: container,
-        child: const MaterialApp(
-          home: SafetySettingsScreen(),
+        child: MaterialApp(
+          theme: VineTheme.theme,
+          home: const SafetySettingsScreen(),
         ),
       );
     }
