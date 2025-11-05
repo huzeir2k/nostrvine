@@ -17,7 +17,9 @@ import 'package:openvine/screens/pure/universal_camera_screen_pure.dart';
 import 'package:openvine/screens/settings_screen.dart';
 import 'package:openvine/screens/video_detail_screen.dart';
 import 'package:openvine/screens/video_editor_screen.dart';
+import 'package:openvine/screens/welcome_screen.dart';
 import 'package:openvine/services/video_stop_navigator_observer.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 // Navigator keys for per-tab state preservation
 final _rootKey = GlobalKey<NavigatorState>(debugLabel: 'root');
@@ -59,8 +61,18 @@ final goRouterProvider = Provider<GoRouter>((ref) {
     navigatorKey: _rootKey,
     initialLocation: '/home/0',
     observers: [VideoStopNavigatorObserver()],
-    redirect: (context, state) {
+    redirect: (context, state) async {
       final location = state.matchedLocation;
+
+      // Check TOS acceptance first (before any other routes except /welcome)
+      if (!location.startsWith('/welcome')) {
+        final prefs = await SharedPreferences.getInstance();
+        final hasAcceptedTerms = prefs.getBool('age_verified_16_plus') ?? false;
+
+        if (!hasAcceptedTerms) {
+          return '/welcome';
+        }
+      }
 
       // Only redirect to explore on very first navigation if user follows nobody
       // After that, let users navigate to home freely (they'll see a message to follow people)
@@ -263,7 +275,11 @@ final goRouterProvider = Provider<GoRouter>((ref) {
         ],
       ),
 
-      // Non-tab routes outside the shell (camera/settings/editor/video)
+      // Non-tab routes outside the shell (camera/settings/editor/video/welcome)
+      GoRoute(
+        path: '/welcome',
+        builder: (_, __) => const WelcomeScreen(),
+      ),
       GoRoute(
         path: '/camera',
         builder: (_, __) => const UniversalCameraScreenPure(),

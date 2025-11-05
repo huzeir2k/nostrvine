@@ -11,6 +11,7 @@ import 'package:openvine/screens/profile_setup_screen.dart';
 import 'package:openvine/theme/vine_theme.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:url_launcher/url_launcher.dart';
+import 'package:go_router/go_router.dart';
 
 class WelcomeScreen extends ConsumerStatefulWidget {
   const WelcomeScreen({super.key});
@@ -22,9 +23,14 @@ class WelcomeScreen extends ConsumerStatefulWidget {
 class _WelcomeScreenState extends ConsumerState<WelcomeScreen> {
   bool _isOver16 = false;
   bool _agreedToTerms = false;
+  bool _isAccepting = false;
 
   @override
-  Widget build(BuildContext context) => Scaffold(
+  Widget build(BuildContext context) {
+    final authService = ref.watch(authServiceProvider);
+    final isAuthenticated = authService.isAuthenticated;
+
+    return Scaffold(
         backgroundColor: Colors.black,
         body: SafeArea(
           child: SingleChildScrollView(
@@ -65,52 +71,91 @@ class _WelcomeScreenState extends ConsumerState<WelcomeScreen> {
                 const SizedBox(height: 32),
 
                 // Main action buttons
-                SizedBox(
-                  width: double.infinity,
-                  child: ElevatedButton(
-                    onPressed: _canProceed
-                        ? () => _createNewIdentity(context, ref)
-                        : null,
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: VineTheme.vineGreen,
-                      foregroundColor: Colors.white,
-                      disabledBackgroundColor: Colors.grey[800],
-                      disabledForegroundColor: Colors.grey[600],
-                      padding: const EdgeInsets.symmetric(vertical: 16),
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(12),
+                if (isAuthenticated)
+                  // If already authenticated, just show Continue button
+                  SizedBox(
+                    width: double.infinity,
+                    child: ElevatedButton(
+                      onPressed: _canProceed && !_isAccepting
+                          ? () => _acceptTermsAndContinue(context)
+                          : null,
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: VineTheme.vineGreen,
+                        foregroundColor: Colors.white,
+                        disabledBackgroundColor: Colors.grey[800],
+                        disabledForegroundColor: Colors.grey[600],
+                        padding: const EdgeInsets.symmetric(vertical: 16),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(12),
+                        ),
+                      ),
+                      child: _isAccepting
+                          ? const SizedBox(
+                              height: 20,
+                              width: 20,
+                              child: CircularProgressIndicator(
+                                color: Colors.white,
+                                strokeWidth: 2,
+                              ),
+                            )
+                          : const Text(
+                              'Continue',
+                              style: TextStyle(
+                                  fontSize: 18, fontWeight: FontWeight.w600),
+                            ),
+                    ),
+                  )
+                else ...[
+                  // If not authenticated, show identity creation/import options
+                  SizedBox(
+                    width: double.infinity,
+                    child: ElevatedButton(
+                      onPressed: _canProceed
+                          ? () => _createNewIdentity(context, ref)
+                          : null,
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: VineTheme.vineGreen,
+                        foregroundColor: Colors.white,
+                        disabledBackgroundColor: Colors.grey[800],
+                        disabledForegroundColor: Colors.grey[600],
+                        padding: const EdgeInsets.symmetric(vertical: 16),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(12),
+                        ),
+                      ),
+                      child: const Text(
+                        'Create New Identity',
+                        style: TextStyle(
+                            fontSize: 18, fontWeight: FontWeight.w600),
                       ),
                     ),
-                    child: const Text(
-                      'Create New Identity',
-                      style:
-                          TextStyle(fontSize: 18, fontWeight: FontWeight.w600),
-                    ),
                   ),
-                ),
-                const SizedBox(height: 16),
-                SizedBox(
-                  width: double.infinity,
-                  child: OutlinedButton(
-                    onPressed:
-                        _canProceed ? () => _importExistingIdentity(context) : null,
-                    style: OutlinedButton.styleFrom(
-                      foregroundColor: Colors.white,
-                      disabledForegroundColor: Colors.grey[600],
-                      side: BorderSide(
-                          color: _canProceed ? Colors.white : Colors.grey[800]!),
-                      padding: const EdgeInsets.symmetric(vertical: 16),
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(12),
+                  const SizedBox(height: 16),
+                  SizedBox(
+                    width: double.infinity,
+                    child: OutlinedButton(
+                      onPressed: _canProceed
+                          ? () => _importExistingIdentity(context)
+                          : null,
+                      style: OutlinedButton.styleFrom(
+                        foregroundColor: Colors.white,
+                        disabledForegroundColor: Colors.grey[600],
+                        side: BorderSide(
+                            color:
+                                _canProceed ? Colors.white : Colors.grey[800]!),
+                        padding: const EdgeInsets.symmetric(vertical: 16),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(12),
+                        ),
+                      ),
+                      child: const Text(
+                        'Import Existing Identity',
+                        style: TextStyle(
+                            fontSize: 18, fontWeight: FontWeight.w600),
                       ),
                     ),
-                    child: const Text(
-                      'Import Existing Identity',
-                      style:
-                          TextStyle(fontSize: 18, fontWeight: FontWeight.w600),
-                    ),
                   ),
-                ),
+                ],
                 const SizedBox(height: 32),
 
                 // Educational content
@@ -154,6 +199,7 @@ class _WelcomeScreenState extends ConsumerState<WelcomeScreen> {
           ),
         ),
       );
+  }
 
   Widget _buildCheckboxSection() => Container(
         padding: const EdgeInsets.all(16),
@@ -316,5 +362,23 @@ class _WelcomeScreenState extends ConsumerState<WelcomeScreen> {
     final prefs = await SharedPreferences.getInstance();
     await prefs.setString('terms_accepted_at', DateTime.now().toIso8601String());
     await prefs.setBool('age_verified_16_plus', true);
+  }
+
+  Future<void> _acceptTermsAndContinue(BuildContext context) async {
+    setState(() => _isAccepting = true);
+
+    try {
+      // Store terms acceptance
+      await _storeTermsAcceptance();
+
+      if (context.mounted) {
+        // Navigate to home
+        context.go('/home/0');
+      }
+    } finally {
+      if (mounted) {
+        setState(() => _isAccepting = false);
+      }
+    }
   }
 }
