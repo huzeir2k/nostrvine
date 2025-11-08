@@ -18,7 +18,8 @@ import 'package:openvine/screens/pure/video_metadata_screen_pure.dart';
 import 'package:openvine/services/camera/native_macos_camera.dart';
 import 'package:openvine/theme/vine_theme.dart';
 import 'package:openvine/utils/unified_logger.dart';
-import 'package:openvine/widgets/macos_camera_preview.dart' show CameraPreviewPlaceholder;
+import 'package:openvine/widgets/macos_camera_preview.dart'
+    show CameraPreviewPlaceholder;
 import 'package:openvine/widgets/camera_controls_overlay.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -28,10 +29,13 @@ class UniversalCameraScreenPure extends ConsumerStatefulWidget {
   const UniversalCameraScreenPure({super.key});
 
   @override
-  ConsumerState<UniversalCameraScreenPure> createState() => _UniversalCameraScreenPureState();
+  ConsumerState<UniversalCameraScreenPure> createState() =>
+      _UniversalCameraScreenPureState();
 }
 
-class _UniversalCameraScreenPureState extends ConsumerState<UniversalCameraScreenPure> with WidgetsBindingObserver {
+class _UniversalCameraScreenPureState
+    extends ConsumerState<UniversalCameraScreenPure>
+    with WidgetsBindingObserver {
   String? _errorMessage;
   bool _isProcessing = false;
   bool _permissionDenied = false;
@@ -56,13 +60,22 @@ class _UniversalCameraScreenPureState extends ConsumerState<UniversalCameraScree
       try {
         // Force dispose all video controllers (this also clears active video)
         disposeAllVideoControllers(ref);
-        Log.info('🗑️ UniversalCameraScreenPure: Disposed all video controllers', category: LogCategory.video);
+        Log.info(
+          '🗑️ UniversalCameraScreenPure: Disposed all video controllers',
+          category: LogCategory.video,
+        );
       } catch (e) {
-        Log.warning('📹 Failed to dispose video controllers: $e', category: LogCategory.video);
+        Log.warning(
+          '📹 Failed to dispose video controllers: $e',
+          category: LogCategory.video,
+        );
       }
     });
 
-    Log.info('📹 UniversalCameraScreenPure: Initialized', category: LogCategory.video);
+    Log.info(
+      '📹 UniversalCameraScreenPure: Initialized',
+      category: LogCategory.video,
+    );
   }
 
   @override
@@ -73,7 +86,10 @@ class _UniversalCameraScreenPureState extends ConsumerState<UniversalCameraScree
     // Provider handles disposal automatically
     super.dispose();
 
-    Log.info('📹 UniversalCameraScreenPure: Disposed', category: LogCategory.video);
+    Log.info(
+      '📹 UniversalCameraScreenPure: Disposed',
+      category: LogCategory.video,
+    );
   }
 
   @override
@@ -82,7 +98,10 @@ class _UniversalCameraScreenPureState extends ConsumerState<UniversalCameraScree
 
     // When app resumes, re-check permissions in case user granted them in Settings
     if (state == AppLifecycleState.resumed && _permissionDenied) {
-      Log.info('📹 App resumed, re-checking permissions', category: LogCategory.video);
+      Log.info(
+        '📹 App resumed, re-checking permissions',
+        category: LogCategory.video,
+      );
       _recheckPermissions();
     }
   }
@@ -93,7 +112,10 @@ class _UniversalCameraScreenPureState extends ConsumerState<UniversalCameraScree
       if (Platform.isMacOS) {
         final hasPermission = await NativeMacOSCamera.hasPermission();
         if (hasPermission && mounted) {
-          Log.info('📹 macOS permission now granted, initializing camera', category: LogCategory.video);
+          Log.info(
+            '📹 macOS permission now granted, initializing camera',
+            category: LogCategory.video,
+          );
           setState(() {
             _permissionDenied = false;
           });
@@ -104,8 +126,10 @@ class _UniversalCameraScreenPureState extends ConsumerState<UniversalCameraScree
         // Even calling .request() again returns the stale cached status
         // SOLUTION: Attempt camera initialization directly, bypassing permission_handler
         // The actual AVCaptureDevice will fail if permissions aren't granted
-        Log.info('📹 Bypassing permission_handler cache, attempting camera initialization',
-            category: LogCategory.video);
+        Log.info(
+          '📹 Bypassing permission_handler cache, attempting camera initialization',
+          category: LogCategory.video,
+        );
 
         setState(() {
           _permissionDenied = false;
@@ -115,14 +139,25 @@ class _UniversalCameraScreenPureState extends ConsumerState<UniversalCameraScree
         // and error handling will show permission screen again
         try {
           await ref.read(vineRecordingProvider.notifier).initialize();
-          Log.info('📹 Camera initialized successfully - permissions were granted', category: LogCategory.video);
+          Log.info(
+            '📹 Camera initialized successfully - permissions were granted',
+            category: LogCategory.video,
+          );
         } catch (e) {
-          Log.error('📹 Camera initialization failed: $e', category: LogCategory.video);
+          Log.error(
+            '📹 Camera initialization failed: $e',
+            category: LogCategory.video,
+          );
           if (mounted) {
             // Check if it's a permission error
             final errorStr = e.toString().toLowerCase();
-            if (errorStr.contains('permission') || errorStr.contains('denied') || errorStr.contains('authorized')) {
-              Log.warning('📹 Still no camera permissions - showing permission screen', category: LogCategory.video);
+            if (errorStr.contains('permission') ||
+                errorStr.contains('denied') ||
+                errorStr.contains('authorized')) {
+              Log.warning(
+                '📹 Still no camera permissions - showing permission screen',
+                category: LogCategory.video,
+              );
               setState(() {
                 _permissionDenied = true;
               });
@@ -136,7 +171,10 @@ class _UniversalCameraScreenPureState extends ConsumerState<UniversalCameraScree
         }
       }
     } catch (e) {
-      Log.error('📹 Failed to recheck permissions: $e', category: LogCategory.video);
+      Log.error(
+        '📹 Failed to recheck permissions: $e',
+        category: LogCategory.video,
+      );
     }
   }
 
@@ -155,18 +193,33 @@ class _UniversalCameraScreenPureState extends ConsumerState<UniversalCameraScree
       // Check platform and request permissions if needed
       if (Platform.isMacOS) {
         // macOS uses native platform channel
-        Log.info('📹 Checking macOS camera permission status', category: LogCategory.video);
+        Log.info(
+          '📹 Checking macOS camera permission status',
+          category: LogCategory.video,
+        );
 
         final hasPermission = await NativeMacOSCamera.hasPermission();
-        Log.info('📹 macOS camera permission status: $hasPermission', category: LogCategory.video);
+        Log.info(
+          '📹 macOS camera permission status: $hasPermission',
+          category: LogCategory.video,
+        );
 
         if (!hasPermission) {
-          Log.info('📹 Requesting macOS camera permission from user', category: LogCategory.video);
+          Log.info(
+            '📹 Requesting macOS camera permission from user',
+            category: LogCategory.video,
+          );
           final granted = await NativeMacOSCamera.requestPermission();
-          Log.info('📹 macOS camera permission request result: $granted', category: LogCategory.video);
+          Log.info(
+            '📹 macOS camera permission request result: $granted',
+            category: LogCategory.video,
+          );
 
           if (!granted) {
-            Log.warning('📹 macOS camera permission denied by user', category: LogCategory.video);
+            Log.warning(
+              '📹 macOS camera permission denied by user',
+              category: LogCategory.video,
+            );
             if (mounted) {
               setState(() {
                 _permissionDenied = true;
@@ -175,26 +228,43 @@ class _UniversalCameraScreenPureState extends ConsumerState<UniversalCameraScree
             return;
           }
 
-          Log.info('📹 macOS camera permission granted, proceeding with initialization', category: LogCategory.video);
+          Log.info(
+            '📹 macOS camera permission granted, proceeding with initialization',
+            category: LogCategory.video,
+          );
         } else {
-          Log.info('📹 macOS camera permission already granted, proceeding with initialization', category: LogCategory.video);
+          Log.info(
+            '📹 macOS camera permission already granted, proceeding with initialization',
+            category: LogCategory.video,
+          );
         }
       } else if (Platform.isIOS || Platform.isAndroid) {
         // iOS: permission_handler has caching issues - bypass it entirely
         // Try to initialize camera directly, let native AVFoundation check permissions
-        Log.info('📹 Bypassing permission_handler, attempting camera initialization directly', category: LogCategory.video);
+        Log.info(
+          '📹 Bypassing permission_handler, attempting camera initialization directly',
+          category: LogCategory.video,
+        );
 
         try {
           // Initialize the recording service - will fail if permissions not granted
           await ref.read(vineRecordingProvider.notifier).initialize();
-          Log.info('📹 Recording service initialized successfully', category: LogCategory.video);
+          Log.info(
+            '📹 Recording service initialized successfully',
+            category: LogCategory.video,
+          );
           return; // Success - exit early
         } catch (e) {
           final errorStr = e.toString().toLowerCase();
 
           // Check if it's a permission error
-          if (errorStr.contains('permission') || errorStr.contains('denied') || errorStr.contains('authorized')) {
-            Log.info('📹 Camera initialization failed due to permissions, requesting permissions', category: LogCategory.video);
+          if (errorStr.contains('permission') ||
+              errorStr.contains('denied') ||
+              errorStr.contains('authorized')) {
+            Log.info(
+              '📹 Camera initialization failed due to permissions, requesting permissions',
+              category: LogCategory.video,
+            );
 
             // Request permissions
             final Map<Permission, PermissionStatus> statuses = await [
@@ -202,14 +272,21 @@ class _UniversalCameraScreenPureState extends ConsumerState<UniversalCameraScree
               Permission.microphone,
             ].request();
 
-            final cameraGranted = statuses[Permission.camera]?.isGranted ?? false;
-            final microphoneGranted = statuses[Permission.microphone]?.isGranted ?? false;
+            final cameraGranted =
+                statuses[Permission.camera]?.isGranted ?? false;
+            final microphoneGranted =
+                statuses[Permission.microphone]?.isGranted ?? false;
 
-            Log.info('📹 Permission request results - Camera: $cameraGranted, Microphone: $microphoneGranted',
-                category: LogCategory.video);
+            Log.info(
+              '📹 Permission request results - Camera: $cameraGranted, Microphone: $microphoneGranted',
+              category: LogCategory.video,
+            );
 
             if (!cameraGranted || !microphoneGranted) {
-              Log.warning('📹 Permissions denied by user', category: LogCategory.video);
+              Log.warning(
+                '📹 Permissions denied by user',
+                category: LogCategory.video,
+              );
               if (mounted) {
                 setState(() {
                   _permissionDenied = true;
@@ -221,10 +298,16 @@ class _UniversalCameraScreenPureState extends ConsumerState<UniversalCameraScree
             // Try initializing again after granting permissions
             try {
               await ref.read(vineRecordingProvider.notifier).initialize();
-              Log.info('📹 Recording service initialized after permission grant', category: LogCategory.video);
+              Log.info(
+                '📹 Recording service initialized after permission grant',
+                category: LogCategory.video,
+              );
               return;
             } catch (retryError) {
-              Log.error('📹 Failed to initialize even after granting permissions: $retryError', category: LogCategory.video);
+              Log.error(
+                '📹 Failed to initialize even after granting permissions: $retryError',
+                category: LogCategory.video,
+              );
               if (mounted) {
                 setState(() {
                   _errorMessage = 'Failed to initialize camera: $retryError';
@@ -234,7 +317,10 @@ class _UniversalCameraScreenPureState extends ConsumerState<UniversalCameraScree
             }
           } else {
             // Some other error
-            Log.error('📹 Camera initialization failed: $e', category: LogCategory.video);
+            Log.error(
+              '📹 Camera initialization failed: $e',
+              category: LogCategory.video,
+            );
             if (mounted) {
               setState(() {
                 _errorMessage = 'Failed to initialize camera: $e';
@@ -246,17 +332,26 @@ class _UniversalCameraScreenPureState extends ConsumerState<UniversalCameraScree
       }
 
       // macOS path continues here
-      Log.info('📹 Initializing recording service', category: LogCategory.video);
+      Log.info(
+        '📹 Initializing recording service',
+        category: LogCategory.video,
+      );
       await ref.read(vineRecordingProvider.notifier).initialize();
-      Log.info('📹 Recording service initialized successfully', category: LogCategory.video);
+      Log.info(
+        '📹 Recording service initialized successfully',
+        category: LogCategory.video,
+      );
     } catch (e) {
-      Log.error('📹 UniversalCameraScreenPure: Failed to initialize recording: $e',
-          category: LogCategory.video);
+      Log.error(
+        '📹 UniversalCameraScreenPure: Failed to initialize recording: $e',
+        category: LogCategory.video,
+      );
 
       if (mounted) {
         // Check if it's a permission error
         final errorStr = e.toString();
-        if (errorStr.contains('PERMISSION_DENIED') || errorStr.contains('permission')) {
+        if (errorStr.contains('PERMISSION_DENIED') ||
+            errorStr.contains('permission')) {
           setState(() {
             _permissionDenied = true;
           });
@@ -312,10 +407,7 @@ class _UniversalCameraScreenPureState extends ConsumerState<UniversalCameraScree
                 },
                 child: const Text(
                   'Drafts',
-                  style: TextStyle(
-                    color: Colors.white,
-                    fontSize: 16,
-                  ),
+                  style: TextStyle(color: Colors.white, fontSize: 16),
                 ),
               );
             },
@@ -325,27 +417,32 @@ class _UniversalCameraScreenPureState extends ConsumerState<UniversalCameraScree
             builder: (context, ref, child) {
               final recordingState = ref.watch(vineRecordingProvider);
               return Container(
-                padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 12,
+                  vertical: 6,
+                ),
                 margin: const EdgeInsets.only(right: 8),
                 decoration: BoxDecoration(
                   color: recordingState.isRecording
-                    ? Colors.red.withValues(alpha: 0.7)
-                    : Colors.black.withValues(alpha: 0.3),
+                      ? Colors.red.withValues(alpha: 0.7)
+                      : Colors.black.withValues(alpha: 0.3),
                   borderRadius: BorderRadius.circular(16),
                 ),
                 child: Row(
                   mainAxisSize: MainAxisSize.min,
                   children: [
                     Icon(
-                      recordingState.isRecording ? Icons.fiber_manual_record : Icons.videocam,
+                      recordingState.isRecording
+                          ? Icons.fiber_manual_record
+                          : Icons.videocam,
                       color: Colors.white,
                       size: 16,
                     ),
                     const SizedBox(width: 4),
                     Text(
                       recordingState.isRecording
-                        ? _formatDuration(recordingState.recordingDuration)
-                        : 'Ready',
+                          ? _formatDuration(recordingState.recordingDuration)
+                          : 'Ready',
                       style: const TextStyle(
                         color: Colors.white,
                         fontSize: 12,
@@ -364,16 +461,39 @@ class _UniversalCameraScreenPureState extends ConsumerState<UniversalCameraScree
           final recordingState = ref.watch(vineRecordingProvider);
 
           // Listen for auto-stop (when recording stops without user action)
-          ref.listen<VineRecordingUIState>(vineRecordingProvider, (previous, next) {
-            if (previous != null && previous.isRecording && !next.isRecording && !_isProcessing) {
-              // Recording stopped automatically - check if it was max duration or an error
+          ref.listen<VineRecordingUIState>(vineRecordingProvider, (
+            previous,
+            next,
+          ) {
+            if (previous != null &&
+                previous.isRecording &&
+                !next.isRecording &&
+                !_isProcessing) {
+              // Recording stopped - check if it was max duration, manual stop, or error
               if (next.hasSegments) {
-                // Has segments = legitimate max duration stop
-                Log.info('📹 Recording auto-stopped at max duration', category: LogCategory.video);
-                _handleRecordingAutoStop();
+                // Check if this was an auto-stop due to max duration (remaining time near zero)
+                // vs. manual segment stop (remaining time > 1 second)
+                if (next.remainingDuration.inSeconds <= 1) {
+                  // Has segments + no remaining time = legitimate max duration auto-stop
+                  Log.info(
+                    '📹 Recording auto-stopped at max duration',
+                    category: LogCategory.video,
+                  );
+                  _handleRecordingAutoStop();
+                } else {
+                  // Has segments + time remaining = manual segment stop (user released button)
+                  Log.debug(
+                    '📹 Manual segment stop (${next.remainingDuration.inSeconds}s remaining)',
+                    category: LogCategory.video,
+                  );
+                  // Don't show "max time reached" message for manual stops
+                }
               } else {
                 // No segments = recording failure
-                Log.warning('📹 Recording stopped due to error (no segments)', category: LogCategory.video);
+                Log.warning(
+                  '📹 Recording stopped due to error (no segments)',
+                  category: LogCategory.video,
+                );
                 _handleRecordingFailure();
               }
             }
@@ -405,17 +525,16 @@ class _UniversalCameraScreenPureState extends ConsumerState<UniversalCameraScree
               Positioned.fill(
                 child: Center(
                   child: AspectRatio(
-                    aspectRatio: recordingState.aspectRatio == vine.AspectRatio.square
-                      ? 1.0
-                      : 9.0 / 16.0,
+                    aspectRatio:
+                        recordingState.aspectRatio == vine.AspectRatio.square
+                        ? 1.0
+                        : 9.0 / 16.0,
                     child: ClipRect(
                       child: Stack(
                         children: [
-                          // Preview widget scaled to fill container
+                          // Preview widget
                           if (recordingState.isInitialized)
-                            SizedBox.expand(
-                              child: ref.read(vineRecordingProvider.notifier).previewWidget,
-                            )
+                            ref.read(vineRecordingProvider.notifier).previewWidget
                           else
                             CameraPreviewPlaceholder(
                               isRecording: recordingState.isRecording,
@@ -425,11 +544,14 @@ class _UniversalCameraScreenPureState extends ConsumerState<UniversalCameraScree
                           if (recordingState.isInitialized)
                             Consumer(
                               builder: (context, ref, child) {
-                                final cameraInterface = ref.read(vineRecordingProvider.notifier).cameraInterface;
+                                final cameraInterface = ref
+                                    .read(vineRecordingProvider.notifier)
+                                    .cameraInterface;
                                 if (cameraInterface != null) {
                                   return CameraControlsOverlay(
                                     cameraInterface: cameraInterface,
-                                    recordingState: recordingState.recordingState,
+                                    recordingState:
+                                        recordingState.recordingState,
                                   );
                                 }
                                 return const SizedBox.shrink();
@@ -525,7 +647,10 @@ class _UniversalCameraScreenPureState extends ConsumerState<UniversalCameraScree
           icon: const Icon(Icons.arrow_back, color: Colors.white),
           onPressed: () => Navigator.of(context).pop(),
         ),
-        title: const Text('Camera Permission', style: TextStyle(color: Colors.white)),
+        title: const Text(
+          'Camera Permission',
+          style: TextStyle(color: Colors.white),
+        ),
       ),
       body: Center(
         child: Padding(
@@ -533,11 +658,7 @@ class _UniversalCameraScreenPureState extends ConsumerState<UniversalCameraScree
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              const Icon(
-                Icons.videocam_off,
-                size: 64,
-                color: Colors.orange,
-              ),
+              const Icon(Icons.videocam_off, size: 64, color: Colors.orange),
               const SizedBox(height: 16),
               const Text(
                 'Camera Permission Required',
@@ -550,10 +671,7 @@ class _UniversalCameraScreenPureState extends ConsumerState<UniversalCameraScree
               const SizedBox(height: 8),
               const Text(
                 'diVine needs access to your camera to record videos. Please grant camera permission in System Settings.',
-                style: TextStyle(
-                  color: Colors.grey,
-                  fontSize: 14,
-                ),
+                style: TextStyle(color: Colors.grey, fontSize: 14),
                 textAlign: TextAlign.center,
               ),
               const SizedBox(height: 32),
@@ -561,7 +679,10 @@ class _UniversalCameraScreenPureState extends ConsumerState<UniversalCameraScree
                 onPressed: _openSystemSettings,
                 style: ElevatedButton.styleFrom(
                   backgroundColor: VineTheme.vineGreen,
-                  padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 24,
+                    vertical: 12,
+                  ),
                 ),
                 icon: const Icon(Icons.settings),
                 label: const Text('Open System Settings'),
@@ -600,7 +721,10 @@ class _UniversalCameraScreenPureState extends ConsumerState<UniversalCameraScree
           icon: const Icon(Icons.arrow_back, color: Colors.white),
           onPressed: () => Navigator.of(context).pop(),
         ),
-        title: const Text('Camera Error', style: TextStyle(color: Colors.white)),
+        title: const Text(
+          'Camera Error',
+          style: TextStyle(color: Colors.white),
+        ),
       ),
       body: Center(
         child: Padding(
@@ -608,11 +732,7 @@ class _UniversalCameraScreenPureState extends ConsumerState<UniversalCameraScree
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              const Icon(
-                Icons.error_outline,
-                size: 64,
-                color: Colors.red,
-              ),
+              const Icon(Icons.error_outline, size: 64, color: Colors.red),
               const SizedBox(height: 16),
               const Text(
                 'Camera Error',
@@ -625,10 +745,7 @@ class _UniversalCameraScreenPureState extends ConsumerState<UniversalCameraScree
               const SizedBox(height: 8),
               Text(
                 message,
-                style: const TextStyle(
-                  color: Colors.grey,
-                  fontSize: 14,
-                ),
+                style: const TextStyle(color: Colors.grey, fontSize: 14),
                 textAlign: TextAlign.center,
               ),
               const SizedBox(height: 24),
@@ -664,11 +781,7 @@ class _UniversalCameraScreenPureState extends ConsumerState<UniversalCameraScree
             child: Row(
               mainAxisSize: MainAxisSize.min,
               children: [
-                Icon(
-                  Icons.verified_user,
-                  color: Colors.white,
-                  size: 16,
-                ),
+                Icon(Icons.verified_user, color: Colors.white, size: 16),
                 const SizedBox(width: 6),
                 Text(
                   'ProofMode Active',
@@ -715,73 +828,88 @@ class _UniversalCameraScreenPureState extends ConsumerState<UniversalCameraScree
         Row(
           mainAxisAlignment: MainAxisAlignment.spaceEvenly,
           children: [
-        // Cancel/Back button (when idle) OR Publish button (when has segments)
-        IconButton(
-          onPressed: recordingState.hasSegments
-            ? () {
-                // Finish and publish
-                Log.info('📹 Publish button pressed', category: LogCategory.video);
-                _finishRecording();
-              }
-            : () {
-                Navigator.of(context).pop();
-              },
-          icon: Icon(
-            recordingState.hasSegments ? Icons.check_circle : Icons.close,
-            color: recordingState.hasSegments ? VineTheme.vineGreen : Colors.white,
-            size: recordingState.hasSegments ? 40 : 32,
-          ),
-          tooltip: recordingState.hasSegments ? 'Publish video' : 'Cancel',
-        ),
+            // Cancel/Back button (when idle) OR Publish button (when has segments)
+            IconButton(
+              onPressed: recordingState.hasSegments
+                  ? () {
+                      // Finish and publish
+                      Log.info(
+                        '📹 Publish button pressed',
+                        category: LogCategory.video,
+                      );
+                      _finishRecording();
+                    }
+                  : () {
+                      Navigator.of(context).pop();
+                    },
+              icon: Icon(
+                recordingState.hasSegments ? Icons.check_circle : Icons.close,
+                color: recordingState.hasSegments
+                    ? VineTheme.vineGreen
+                    : Colors.white,
+                size: recordingState.hasSegments ? 40 : 32,
+              ),
+              tooltip: recordingState.hasSegments ? 'Publish video' : 'Cancel',
+            ),
 
-        // Record button - Platform-specific interaction
-        // Web: Tap to start/stop (single continuous recording)
-        // Mobile: Press-and-hold to record, release to pause (segmented)
-        GestureDetector(
-          onTap: kIsWeb ? _toggleRecordingWeb : null,
-          onTapDown: !kIsWeb && recordingState.canRecord ? (_) => _startRecording() : null,
-          onTapUp: !kIsWeb && recordingState.isRecording ? (_) => _stopRecording() : null,
-          onTapCancel: !kIsWeb && recordingState.isRecording ? () => _stopRecording() : null,
-          child: Container(
-            width: 80,
-            height: 80,
-            decoration: BoxDecoration(
-              shape: BoxShape.circle,
-              color: recordingState.isRecording ? Colors.red : Colors.white,
-              border: Border.all(
-                color: recordingState.isRecording ? Colors.white : Colors.grey,
-                width: 4,
+            // Record button - Platform-specific interaction
+            // Web: Tap to start/stop (single continuous recording)
+            // Mobile: Press-and-hold to record, release to pause (segmented)
+            GestureDetector(
+              onTap: kIsWeb ? _toggleRecordingWeb : null,
+              onTapDown: !kIsWeb && recordingState.canRecord
+                  ? (_) => _startRecording()
+                  : null,
+              onTapUp: !kIsWeb && recordingState.isRecording
+                  ? (_) => _stopRecording()
+                  : null,
+              onTapCancel: !kIsWeb && recordingState.isRecording
+                  ? () => _stopRecording()
+                  : null,
+              child: Container(
+                width: 80,
+                height: 80,
+                decoration: BoxDecoration(
+                  shape: BoxShape.circle,
+                  color: recordingState.isRecording ? Colors.red : Colors.white,
+                  border: Border.all(
+                    color: recordingState.isRecording
+                        ? Colors.white
+                        : Colors.grey,
+                    width: 4,
+                  ),
+                ),
+                child: recordingState.isRecording
+                    ? Center(
+                        child: Text(
+                          _formatDuration(recordingState.recordingDuration),
+                          style: const TextStyle(
+                            color: Colors.white,
+                            fontSize: 16,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                      )
+                    : const Icon(
+                        Icons.fiber_manual_record,
+                        color: Colors.red,
+                        size: 32,
+                      ),
               ),
             ),
-            child: recordingState.isRecording
-              ? Center(
-                  child: Text(
-                    _formatDuration(recordingState.recordingDuration),
-                    style: const TextStyle(
-                      color: Colors.white,
-                      fontSize: 16,
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
-                )
-              : const Icon(
-                  Icons.fiber_manual_record,
-                  color: Colors.red,
+
+            // Switch camera button - only show if multiple cameras available
+            if (recordingState.canSwitchCamera)
+              IconButton(
+                onPressed: recordingState.isRecording ? null : _switchCamera,
+                icon: Icon(
+                  Icons.flip_camera_ios,
+                  color: recordingState.isRecording
+                      ? Colors.grey
+                      : Colors.white,
                   size: 32,
                 ),
-          ),
-        ),
-
-        // Switch camera button - only show if multiple cameras available
-        if (recordingState.canSwitchCamera)
-          IconButton(
-            onPressed: recordingState.isRecording ? null : _switchCamera,
-            icon: Icon(
-              Icons.flip_camera_ios,
-              color: recordingState.isRecording ? Colors.grey : Colors.white,
-              size: 32,
-            ),
-          ),
+              ),
           ],
         ),
       ],
@@ -794,21 +922,13 @@ class _UniversalCameraScreenPureState extends ConsumerState<UniversalCameraScree
         // Flash toggle
         IconButton(
           onPressed: _toggleFlash,
-          icon: Icon(
-            _getFlashIcon(),
-            color: Colors.white,
-            size: 28,
-          ),
+          icon: Icon(_getFlashIcon(), color: Colors.white, size: 28),
         ),
         const SizedBox(height: 8),
         // Timer toggle
         IconButton(
           onPressed: _toggleTimer,
-          icon: Icon(
-            _getTimerIcon(),
-            color: Colors.white,
-            size: 28,
-          ),
+          icon: Icon(_getTimerIcon(), color: Colors.white, size: 28),
         ),
         const SizedBox(height: 8),
         // Aspect ratio toggle
@@ -826,17 +946,23 @@ class _UniversalCameraScreenPureState extends ConsumerState<UniversalCameraScree
       child: IconButton(
         icon: Icon(
           recordingState.aspectRatio == vine.AspectRatio.square
-            ? Icons.crop_square  // Square icon for 1:1
-            : Icons.crop_portrait, // Portrait icon for 9:16
+              ? Icons
+                    .crop_square // Square icon for 1:1
+              : Icons.crop_portrait, // Portrait icon for 9:16
           color: Colors.white,
           size: 28,
         ),
-        onPressed: recordingState.isRecording ? null : () {
-          final newRatio = recordingState.aspectRatio == vine.AspectRatio.square
-            ? vine.AspectRatio.vertical
-            : vine.AspectRatio.square;
-          ref.read(vineRecordingProvider.notifier).setAspectRatio(newRatio);
-        },
+        onPressed: recordingState.isRecording
+            ? null
+            : () {
+                final newRatio =
+                    recordingState.aspectRatio == vine.AspectRatio.square
+                    ? vine.AspectRatio.vertical
+                    : vine.AspectRatio.square;
+                ref
+                    .read(vineRecordingProvider.notifier)
+                    .setAspectRatio(newRatio);
+              },
       ),
     );
   }
@@ -889,8 +1015,10 @@ class _UniversalCameraScreenPureState extends ConsumerState<UniversalCameraScree
       Log.info('📹 Starting recording segment', category: LogCategory.video);
       await notifier.startRecording();
     } catch (e) {
-      Log.error('📹 UniversalCameraScreenPure: Start recording failed: $e',
-          category: LogCategory.video);
+      Log.error(
+        '📹 UniversalCameraScreenPure: Start recording failed: $e',
+        category: LogCategory.video,
+      );
 
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
@@ -930,8 +1058,10 @@ class _UniversalCameraScreenPureState extends ConsumerState<UniversalCameraScree
       await notifier.stopRecording();
       // Don't process here - wait for user to press publish button
     } catch (e) {
-      Log.error('📹 UniversalCameraScreenPure: Stop recording failed: $e',
-          category: LogCategory.video);
+      Log.error(
+        '📹 UniversalCameraScreenPure: Stop recording failed: $e',
+        category: LogCategory.video,
+      );
 
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
@@ -947,20 +1077,30 @@ class _UniversalCameraScreenPureState extends ConsumerState<UniversalCameraScree
   void _finishRecording() async {
     try {
       final notifier = ref.read(vineRecordingProvider.notifier);
-      Log.info('📹 Finishing recording and concatenating segments', category: LogCategory.video);
+      Log.info(
+        '📹 Finishing recording and concatenating segments',
+        category: LogCategory.video,
+      );
 
       final (videoFile, proofManifest) = await notifier.finishRecording();
-      Log.info('📹 Recording finished, video: ${videoFile?.path}, proof: ${proofManifest != null}',
-          category: LogCategory.video);
+      Log.info(
+        '📹 Recording finished, video: ${videoFile?.path}, proof: ${proofManifest != null}',
+        category: LogCategory.video,
+      );
 
       if (videoFile != null && mounted) {
         _processRecording(videoFile, proofManifest);
       } else {
-        Log.warning('📹 No file returned from finishRecording', category: LogCategory.video);
+        Log.warning(
+          '📹 No file returned from finishRecording',
+          category: LogCategory.video,
+        );
       }
     } catch (e) {
-      Log.error('📹 UniversalCameraScreenPure: Finish recording failed: $e',
-          category: LogCategory.video);
+      Log.error(
+        '📹 UniversalCameraScreenPure: Finish recording failed: $e',
+        category: LogCategory.video,
+      );
 
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
@@ -977,8 +1117,10 @@ class _UniversalCameraScreenPureState extends ConsumerState<UniversalCameraScree
     try {
       await ref.read(vineRecordingProvider.notifier).switchCamera();
     } catch (e) {
-      Log.error('📹 UniversalCameraScreenPure: Camera switch failed: $e',
-          category: LogCategory.video);
+      Log.error(
+        '📹 UniversalCameraScreenPure: Camera switch failed: $e',
+        category: LogCategory.video,
+      );
     }
   }
 
@@ -999,7 +1141,10 @@ class _UniversalCameraScreenPureState extends ConsumerState<UniversalCameraScree
           break;
       }
     });
-    Log.info('📹 Flash mode changed to: $_flashMode', category: LogCategory.video);
+    Log.info(
+      '📹 Flash mode changed to: $_flashMode',
+      category: LogCategory.video,
+    );
     // TODO: Apply flash mode to camera controller when camera package supports it
   }
 
@@ -1007,12 +1152,17 @@ class _UniversalCameraScreenPureState extends ConsumerState<UniversalCameraScree
     try {
       // Auto-stop just pauses the current segment
       // User must press publish button to finish and concatenate
-      Log.info('📹 Recording auto-stopped (max duration reached)', category: LogCategory.video);
+      Log.info(
+        '📹 Recording auto-stopped (max duration reached)',
+        category: LogCategory.video,
+      );
 
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: const Text('Maximum recording time reached. Press ✓ to publish.'),
+            content: const Text(
+              'Maximum recording time reached. Press ✓ to publish.',
+            ),
             backgroundColor: VineTheme.vineGreen,
             duration: const Duration(seconds: 3),
             behavior: SnackBarBehavior.floating,
@@ -1025,7 +1175,10 @@ class _UniversalCameraScreenPureState extends ConsumerState<UniversalCameraScree
         );
       }
     } catch (e) {
-      Log.error('📹 Failed to handle auto-stop: $e', category: LogCategory.video);
+      Log.error(
+        '📹 Failed to handle auto-stop: $e',
+        category: LogCategory.video,
+      );
     }
   }
 
@@ -1055,14 +1208,22 @@ class _UniversalCameraScreenPureState extends ConsumerState<UniversalCameraScree
           break;
       }
     });
-    Log.info('📹 Timer duration changed to: $_timerDuration', category: LogCategory.video);
+    Log.info(
+      '📹 Timer duration changed to: $_timerDuration',
+      category: LogCategory.video,
+    );
   }
 
-  void _processRecording(File recordedFile, ProofManifest? proofManifest) async {
+  void _processRecording(
+    File recordedFile,
+    ProofManifest? proofManifest,
+  ) async {
     // Guard against double-processing
     if (_isProcessing) {
-      Log.warning('📹 Already processing a recording, ignoring duplicate call',
-          category: LogCategory.video);
+      Log.warning(
+        '📹 Already processing a recording, ignoring duplicate call',
+        category: LogCategory.video,
+      );
       return;
     }
 
@@ -1071,8 +1232,10 @@ class _UniversalCameraScreenPureState extends ConsumerState<UniversalCameraScree
     });
 
     try {
-      Log.info('📹 UniversalCameraScreenPure: Processing recorded file: ${recordedFile.path}',
-          category: LogCategory.video);
+      Log.info(
+        '📹 UniversalCameraScreenPure: Processing recorded file: ${recordedFile.path}',
+        category: LogCategory.video,
+      );
 
       // Create a draft for the recorded video
       final prefs = await SharedPreferences.getInstance();
@@ -1083,9 +1246,15 @@ class _UniversalCameraScreenPureState extends ConsumerState<UniversalCameraScree
       if (proofManifest != null) {
         try {
           proofManifestJson = jsonEncode(proofManifest.toJson());
-          Log.info('📜 ProofManifest attached to draft from universal camera', category: LogCategory.video);
+          Log.info(
+            '📜 ProofManifest attached to draft from universal camera',
+            category: LogCategory.video,
+          );
         } catch (e) {
-          Log.error('Failed to serialize ProofManifest for draft: $e', category: LogCategory.video);
+          Log.error(
+            'Failed to serialize ProofManifest for draft: $e',
+            category: LogCategory.video,
+          );
         }
       }
 
@@ -1101,32 +1270,40 @@ class _UniversalCameraScreenPureState extends ConsumerState<UniversalCameraScree
 
       await draftService.saveDraft(draft);
 
-      Log.info('📹 Created draft with ID: ${draft.id}',
-          category: LogCategory.video);
+      Log.info(
+        '📹 Created draft with ID: ${draft.id}',
+        category: LogCategory.video,
+      );
 
       if (mounted) {
         // Navigate to metadata screen
         await Navigator.of(context).push(
           MaterialPageRoute(
-            builder: (context) => VideoMetadataScreenPure(
-              draftId: draft.id,
-            ),
+            builder: (context) => VideoMetadataScreenPure(draftId: draft.id),
           ),
         );
 
         // After metadata screen returns, navigate to profile
         if (mounted) {
-          Log.info('📹 Returned from metadata screen, navigating to profile',
-              category: LogCategory.video);
+          Log.info(
+            '📹 Returned from metadata screen, navigating to profile',
+            category: LogCategory.video,
+          );
 
           // CRITICAL: Dispose all controllers again before navigation
           // This ensures no stale controllers exist when switching to profile tab
           disposeAllVideoControllers(ref);
-          Log.info('🗑️ Disposed controllers before profile navigation', category: LogCategory.video);
+          Log.info(
+            '🗑️ Disposed controllers before profile navigation',
+            category: LogCategory.video,
+          );
 
           // Navigate to user's own profile using GoRouter
           context.go('/profile/me/0');
-          Log.info('📹 Successfully navigated to profile', category: LogCategory.video);
+          Log.info(
+            '📹 Successfully navigated to profile',
+            category: LogCategory.video,
+          );
 
           // Reset processing flag after navigation
           setState(() {
@@ -1135,8 +1312,10 @@ class _UniversalCameraScreenPureState extends ConsumerState<UniversalCameraScree
         }
       }
     } catch (e) {
-      Log.error('📹 UniversalCameraScreenPure: Processing failed: $e',
-          category: LogCategory.video);
+      Log.error(
+        '📹 UniversalCameraScreenPure: Processing failed: $e',
+        category: LogCategory.video,
+      );
 
       if (mounted) {
         setState(() {
@@ -1178,8 +1357,12 @@ class _UniversalCameraScreenPureState extends ConsumerState<UniversalCameraScree
 
         // On iOS, if permission was previously denied, .request() won't show a dialog
         // We need to check for permanentlyDenied and direct user to Settings
-        if (cameraStatus.isPermanentlyDenied || microphoneStatus.isPermanentlyDenied) {
-          Log.warning('📹 Permissions permanently denied, opening Settings', category: LogCategory.video);
+        if (cameraStatus.isPermanentlyDenied ||
+            microphoneStatus.isPermanentlyDenied) {
+          Log.warning(
+            '📹 Permissions permanently denied, opening Settings',
+            category: LogCategory.video,
+          );
           _openSystemSettings();
           return;
         }
@@ -1191,19 +1374,24 @@ class _UniversalCameraScreenPureState extends ConsumerState<UniversalCameraScree
         ].request();
 
         final cameraGranted = statuses[Permission.camera]?.isGranted ?? false;
-        final microphoneGranted = statuses[Permission.microphone]?.isGranted ?? false;
+        final microphoneGranted =
+            statuses[Permission.microphone]?.isGranted ?? false;
 
         granted = cameraGranted && microphoneGranted;
 
-        Log.info('📹 Permission request results - Camera: $cameraGranted, Microphone: $microphoneGranted',
-            category: LogCategory.video);
+        Log.info(
+          '📹 Permission request results - Camera: $cameraGranted, Microphone: $microphoneGranted',
+          category: LogCategory.video,
+        );
 
         // If still denied, it might be permanently denied now - guide to Settings
         if (!granted) {
           if (mounted) {
             ScaffoldMessenger.of(context).showSnackBar(
               const SnackBar(
-                content: Text('Please grant camera and microphone permissions in Settings to record videos.'),
+                content: Text(
+                  'Please grant camera and microphone permissions in Settings to record videos.',
+                ),
                 backgroundColor: Colors.orange,
                 duration: Duration(seconds: 3),
               ),
@@ -1214,14 +1402,20 @@ class _UniversalCameraScreenPureState extends ConsumerState<UniversalCameraScree
       }
 
       if (granted) {
-        Log.info('📹 Permission granted, initializing camera', category: LogCategory.video);
+        Log.info(
+          '📹 Permission granted, initializing camera',
+          category: LogCategory.video,
+        );
         setState(() {
           _permissionDenied = false;
         });
         await _initializeServices();
       }
     } catch (e) {
-      Log.error('📹 Failed to request permission: $e', category: LogCategory.video);
+      Log.error(
+        '📹 Failed to request permission: $e',
+        category: LogCategory.video,
+      );
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
@@ -1242,14 +1436,22 @@ class _UniversalCameraScreenPureState extends ConsumerState<UniversalCameraScree
       if (!opened) {
         Log.warning('Failed to open app settings', category: LogCategory.video);
       } else {
-        Log.info('Opened app settings successfully', category: LogCategory.video);
+        Log.info(
+          'Opened app settings successfully',
+          category: LogCategory.video,
+        );
       }
     } catch (e) {
-      Log.error('📹 Failed to open system settings: $e', category: LogCategory.video);
+      Log.error(
+        '📹 Failed to open system settings: $e',
+        category: LogCategory.video,
+      );
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(
-            content: Text('Please open System Settings manually and grant camera permission to diVine.'),
+            content: Text(
+              'Please open System Settings manually and grant camera permission to diVine.',
+            ),
             backgroundColor: Colors.orange,
             duration: Duration(seconds: 4),
           ),
@@ -1267,16 +1469,7 @@ class _UniversalCameraScreenPureState extends ConsumerState<UniversalCameraScree
 }
 
 /// Flash mode options for camera
-enum FlashMode {
-  off,
-  auto,
-  on,
-  torch,
-}
+enum FlashMode { off, auto, on, torch }
 
 /// Timer duration options for delayed recording
-enum TimerDuration {
-  off,
-  threeSeconds,
-  tenSeconds,
-}
+enum TimerDuration { off, threeSeconds, tenSeconds }
