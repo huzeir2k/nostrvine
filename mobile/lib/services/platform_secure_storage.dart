@@ -92,10 +92,10 @@ class PlatformSecureStorage {
       encryptedSharedPreferences: true,
     ),
     iOptions: IOSOptions(
-      accessibility: KeychainAccessibility.first_unlock_this_device,
+      accessibility: KeychainAccessibility.first_unlock,
     ),
     mOptions: MacOsOptions(
-      accessibility: KeychainAccessibility.first_unlock_this_device,
+      accessibility: KeychainAccessibility.first_unlock,
     ),
   );
 
