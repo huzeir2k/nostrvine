@@ -14,6 +14,7 @@ import 'package:openvine/services/proofmode_session_service.dart'
 import 'package:openvine/services/proofmode_key_service.dart';
 import 'package:openvine/services/proofmode_attestation_service.dart';
 import 'package:openvine/models/vine_draft.dart';
+import 'package:openvine/models/aspect_ratio.dart' as model;
 import 'package:openvine/providers/app_providers.dart';
 import 'package:openvine/utils/unified_logger.dart';
 import 'package:path_provider/path_provider.dart';
@@ -43,6 +44,7 @@ class VineRecordingUIState {
     required this.segments,
     required this.isCameraInitialized,
     required this.canSwitchCamera,
+    required this.aspectRatio,
   });
 
   final VineRecordingState recordingState;
@@ -53,6 +55,7 @@ class VineRecordingUIState {
   final List<RecordingSegment> segments;
   final bool isCameraInitialized;
   final bool canSwitchCamera;
+  final model.AspectRatio aspectRatio;
 
   // Convenience getters used by UI
   bool get isRecording => recordingState == VineRecordingState.recording;
@@ -71,6 +74,7 @@ class VineRecordingUIState {
     List<RecordingSegment>? segments,
     bool? isCameraInitialized,
     bool? canSwitchCamera,
+    model.AspectRatio? aspectRatio,
   }) {
     return VineRecordingUIState(
       recordingState: recordingState ?? this.recordingState,
@@ -82,6 +86,7 @@ class VineRecordingUIState {
       segments: segments ?? this.segments,
       isCameraInitialized: isCameraInitialized ?? this.isCameraInitialized,
       canSwitchCamera: canSwitchCamera ?? this.canSwitchCamera,
+      aspectRatio: aspectRatio ?? this.aspectRatio,
     );
   }
 }
@@ -101,6 +106,7 @@ class VineRecordingNotifier extends StateNotifier<VineRecordingUIState> {
             segments: _controller.segments,
             isCameraInitialized: _controller.isCameraInitialized,
             canSwitchCamera: _controller.canSwitchCamera,
+            aspectRatio: _controller.aspectRatio,
           ),
         ) {
     // Set up callback for recording progress updates
@@ -130,6 +136,7 @@ class VineRecordingNotifier extends StateNotifier<VineRecordingUIState> {
       segments: _controller.segments,
       isCameraInitialized: _controller.isCameraInitialized,
       canSwitchCamera: _controller.canSwitchCamera,
+      aspectRatio: _controller.aspectRatio,
     );
   }
 
@@ -210,6 +217,8 @@ class VineRecordingNotifier extends StateNotifier<VineRecordingUIState> {
 
   Future<void> switchCamera() async {
     await _controller.switchCamera();
+
+    // Force state update to rebuild UI with new camera preview
     updateState();
   }
 

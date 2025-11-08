@@ -229,7 +229,14 @@ class MobileCameraInterface extends CameraPlatformInterface {
 
   @override
   Future<void> switchCamera() async {
-    if (_availableCameras.length <= 1) return; // No other cameras to switch to
+    Log.info('🔄 switchCamera called, current cameras: ${_availableCameras.length}',
+        name: 'VineRecordingController', category: LogCategory.system);
+
+    if (_availableCameras.length <= 1) {
+      Log.warning('Cannot switch camera - only ${_availableCameras.length} camera(s) available',
+          name: 'VineRecordingController', category: LogCategory.system);
+      return;
+    }
 
     // Don't switch if controller is not properly initialized
     if (_controller == null || !_controller!.value.isInitialized) {
@@ -238,8 +245,13 @@ class MobileCameraInterface extends CameraPlatformInterface {
       return;
     }
 
+    Log.info('🔄 Current camera index: $_currentCameraIndex, direction: ${_availableCameras[_currentCameraIndex].lensDirection}',
+        name: 'VineRecordingController', category: LogCategory.system);
+
     // Stop any active recording before switching
     if (isRecording) {
+      Log.info('🔄 Stopping active recording before camera switch',
+          name: 'VineRecordingController', category: LogCategory.system);
       try {
         await _controller?.stopVideoRecording();
       } catch (e) {
@@ -255,20 +267,31 @@ class MobileCameraInterface extends CameraPlatformInterface {
 
     try {
       // Switch to the next camera
-      _currentCameraIndex =
-          (_currentCameraIndex + 1) % _availableCameras.length;
+      final oldIndex = _currentCameraIndex;
+      _currentCameraIndex = (_currentCameraIndex + 1) % _availableCameras.length;
+
+      Log.info('🔄 Switching from camera $oldIndex to $_currentCameraIndex',
+          name: 'VineRecordingController', category: LogCategory.system);
+
       await _initializeNewCamera();
+
+      Log.info('🔄 New camera initialized: ${_availableCameras[_currentCameraIndex].lensDirection}',
+          name: 'VineRecordingController', category: LogCategory.system);
 
       // Safely dispose old controller after new one is ready
       await oldController?.dispose();
 
-      Log.info('✅ Successfully switched to camera $_currentCameraIndex',
+      Log.info('✅ Successfully switched to camera $_currentCameraIndex (${_availableCameras[_currentCameraIndex].lensDirection})',
           name: 'VineRecordingController', category: LogCategory.system);
+
+      // CRITICAL: Notify listeners that camera changed to force UI rebuild
+      // The preview widget needs to be re-rendered with new controller
+
     } catch (e) {
       // If switching fails, restore old controller
-      _controller = oldController;
-      Log.error('Camera switch failed, restored previous camera: $e',
+      Log.error('❌ Camera switch failed, restoring previous camera: $e',
           name: 'VineRecordingController', category: LogCategory.system);
+      _controller = oldController;
       rethrow;
     }
   }
@@ -885,6 +908,10 @@ class VineRecordingController {
       await _cameraInterface?.switchCamera();
       Log.info('📱 Camera switched successfully',
           name: 'VineRecordingController', category: LogCategory.system);
+
+      // CRITICAL: Force state notification to trigger UI rebuild
+      _onStateChanged?.call();
+
     } catch (e) {
       Log.error('Failed to switch camera: $e',
           name: 'VineRecordingController', category: LogCategory.system);
