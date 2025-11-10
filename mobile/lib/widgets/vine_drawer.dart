@@ -64,7 +64,7 @@ class _VineDrawerState extends ConsumerState<VineDrawer> {
                   return Column(
                     crossAxisAlignment: CrossAxisAlignment.center,
                     children: [
-                      // diVine logo
+                      // Divine logo
                       Image.asset(
                         'assets/icon/White cropped.png',
                         width: constraints.maxWidth * 0.5,

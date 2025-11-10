@@ -29,8 +29,8 @@
 	<key>NSPrincipalClass</key>
 	<string>NSApplication</string>
 	<key>NSCameraUsageDescription</key>
-	<string>diVine needs access to your camera to record short videos.</string>
+	<string>Divine needs access to your camera to record short videos.</string>
 	<key>NSMicrophoneUsageDescription</key>
-	<string>diVine needs access to your microphone to record audio with videos.</string>
+	<string>Divine needs access to your microphone to record audio with videos.</string>
 </dict>
 </plist>

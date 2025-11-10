@@ -27,7 +27,7 @@ Screenshots now accurately represent the app running natively on iPad hardware w
 - Removed `AVInitialRouteSharingPolicy` key
 - Removed `AVAudioSessionCategoryPlayback` key
 
-**Rationale**: diVine is a short-form video app similar to Vine/TikTok. Videos play only when the app is in the foreground and in focus. We do not provide background audio playback, so these keys were incorrectly included and have now been removed.
+**Rationale**: Divine is a short-form video app similar to Vine/TikTok. Videos play only when the app is in the foreground and in focus. We do not provide background audio playback, so these keys were incorrectly included and have now been removed.
 
 ---
 
@@ -36,7 +36,7 @@ Screenshots now accurately represent the app running natively on iPad hardware w
 **Apple's Concern**: "The app declares support for bluetooth-central and bluetooth-peripheral in the UIBackgroundModes key in your Info.plist but we are unable to locate any Bluetooth Low Energy functionality."
 
 **Resolution**:
-✅ **VERIFIED** - diVine does **NOT** declare `bluetooth-central` or `bluetooth-peripheral` in `UIBackgroundModes`.
+✅ **VERIFIED** - Divine does **NOT** declare `bluetooth-central` or `bluetooth-peripheral` in `UIBackgroundModes`.
 
 **Clarification**: The app includes Bluetooth **usage descriptions** (NSBluetoothAlwaysUsageDescription) to explain our peer-to-peer sync feature, but we do **NOT** request background Bluetooth modes. These usage descriptions are required by iOS to request Bluetooth permissions at runtime, but they do not imply background operation.
 
@@ -57,7 +57,7 @@ Screenshots now accurately represent the app running natively on iPad hardware w
 Our Terms of Service at **https://divine.video/terms** explicitly states:
 
 > **Zero Tolerance for Objectionable Content and Abusive Users**
-> diVine maintains a strict zero-tolerance policy for objectionable content and abusive behavior.
+> Divine maintains a strict zero-tolerance policy for objectionable content and abusive behavior.
 
 The TOS includes:
 - Explicit prohibition of CSAM, violence, harassment, hate speech, spam, and illegal content

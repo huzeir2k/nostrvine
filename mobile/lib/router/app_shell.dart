@@ -31,7 +31,7 @@ class AppShell extends ConsumerWidget {
     final ctx = ref.watch(pageContextProvider).asData?.value;
     switch (ctx?.type) {
       case RouteType.home:
-        return 'diVine';
+        return 'Divine';
       case RouteType.explore:
         return 'Explore';
       case RouteType.notifications:
@@ -179,8 +179,8 @@ class AppShell extends ConsumerWidget {
               ),
         title: Text(
           title,
-          // Use Pacifico font only for 'diVine' on home feed, system font elsewhere
-          style: title == 'diVine'
+          // Use Pacifico font only for 'Divine' on home feed, system font elsewhere
+          style: title == 'Divine'
               ? GoogleFonts.pacifico(
                   textStyle: const TextStyle(
                     fontSize: 24,

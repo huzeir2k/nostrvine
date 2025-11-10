@@ -54,14 +54,14 @@ class _WelcomeScreenState extends ConsumerState<WelcomeScreen> {
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
                 const SizedBox(height: 40),
-                // App branding - diVine icon
+                // App branding - Divine icon
                 Image.asset(
                   'assets/icon/divine_icon_transparent.png',
                   height: 320,
                   fit: BoxFit.contain,
                 ),
                 Text(
-                  'diVine',
+                  'Divine',
                   style: GoogleFonts.pacifico(
                     fontSize: 64,
                     color: const Color(0xFFF5F6EA),
@@ -190,7 +190,7 @@ class _WelcomeScreenState extends ConsumerState<WelcomeScreen> {
                       ),
                       const SizedBox(height: 8),
                       const Text(
-                        'What is diVine?',
+                        'What is Divine?',
                         style: TextStyle(
                           color: Colors.white,
                           fontSize: 16,
@@ -199,7 +199,7 @@ class _WelcomeScreenState extends ConsumerState<WelcomeScreen> {
                       ),
                       const SizedBox(height: 8),
                       Text(
-                        'diVine is reviving the dream of 6 second looping videos, by and for humans. Do it for the vine!',
+                        'Divine is reviving the dream of 6 second looping videos, by and for humans. Do it for the vine!',
                         style: TextStyle(
                           color: Colors.grey[300],
                           fontSize: 14,

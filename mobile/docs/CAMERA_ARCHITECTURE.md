@@ -113,8 +113,8 @@ if (Platform.isMacOS) {
 
 ### iOS
 - **Info.plist keys** (ios/Runner/Info.plist):
-  - `NSCameraUsageDescription`: "diVine needs access to your camera to record short videos."
-  - `NSMicrophoneUsageDescription`: "diVine needs access to your microphone to record audio with videos."
+  - `NSCameraUsageDescription`: "Divine needs access to your camera to record short videos."
+  - `NSMicrophoneUsageDescription`: "Divine needs access to your microphone to record audio with videos."
 - **Permission request timing**: When `CameraController.initialize()` is first called
 - **Handled by**: Flutter `camera` package native iOS code
 - **No explicit Dart code needed** - permissions requested automatically
@@ -129,8 +129,8 @@ if (Platform.isMacOS) {
 
 ### macOS
 - **Info.plist keys** (macos/Runner/Info.plist):
-  - `NSCameraUsageDescription`: "diVine needs access to your camera to record short videos."
-  - `NSMicrophoneUsageDescription`: "diVine needs access to your microphone to record audio with videos."
+  - `NSCameraUsageDescription`: "Divine needs access to your camera to record short videos."
+  - `NSMicrophoneUsageDescription`: "Divine needs access to your microphone to record audio with videos."
 - **Permission request timing**: When `NativeCameraPlugin.initializeCamera()` is called
 - **Handled by**: Custom Swift code using `AVCaptureDevice.requestAccess(for: .video)`
 - **TCC database**: macOS tracks permissions in TCC (Transparency, Consent, and Control) database

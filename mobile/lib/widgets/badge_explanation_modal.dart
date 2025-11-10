@@ -207,7 +207,7 @@ class _VerificationLevelCard extends StatelessWidget {
         color: Colors.green[700]!,
         title: 'Fully Verified',
         description:
-            'This video has the highest level of proof - captured on a real device with hardware security verification. We can confirm it was recorded using diVine on an actual phone.',
+            'This video has the highest level of proof - captured on a real device with hardware security verification. We can confirm it was recorded using Divine on an actual phone.',
       );
     } else if (video.isVerifiedWeb) {
       return _VerificationConfig(
@@ -229,7 +229,7 @@ class _VerificationLevelCard extends StatelessWidget {
         icon: Icons.shield_outlined,
         color: Colors.grey[600]!,
         title: 'Unverified',
-        description: 'We can\'t be sure this video is real and was recorded using diVine on a user\'s phone.',
+        description: 'We can\'t be sure this video is real and was recorded using Divine on a user\'s phone.',
       );
     }
   }

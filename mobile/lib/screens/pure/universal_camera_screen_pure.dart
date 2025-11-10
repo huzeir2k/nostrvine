@@ -749,7 +749,7 @@ class _UniversalCameraScreenPureState
               ),
               const SizedBox(height: 8),
               const Text(
-                'diVine needs access to your camera to record videos. Please grant camera permission in System Settings.',
+                'Divine needs access to your camera to record videos. Please grant camera permission in System Settings.',
                 style: TextStyle(color: Colors.grey, fontSize: 14),
                 textAlign: TextAlign.center,
               ),
@@ -1502,7 +1502,7 @@ class _UniversalCameraScreenPureState
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(
             content: Text(
-              'Please open System Settings manually and grant camera permission to diVine.',
+              'Please open System Settings manually and grant camera permission to Divine.',
             ),
             backgroundColor: Colors.orange,
             duration: Duration(seconds: 4),

@@ -4,7 +4,7 @@
 
 ## 24-Hour Response Commitment
 
-diVine commits to reviewing and acting on reports of objectionable content **within 24 hours** of submission.
+Divine commits to reviewing and acting on reports of objectionable content **within 24 hours** of submission.
 
 For reports of illegal content (especially CSAM), our response is **immediate**.
 
@@ -117,7 +117,7 @@ For illegal content (CSAM, credible threats):
 
 ## User-Controlled Moderation
 
-diVine implements a **stackable moderation system** giving users control:
+Divine implements a **stackable moderation system** giving users control:
 
 ### Layer 1: Built-in Safety (Always Active)
 - CSAM detection via PhotoDNA
@@ -144,10 +144,10 @@ diVine implements a **stackable moderation system** giving users control:
 
 ### What We Control
 
-diVine directly moderates content on:
+Divine directly moderates content on:
 - `relay3.openvine.co` (our primary relay)
 - `media.divine.video` (our CDN)
-- The diVine mobile app (client-side filtering)
+- The Divine mobile app (client-side filtering)
 
 ### What We Don't Control
 
@@ -161,7 +161,7 @@ Due to Nostr's decentralized nature:
 We are responsible **only for content hosted on our infrastructure**. We enforce strict moderation on:
 - Events accepted by relay3.openvine.co
 - Media served via media.divine.video
-- Content displayed in the diVine app
+- Content displayed in the Divine app
 
 Other Nostr infrastructure operators are responsible for their own moderation.
 

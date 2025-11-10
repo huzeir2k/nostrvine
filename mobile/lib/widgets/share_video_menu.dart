@@ -2693,7 +2693,7 @@ class _ReportConfirmationDialog extends StatelessWidget {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             const Text(
-              'Thank you for helping keep diVine safe.',
+              'Thank you for helping keep Divine safe.',
               style: TextStyle(
                 color: VineTheme.whiteText,
                 fontSize: 16,

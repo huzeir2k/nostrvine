@@ -23,7 +23,7 @@ void main() {
       when(mockAuthService.currentPublicKeyHex).thenReturn('test_pubkey_' + '0' * 54);
     });
 
-    testWidgets('displays diVine logo image in header', (tester) async {
+    testWidgets('displays Divine logo image in header', (tester) async {
       final scaffoldKey = GlobalKey<ScaffoldState>();
 
       await tester.pumpWidget(
@@ -54,7 +54,7 @@ void main() {
               (widget.image as AssetImage).assetName.contains('app_icon.png'),
         ),
         findsOneWidget,
-        reason: 'diVine logo image should be displayed in drawer header',
+        reason: 'Divine logo image should be displayed in drawer header',
       );
     });
 

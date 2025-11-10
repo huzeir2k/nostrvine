@@ -73,7 +73,7 @@ class _BugReportDialogState extends State<BugReportDialog> {
           _isSuccess = result.success;
           if (result.success) {
             _resultMessage =
-                "Thank you! We've received your report and will use it to make diVine better.";
+                "Thank you! We've received your report and will use it to make Divine better.";
           } else {
             _resultMessage = 'Failed to send bug report: ${result.error}';
           }

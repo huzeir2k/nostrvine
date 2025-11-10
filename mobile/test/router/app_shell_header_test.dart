@@ -14,13 +14,13 @@ void main() {
         ),
       );
 
-  testWidgets('Header shows diVine on home', (tester) async {
+  testWidgets('Header shows Divine on home', (tester) async {
     final c = ProviderContainer();
     addTearDown(c.dispose);
     await tester.pumpWidget(shell(c));
     c.read(goRouterProvider).go('/home/0');
     await tester.pump();
-    expect(find.text('diVine'), findsOneWidget);
+    expect(find.text('Divine'), findsOneWidget);
     expect(find.byIcon(Icons.photo_camera_outlined), findsOneWidget);
   });
 

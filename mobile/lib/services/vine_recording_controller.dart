@@ -390,7 +390,7 @@ class MobileCameraInterface extends CameraPlatformInterface {
             ),
             SizedBox(height: 16),
             Text(
-              'diVine',
+              'Divine',
               style: TextStyle(
                 color: Colors.white,
                 fontSize: 20,
@@ -946,7 +946,7 @@ class VineRecordingController {
               ),
               SizedBox(height: 16),
               Text(
-                'diVine',
+                'Divine',
                 style: TextStyle(
                   color: Colors.white,
                   fontSize: 20,

@@ -1,5 +1,5 @@
 // ABOUTME: Widget test for welcome screen Google Font rendering
-// ABOUTME: Verifies that the diVine title uses Pacifico font
+// ABOUTME: Verifies that the Divine title uses Pacifico font
 
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -24,7 +24,7 @@ void main() {
       when(mockAuthService.isAuthenticated).thenReturn(true);
     });
 
-    testWidgets('diVine title uses Pacifico Google Font', (tester) async {
+    testWidgets('Divine title uses Pacifico Google Font', (tester) async {
       // Set larger test size to prevent overflow
       await tester.binding.setSurfaceSize(const Size(800, 1200));
 
@@ -44,7 +44,7 @@ void main() {
       await tester.pumpAndSettle();
 
       // Find the title text widget
-      final titleFinder = find.text('Welcome to diVine');
+      final titleFinder = find.text('Welcome to Divine');
       expect(titleFinder, findsOneWidget);
 
       // Get the Text widget
@@ -78,9 +78,9 @@ void main() {
       await tester.pumpAndSettle();
 
       // Verify key elements are present
-      expect(find.text('Welcome to diVine'), findsOneWidget);
+      expect(find.text('Welcome to Divine'), findsOneWidget);
       expect(find.text('Create and share short videos on the decentralized web'), findsOneWidget);
-      expect(find.text('What is diVine?'), findsOneWidget);
+      expect(find.text('What is Divine?'), findsOneWidget);
 
       // Note: Create/Import buttons no longer shown - app auto-creates nsec
       // Users can only import keys later from settings
